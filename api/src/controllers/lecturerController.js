@@ -1,25 +1,24 @@
 const bcrypt = require("bcryptjs");
-const User = require("../models/userModel");
-const userHandler = require("../handlers/userHandler");
+const Lecturer = require("../models/LecturerModel");
+const userHandler = require("../Handlers/lecturerHandler");
 
-async function registerUser(req, res) {
-  const { username, email, password, user_type, matricCard } = req.body;
+async function registerLecturer(req, res) {
+  const { username, email, password, user_type } = req.body;
 
   try {
     // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10); // 10 is the number of salt rounds
 
-    const existingUserByEmail = await User.getUserByEmail(email);
+    const existingUserByEmail = await Lecturer.getUserByEmail(email);
     if (existingUserByEmail) {
       return res.status(400).json({ error: "Email is already registered" });
     }
 
     // Create a new user instance with hashed password
-    const newUser = new User({
+    const newUser = new Lecturer({
       username,
       email,
       password: hashedPassword,
-      matricCard,
       user_type,
     });
     await newUser.save();
@@ -36,12 +35,12 @@ async function registerUser(req, res) {
     return res.status(500).json({ error: "Internal server error" });
   }
 }
-async function loginUser(req, res) {
+async function loginLecturer(req, res) {
   const { email, matricCard, password } = req.body;
 
   try {
     // Find the user by matric card or email
-    const user = await User.getUserByEmailOrMatric(email, matricCard);
+    const user = await Lecturer.getUserByEmailOrMatric(email, matricCard);
     if (!user) {
       return res
         .status(401)
@@ -72,10 +71,10 @@ async function loginUser(req, res) {
   }
 }
 
-async function getAllUsers(req, res) {
+async function getAllLecturers(req, res) {
   try {
     const usersData = await userHandler.getAllUsers();
-    const users = usersData.map((userData) => new User(userData)); // Convert data to User instances
+    const users = usersData.map((userData) => new Lecturer(userData)); // Convert data to User instances
 
     // Create a sanitized version of the users array without the password property
     const sanitizedUsers = users.map(
@@ -95,10 +94,10 @@ async function getAllUsers(req, res) {
   }
 }
 
-async function getUserById(req, res) {
+async function getLecturerById(req, res) {
   const { userId } = req.params;
   try {
-    const user = await User.getUserById(userId);
+    const user = await Lecturer.getUserById(userId);
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
@@ -112,10 +111,10 @@ async function getUserById(req, res) {
   }
 }
 
-async function getUserByEmail(req, res) {
+async function getLecturerByEmail(req, res) {
   const { email } = req.body; // Get the email from the request body
   try {
-    const user = await User.getUserByEmail(email);
+    const user = await Lecturer.getUserByEmail(email);
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
@@ -130,9 +129,9 @@ async function getUserByEmail(req, res) {
 }
 
 module.exports = {
-  registerUser,
-  loginUser,
-  getAllUsers,
-  getUserById,
-  getUserByEmail,
+  registerLecturer,
+  loginLecturer,
+  getAllLecturers,
+  getLecturerById,
+  getLecturerByEmail,
 };

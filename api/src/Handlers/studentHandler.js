@@ -1,9 +1,9 @@
 const { firestore } = require("../services/firebase");
-const userCollection = firestore().collection("users");
+const studentCollection = firestore().collection("students");
 
 async function getUserById(userId) {
   try {
-    const userDoc = await userCollection.doc(userId).get();
+    const userDoc = await studentCollection.doc(userId).get();
     if (!userDoc.exists) {
       return null;
     }
@@ -16,7 +16,7 @@ async function getUserById(userId) {
 async function getAllUsers() {
   try {
     const users = [];
-    const querySnapshot = await userCollection.get();
+    const querySnapshot = await studentCollection.get();
     querySnapshot.forEach((doc) => {
       users.push(doc.data());
     });
@@ -28,7 +28,7 @@ async function getAllUsers() {
 
 async function getUserByEmail(email) {
   try {
-    const querySnapshot = await userCollection
+    const querySnapshot = await studentCollection
       .where("email", "==", email)
       .get();
     if (querySnapshot.empty) {
@@ -45,9 +45,9 @@ async function getUserByEmailOrMatric(email, matricCard) {
     let query = null;
 
     if (email) {
-      query = userCollection.where("email", "==", email);
+      query = studentCollection.where("email", "==", email);
     } else if (matricCard) {
-      query = userCollection.where("matricCard", "==", matricCard);
+      query = studentCollection.where("matricCard", "==", matricCard);
     } else {
       // Handle the case when neither email nor matricCard is provided
       return null;
