@@ -1,6 +1,11 @@
 const bcrypt = require("bcryptjs");
-const Lecturer = require("../models/LecturerModel");
 const userHandler = require("../Handlers/lecturerHandler");
+const Lecturer = require("../models/lecturerModel");
+const Student = require("../models/studentModel");
+const dotenv = require("dotenv");
+dotenv.config();
+const secretKey = process.env.SECRET_TOKEN;
+const jwt = require("jsonwebtoken");
 
 async function registerLecturer(req, res) {
   const { username, email, password, user_type } = req.body;
@@ -36,35 +41,34 @@ async function registerLecturer(req, res) {
   }
 }
 async function loginLecturer(req, res) {
-  const { email, matricCard, password } = req.body;
+  const { email, password } = req.body;
 
   try {
     // Find the user by matric card or email
-    const user = await Lecturer.getUserByEmailOrMatric(email, matricCard);
+    const user = await Lecturer.getUserByEmail(email);
     if (!user) {
-      return res
-        .status(401)
-        .json({ error: "Invalid matric card or email or password" });
+      return res.status(401).json({ error: "Invalid email or password" });
     }
 
     // Verify password
     const isPasswordMatch = await bcrypt.compare(password, user.password);
     if (!isPasswordMatch) {
-      return res
-        .status(401)
-        .json({ error: "Invalid matric card or email or password" });
+      return res.status(401).json({ error: "Invalid email or password" });
     }
 
     // User is authenticated, send a success response
-    // You might also generate and send a JWT token for authentication at this point
-
+    const token = jwt.sign(
+      { user_id: user.user_id, user_type: user.user_type },
+      secretKey,
+      { expiresIn: "1h" }
+    );
     // Remove password from the response
     const responseUser = { ...user };
     delete responseUser.password;
 
     return res
       .status(200)
-      .json({ message: "Login successful", user: responseUser });
+      .json({ message: "Login successful", user: responseUser, token });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "Internal server error" });
@@ -78,12 +82,20 @@ async function getAllLecturers(req, res) {
 
     // Create a sanitized version of the users array without the password property
     const sanitizedUsers = users.map(
-      ({ user_id, username, email, matricCard, user_type }) => ({
+      ({
         user_id,
         username,
         email,
         matricCard,
         user_type,
+        supervisedStudents,
+      }) => ({
+        user_id,
+        username,
+        email,
+        matricCard,
+        user_type,
+        supervisedStudents,
       })
     );
 
@@ -128,10 +140,42 @@ async function getLecturerByEmail(req, res) {
   }
 }
 
+async function getMyStudents(req, res) {
+  const { userId } = req.params;
+  try {
+    const user = await Lecturer.getUserById(userId);
+    if (!user) {
+      return res.status(404).json({ error: "No Assigned students" });
+    }
+    const userSupervisedStudents = user.supervisedStudents;
+
+    // Use Promise.all() with map() to fetch students asynchronously
+    const studentPromises = userSupervisedStudents.map(async (studentId) => {
+      const student = await Student.getUserById(studentId);
+      const responseStudent = {
+        username: student.username,
+        email: student.email,
+        matricCard: student.matricCard,
+      };
+
+      return responseStudent; // Return the student object
+    });
+
+    // Wait for all promises to resolve using Promise.all()
+    const students = await Promise.all(studentPromises);
+
+    return res.status(200).json(students);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
 module.exports = {
   registerLecturer,
   loginLecturer,
   getAllLecturers,
   getLecturerById,
   getLecturerByEmail,
+  getMyStudents,
 };
