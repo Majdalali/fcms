@@ -19,5 +19,19 @@ router.post(
   evaluationsController.createEXEvaluationMECC
 );
 
+router.post(
+  "/mcsd/examiner",
+  verifyToken,
+  authGuard("lecturer"),
+  evaluationsController.createEXEvaluationMCSD
+);
+
+router.post(
+  "/mcsd/supervisor",
+  verifyToken,
+  authGuard("lecturer"),
+  evaluationsController.createSVEvaluationMCSD
+);
+
 router.get("/mecc/:id", evaluationsController.getEvaluationsById);
 module.exports = router;

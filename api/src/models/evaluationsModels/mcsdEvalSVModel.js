@@ -1,5 +1,5 @@
 const { firestore } = require("../../services/firebase");
-const meccCollection = firestore().collection("meccEvaluations");
+const meccCollection = firestore().collection("mcsdEvaluations");
 
 class meccEvalSVModel {
   constructor({
@@ -7,12 +7,11 @@ class meccEvalSVModel {
     type = "Supervisor",
     evaluatorId,
     studentId,
-    pmpone = 0, // Project Management & Progress I
-    pmptwo = 0, // Project Management & Progress II
+    pmp = 0, // Project Management & Progress
     pp = 0, // Project Performance
     aor = 0, // Assessment of Report
-    pic = 0, // Project Ideas communication
-    ps = 0, // Personal Skills
+    pfpd = 0, // Problem Formulation and Project Design 18 marks
+    pac = 0, // Presentation and outcome
     finalMark = 0,
     remarksForCord,
     createdAt,
@@ -21,12 +20,11 @@ class meccEvalSVModel {
     this.type = type;
     this.evaluatorId = evaluatorId;
     this.studentId = studentId;
-    this.pmpone = pmpone;
-    this.pmptwo = pmptwo;
+    this.pmp = pmp;
     this.pp = pp;
     this.aor = aor;
-    this.pic = pic;
-    this.ps = ps;
+    this.pfpd = pfpd;
+    this.pac = pac;
     this.finalMark = finalMark;
     this.remarksForCord = remarksForCord;
     this.createdAt = createdAt;
@@ -43,12 +41,11 @@ class meccEvalSVModel {
         type: this.type,
         evaluatorId: this.evaluatorId,
         studentId: this.studentId,
-        pmpone: this.pmpone,
-        pmptwo: this.pmptwo,
+        pmp: this.pmp,
         pp: this.pp,
         aor: this.aor,
-        pic: this.pic,
-        ps: this.ps,
+        pfpd: this.pfpd,
+        pac: this.pac,
         finalMark: this.finalMark,
         remarksForCord: this.remarksForCord,
         createdAt: this.createdAt,

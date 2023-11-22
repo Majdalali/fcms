@@ -10,6 +10,7 @@ class meccEvalSVModel {
     aor = 0, // Assessment of Report
     presentationMark = 0, // presentation (CLO3 - 10%)
     finalMark = 0,
+    remarksForCord,
     createdAt,
   }) {
     this.evaluationId = evaluationId || this.generateRandomId();
@@ -19,6 +20,7 @@ class meccEvalSVModel {
     this.aor = aor;
     this.presentationMark = presentationMark;
     this.finalMark = finalMark;
+    this.remarksForCord = remarksForCord;
     this.createdAt = createdAt;
   }
   generateRandomId() {
@@ -36,6 +38,7 @@ class meccEvalSVModel {
         aor: this.aor,
         presentationMark: this.presentationMark,
         finalMark: this.finalMark,
+        remarksForCord: this.remarksForCord,
         createdAt: this.createdAt,
       });
     } catch (error) {

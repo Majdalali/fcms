@@ -9,16 +9,20 @@ const { firestore } = require("../services/firebase");
 
 const meccEvalSVModel = require("../models/evaluationsModels/meccEvalSVModel");
 const meccEvalEXModel = require("../models/evaluationsModels/meccEvalEXModel");
+const mcsdEvalEXModel = require("../models/evaluationsModels/mcsdEvalEXModel");
+const mcsdEvalSVModel = require("../models/evaluationsModels/mcsdEvalSVModel");
 
 // Functions
 
+// MECC Evaluations
 async function createSVEvaluationMECC(req, res) {
   const token = req.headers.authorization;
 
   try {
     const decoded = jwt.verify(token, secretKey);
     const evaluatorId = decoded.user_id;
-    const { studentId, pmpone, pmptwo, pp, aor, pic, ps } = req.body;
+    const { studentId, pmpone, pmptwo, pp, aor, pic, ps, remarksForCord } =
+      req.body;
     const finalMark =
       parseInt(pmpone) +
       parseInt(pmptwo) +
@@ -36,6 +40,7 @@ async function createSVEvaluationMECC(req, res) {
       pic,
       ps,
       finalMark,
+      remarksForCord,
       createdAt: new Date(),
     };
 
@@ -58,7 +63,7 @@ async function createEXEvaluationMECC(req, res) {
   try {
     const decoded = jwt.verify(token, secretKey);
     const evaluatorId = decoded.user_id;
-    const { studentId, aor, presentationMark } = req.body;
+    const { studentId, aor, presentationMark, remarksForCord } = req.body;
     const finalMark = parseInt(aor) + parseInt(presentationMark);
     const evaluationData = {
       evaluatorId: evaluatorId,
@@ -66,6 +71,7 @@ async function createEXEvaluationMECC(req, res) {
       aor,
       presentationMark,
       finalMark,
+      remarksForCord,
       createdAt: new Date(),
     };
 
@@ -74,6 +80,78 @@ async function createEXEvaluationMECC(req, res) {
 
     return res.status(201).json({
       message: "MECC Evaluation created successfully",
+      evaluationId: newEvaluation.evaluationId,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+// MCSD Evaluations
+async function createSVEvaluationMCSD(req, res) {
+  const token = req.headers.authorization;
+
+  try {
+    const decoded = jwt.verify(token, secretKey);
+    const evaluatorId = decoded.user_id;
+    const { studentId, pmp, pp, aor, pfpd, pac, remarksForCord } = req.body;
+    const finalMark =
+      parseInt(pmp) +
+      parseInt(pp) +
+      parseInt(aor) +
+      parseInt(pfpd) +
+      parseInt(pac);
+
+    const evaluationData = {
+      evaluatorId: evaluatorId,
+      studentId,
+      pmp,
+      pp,
+      aor,
+      pfpd,
+      pac,
+      finalMark,
+      remarksForCord,
+      createdAt: new Date(),
+    };
+
+    const newEvaluation = new mcsdEvalSVModel(evaluationData);
+    await newEvaluation.save();
+
+    return res.status(201).json({
+      message: "MCSD Evaluation created successfully",
+      evaluationId: newEvaluation.evaluationId,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+async function createEXEvaluationMCSD(req, res) {
+  const token = req.headers.authorization;
+
+  try {
+    const decoded = jwt.verify(token, secretKey);
+    const evaluatorId = decoded.user_id;
+    const { studentId, aor, pfpd, remarksForCord } = req.body;
+    const finalMark = parseInt(aor) + parseInt(pfpd);
+    const evaluationData = {
+      evaluatorId: evaluatorId,
+      studentId,
+      aor,
+      pfpd,
+      finalMark,
+      remarksForCord,
+      createdAt: new Date(),
+    };
+
+    const newEvaluation = new mcsdEvalEXModel(evaluationData);
+    await newEvaluation.save();
+
+    return res.status(201).json({
+      message: "MCSD Evaluation created successfully",
       evaluationId: newEvaluation.evaluationId,
     });
   } catch (error) {
@@ -130,5 +208,7 @@ async function getEvaluationsById(req, res) {
 module.exports = {
   createSVEvaluationMECC,
   createEXEvaluationMECC,
+  createSVEvaluationMCSD,
+  createEXEvaluationMCSD,
   getEvaluationsById,
 };
