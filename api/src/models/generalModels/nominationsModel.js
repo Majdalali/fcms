@@ -1,4 +1,4 @@
-const { firestore } = require("../services/firebase");
+const { firestore } = require("../../services/firebase");
 
 class Examiner {
   constructor({ name, email, phoneNumber, institution, expertise }) {

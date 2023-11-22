@@ -1,6 +1,5 @@
-const FileSubmission = require("../models/fileSubmissionModel");
-const Lecturer = require("../models/lecturerModel");
-const Student = require("../models/studentModel");
+const FileSubmission = require("../../models/generalModels/fileSubmissionModel");
+const Lecturer = require("../../models/usersModels/lecturerModel");
 
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");

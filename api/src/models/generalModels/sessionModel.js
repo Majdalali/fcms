@@ -1,4 +1,4 @@
-const { firestore } = require("../services/firebase");
+const { firestore } = require("../../services/firebase");
 const sessionCollection = firestore().collection("sessions");
 
 class Session {

@@ -1,7 +1,7 @@
 // models/user.js
-const { firestore } = require("../services/firebase");
+const { firestore } = require("../../services/firebase");
 const userCollection = firestore().collection("students");
-const userHandler = require("../Handlers/studentHandler");
+const userHandler = require("../../Handlers/studentHandler");
 class Student {
   constructor({
     username,

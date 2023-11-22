@@ -1,9 +1,8 @@
 const express = require("express");
-const studentController = require("../controllers/studentController");
+const studentController = require("../controllers/usersControllers/studentController");
 const router = express.Router();
 const verifyToken = require("../middleware/verifyToken");
-const fileUploadController = require("../controllers/fileUploadController");
-const upload = require("../controllers/fileUploadController");
+const fileUploadController = require("../controllers/generalControllers/fileUploadController");
 
 // END POINTS FOR USER ROUTES
 router.post("/register", studentController.registerUser);

@@ -5,7 +5,7 @@ const {
   Examiner,
   CoSupervisor,
   Student,
-} = require("../models/nominationsModel");
+} = require("../../models/generalModels/nominationsModel");
 
 const jwt = require("jsonwebtoken");
 

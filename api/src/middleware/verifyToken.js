@@ -7,7 +7,7 @@ function verifyToken(req, res, next) {
   const token = req.headers.authorization;
 
   if (!token) {
-    return res.status(401).json({ error: "Unauthorized" });
+    return res.status(401).json({ error: "Unauthorized: Please log in first" });
   }
 
   jwt.verify(token, secretKey, (err, decoded) => {

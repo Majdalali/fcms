@@ -1,7 +1,7 @@
 const bcrypt = require("bcryptjs");
-const userHandler = require("../Handlers/lecturerHandler");
-const Lecturer = require("../models/lecturerModel");
-const Student = require("../models/studentModel");
+const userHandler = require("../../Handlers/lecturerHandler");
+const Lecturer = require("../../models/usersModels/lecturerModel");
+const Student = require("../../models/usersModels/studentModel");
 const dotenv = require("dotenv");
 dotenv.config();
 const secretKey = process.env.SECRET_TOKEN;

@@ -1,8 +1,8 @@
 const express = require("express");
 const router = express.Router();
 
-const sessionController = require("../controllers/sessionController");
-const nominationsController = require("../controllers/nominationController");
+const sessionController = require("../controllers/generalControllers/sessionController");
+const nominationsController = require("../controllers/generalControllers/nominationsController");
 
 router.post("/createSession", sessionController.createSession);
 router.get("/currentSession/:sessionTitle", sessionController.getSession);

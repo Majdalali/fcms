@@ -1,7 +1,7 @@
 const bcrypt = require("bcryptjs");
-const Student = require("../models/studentModel");
-const Lecturer = require("../models/lecturerModel");
-const userHandler = require("../Handlers/studentHandler");
+const Student = require("../../models/usersModels/studentModel");
+const Lecturer = require("../../models/usersModels/lecturerModel");
+const userHandler = require("../../Handlers/studentHandler");
 const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
 dotenv.config();
