@@ -9,24 +9,22 @@ class Student {
     matricCard,
     password,
     user_type = "student",
+    user_program,
+    isActivated = false,
     user_id = null,
     supervisor = null,
     examiners = [],
   }) {
-    this.user_id = user_id || this.generateRandomId(); // Generates a new random ID if user_id is not provided
+    this.user_id = user_id; // Generates a new random ID if user_id is not provided
     this.username = username;
     this.matricCard = matricCard;
     this.email = email;
     this.password = password;
     this.user_type = user_type;
+    this.user_program = user_program;
+    this.isActivated = isActivated;
     this.supervisor = supervisor;
     this.examiners = examiners;
-  }
-
-  generateRandomId() {
-    const timestamp = Date.now().toString(); // Current timestamp in milliseconds
-    const randomPortion = Math.floor(Math.random() * 100000).toString(); // Random 5-digit number
-    return timestamp + randomPortion;
   }
 
   static async getUserByEmail(email) {
@@ -65,9 +63,47 @@ class Student {
         matricCard: this.matricCard,
         password: this.password,
         user_type: this.user_type,
+        user_program: this.user_program,
+        isActivated: this.isActivated,
         supervisor: this.supervisor,
         examiners: this.examiners,
       });
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Update the user data in the database
+  async update() {
+    try {
+      await userCollection.doc(this.user_id).update({
+        username: this.username,
+        email: this.email,
+        matricCard: this.matricCard,
+        password: this.password,
+        user_type: this.user_type,
+        user_program: this.user_program,
+        isActivated: this.isActivated,
+        supervisor: this.supervisor,
+        examiners: this.examiners,
+      });
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async updateExaminers(examiners) {
+    try {
+      const updatedData = {};
+
+      // Check if examiners array is defined and not empty before updating
+      if (examiners && Array.isArray(examiners) && examiners.length > 0) {
+        updatedData.examiners = examiners;
+      } else {
+        throw new Error("Examiners data is invalid");
+      }
+
+      await userCollection.doc(this.user_id).update(updatedData);
     } catch (error) {
       throw error;
     }

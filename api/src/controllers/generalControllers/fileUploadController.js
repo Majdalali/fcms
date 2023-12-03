@@ -40,6 +40,8 @@ async function uploadFile(req, res) {
       "finalSubmission",
       "corrections",
       "presentationAndDemos",
+      "finalReport",
+      "others",
     ]; // Add more allowed types as needed
 
     // Check if the provided submissionType is in the allowed types array

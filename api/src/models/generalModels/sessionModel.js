@@ -69,6 +69,14 @@ class Session {
       throw error;
     }
   }
+
+  static async deleteSession(sessionId) {
+    try {
+      await sessionCollection.doc(sessionId).delete();
+    } catch (error) {
+      throw error;
+    }
+  }
 }
 
 module.exports = Session;

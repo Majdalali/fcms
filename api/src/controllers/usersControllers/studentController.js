@@ -6,46 +6,51 @@ const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
 dotenv.config();
 const secretKey = process.env.SECRET_TOKEN;
+const admin = require("../../services/firebase");
 
 async function registerUser(req, res) {
-  const { username, email, password, user_type, matricCard } = req.body;
+  const { username, email, password, user_type, matricCard, user_program } =
+    req.body;
 
   try {
-    // Hash the password
-    const hashedPassword = await bcrypt.hash(password, 10); // 10 is the number of salt rounds
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     const existingUserByEmail = await Student.getUserByEmail(email);
     if (existingUserByEmail) {
       return res.status(400).json({ error: "Email is already registered" });
     }
 
-    // Create a new user instance with hashed password
+    const userRecord = await admin.auth().createUser({
+      email,
+      password: hashedPassword,
+      displayName: username, // Optionally set the display name
+    });
+
     const newUser = new Student({
       username,
       email,
       password: hashedPassword,
       matricCard: matricCard || null,
       user_type,
+      user_program,
+      user_id: userRecord.uid, // Use Firebase UID as your user ID
     });
+
     await newUser.save();
 
-    // Remove password from the response
-    const responseUser = { ...newUser };
-    delete responseUser.password;
+    await admin.auth().generateEmailVerificationLink(email);
 
-    return res
-      .status(201)
-      .json({ message: "User registered successfully", user: responseUser });
+    return res.status(201).json({ message: "User registered successfully" });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "Internal server error" });
   }
 }
+
 async function loginUser(req, res) {
   const { email, matricCard, password } = req.body;
 
   try {
-    // Find the user by matric card or email
     const user = await Student.getUserByEmailOrMatric(email, matricCard);
     if (!user) {
       return res
@@ -53,7 +58,6 @@ async function loginUser(req, res) {
         .json({ error: "Invalid matric card or email or password" });
     }
 
-    // Verify password
     const isPasswordMatch = await bcrypt.compare(password, user.password);
     if (!isPasswordMatch) {
       return res
@@ -61,13 +65,17 @@ async function loginUser(req, res) {
         .json({ error: "Invalid matric card or email or password" });
     }
 
-    // User is authenticated, generate JWT token
+    // Generate JWT token
     const token = jwt.sign(
-      { user_id: user.user_id, user_type: user.user_type },
+      {
+        user_id: user.user_id,
+        user_type: user.user_type,
+        user_program: user.user_program,
+      },
       secretKey,
       { expiresIn: "1h" }
     );
-    // Remove password from the response
+
     const responseUser = { ...user };
     delete responseUser.password;
 
@@ -118,7 +126,7 @@ async function getUserById(req, res) {
   try {
     const user = await Student.getUserById(userId);
     if (!user) {
-      return res.status(404).json({ error: "User not found" });
+      return res.status(404).json({ error: "User not found 4" });
     }
     // Remove password from the response
     const responseUser = { ...user };
@@ -227,6 +235,62 @@ async function getSupervisorDetails(req, res) {
   }
 }
 
+async function updateStudentExaminers(req, res) {
+  const studentId = req.params.userId;
+  const { examinerId } = req.body; // Assuming you receive an array of examiner IDs
+
+  try {
+    // Find the student by ID
+    const student = await Student.getUserById(studentId);
+    if (!student) {
+      return res.status(404).json({ error: "Student not found" });
+    }
+
+    if (!Array.isArray(examinerId) || examinerId.length === 0) {
+      return res.status(400).json({ error: "No valid examiner IDs provided" });
+    }
+
+    // If student.examiners is undefined or not an array, initialize it as an empty array
+    if (!Array.isArray(student.examiners)) {
+      student.examiners = [];
+    }
+
+    // Check if any of the received examinerIds already exist in the student's examiners list
+    const existingExaminers = student.examiners;
+    const newExaminers = [];
+    let examinerExists = false;
+
+    for (const id of examinerId) {
+      if (!existingExaminers.includes(id)) {
+        newExaminers.push(id);
+      } else {
+        examinerExists = true;
+      }
+    }
+
+    if (examinerExists) {
+      if (newExaminers.length === 0) {
+        return res
+          .status(400)
+          .json({ error: "Examminers has already been assigned to student" });
+      } else {
+        await student.updateExaminers(student.examiners.concat(newExaminers));
+        return res
+          .status(200)
+          .json({ message: "Student examiners updated successfully" });
+      }
+    } else {
+      await student.updateExaminers(student.examiners.concat(newExaminers));
+      return res
+        .status(200)
+        .json({ message: "Student examiners updated successfully" });
+    }
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
 module.exports = {
   registerUser,
   loginUser,
@@ -235,4 +299,5 @@ module.exports = {
   getUserByEmail,
   assignSupervisor,
   getSupervisorDetails,
+  updateStudentExaminers,
 };

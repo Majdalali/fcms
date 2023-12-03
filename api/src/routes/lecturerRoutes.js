@@ -4,6 +4,7 @@ const router = express.Router();
 const lecturerController = require("../controllers/usersControllers/lecturerController");
 const fileUploadController = require("../controllers/generalControllers/fileUploadController");
 const nominationController = require("../controllers/generalControllers/nominationsController");
+const commentsController = require("../controllers/generalControllers/commentsController");
 
 const authGuard = require("../middleware/roleAuth"); // Import the middleware
 const verifyToken = require("../middleware/verifyToken");
@@ -26,4 +27,20 @@ router.post(
   nominationController.createNomination
 );
 
+router.post(
+  "/lecturer/newcomment",
+  verifyToken,
+  commentsController.createComment
+);
+
+router.get(
+  "/lecturer/mycomments/:lecturerId",
+  commentsController.getLecturerComments
+);
+
+// router.get(
+//   "/mycomments",
+//   verifyToken,
+//   commentsController.getMyLecturerComments
+// );
 module.exports = router;

@@ -6,6 +6,7 @@ const dotenv = require("dotenv");
 dotenv.config();
 const secretKey = process.env.SECRET_TOKEN;
 const jwt = require("jsonwebtoken");
+const admin = require("../../services/firebase");
 
 async function registerLecturer(req, res) {
   const { username, email, password, user_type } = req.body;
@@ -19,15 +20,22 @@ async function registerLecturer(req, res) {
       return res.status(400).json({ error: "Email is already registered" });
     }
 
+    const userRecord = await admin.auth().createUser({
+      email,
+      password: hashedPassword,
+      displayName: username, // Optionally set the display name
+    });
+
     // Create a new user instance with hashed password
     const newUser = new Lecturer({
       username,
       email,
       password: hashedPassword,
       user_type,
+      user_id: userRecord.uid,
     });
     await newUser.save();
-
+    await admin.auth().generateEmailVerificationLink(userRecord.email);
     // Remove password from the response
     const responseUser = { ...newUser };
     delete responseUser.password;
@@ -58,7 +66,11 @@ async function loginLecturer(req, res) {
 
     // User is authenticated, send a success response
     const token = jwt.sign(
-      { user_id: user.user_id, user_type: user.user_type },
+      {
+        user_id: user.user_id,
+        user_type: user.user_type,
+        isAdmin: user.isAdmin,
+      },
       secretKey,
       { expiresIn: "1h" }
     );
@@ -171,6 +183,62 @@ async function getMyStudents(req, res) {
   }
 }
 
+async function updateLecturerExaminees(req, res) {
+  const lecturerId = req.params.userId;
+  const { studentId } = req.body; // Assuming you receive a student ID to add
+
+  try {
+    // Find the lecturer by ID
+    const lecturer = await Lecturer.getUserById(lecturerId);
+    if (!lecturer) {
+      return res.status(404).json({ error: "Lecturer not found" });
+    }
+
+    if (!Array.isArray(studentId) || studentId.length === 0) {
+      return res.status(400).json({ error: "No valid Student IDs provided" });
+    }
+
+    // If lecturer.examinees is undefined or not an array, initialize it as an empty array
+    if (!Array.isArray(lecturer.examinees)) {
+      lecturer.examinees = [];
+    }
+
+    // Check if the studentId already exists in the lecturer's examinees list
+    const existingStudents = lecturer.examinees;
+    const newStudents = [];
+    let studentExists = false;
+
+    for (const id of studentId) {
+      if (!existingStudents.includes(id)) {
+        newStudents.push(id);
+      } else {
+        studentExists = true;
+      }
+    }
+
+    if (studentExists) {
+      if (newStudents.length === 0) {
+        return res
+          .status(400)
+          .json({ error: "Students has already been assigned to Examiner" });
+      } else {
+        await lecturer.updateExaminees(lecturer.examinees.concat(newStudents));
+        return res
+          .status(200)
+          .json({ message: "Lecturer examinees updated successfully" });
+      }
+    } else {
+      await lecturer.updateExaminees(lecturer.examinees.concat(newStudents));
+      return res
+        .status(200)
+        .json({ message: "Lecturer examinees updated successfully" });
+    }
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
 module.exports = {
   registerLecturer,
   loginLecturer,
@@ -178,4 +246,5 @@ module.exports = {
   getLecturerById,
   getLecturerByEmail,
   getMyStudents,
+  updateLecturerExaminees,
 };

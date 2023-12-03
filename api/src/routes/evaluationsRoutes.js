@@ -6,32 +6,12 @@ const authGuard = require("../middleware/roleAuth");
 const evaluationsController = require("../controllers/evaluationsController");
 
 router.post(
-  "/mecc/supervisor",
+  "/evaluate",
   verifyToken,
   authGuard("lecturer"),
-  evaluationsController.createSVEvaluationMECC
+  evaluationsController.createANomination
 );
 
-router.post(
-  "/mecc/examiner",
-  verifyToken,
-  authGuard("lecturer"),
-  evaluationsController.createEXEvaluationMECC
-);
-
-router.post(
-  "/mcsd/examiner",
-  verifyToken,
-  authGuard("lecturer"),
-  evaluationsController.createEXEvaluationMCSD
-);
-
-router.post(
-  "/mcsd/supervisor",
-  verifyToken,
-  authGuard("lecturer"),
-  evaluationsController.createSVEvaluationMCSD
-);
-
-router.get("/mecc/:id", evaluationsController.getEvaluationsById);
+router.get("/evaluations", evaluationsController.getAllEvaluations);
+router.get("/evaluations/:id", evaluationsController.getEvaluationsById);
 module.exports = router;

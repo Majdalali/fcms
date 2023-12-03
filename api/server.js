@@ -5,7 +5,7 @@ const lecturerRoutes = require("./src/routes/lecturerRoutes");
 const generalRoutes = require("./src/routes/generalRoutes");
 const evaluationRoutes = require("./src/routes/evaluationsRoutes");
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8000;
 app.use(bodyParser.json());
 
 // endpoint

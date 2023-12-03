@@ -10,19 +10,17 @@ class Lecturer {
     user_type = "lecturer",
     user_id = null,
     supervisedStudents = [],
+    examinees = [],
+    isAdmin = false,
   }) {
-    this.user_id = user_id || this.generateRandomId(); // Generates a new random ID if user_id is not provided
+    this.user_id = user_id; // Generates a new random ID if user_id is not provided
     this.username = username;
     this.email = email;
     this.password = password;
     this.user_type = user_type;
+    this.isAdmin = isAdmin;
+    this.examinees = examinees;
     this.supervisedStudents = supervisedStudents;
-  }
-
-  generateRandomId() {
-    const timestamp = Date.now().toString(); // Current timestamp in milliseconds
-    const randomPortion = Math.floor(Math.random() * 100000).toString(); // Random 5-digit number
-    return timestamp + randomPortion;
   }
 
   static async getUserByEmail(email) {
@@ -72,9 +70,48 @@ class Lecturer {
         email: this.email,
         password: this.password,
         user_type: this.user_type,
+        examinees: this.examinees,
+        isAdmin: this.isAdmin,
         supervisedStudents: this.supervisedStudents,
       });
     } catch (error) {
+      throw error;
+    }
+  }
+
+  async update() {
+    try {
+      await lecturerCollection.doc(this.user_id).update({
+        username: this.username,
+        email: this.email,
+        password: this.password,
+        user_type: this.user_type,
+        examinees: this.examinees,
+        isAdmin: this.isAdmin,
+      });
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async updateExaminees(examinees) {
+    try {
+      const updatedData = {};
+
+      // Check if examinees array is defined and not empty before updating
+      if (examinees && Array.isArray(examinees) && examinees.length > 0) {
+        updatedData.examinees = examinees;
+      } else {
+        throw new Error("Examinees data is invalid");
+      }
+
+      // Log the data before the update to see what's being sent to Firestore
+      console.log("Updated Data:", updatedData);
+
+      await lecturerCollection.doc(this.user_id).update(updatedData);
+    } catch (error) {
+      // Log the error details to check the specific issue
+      console.error("Update Examinees Error:", error);
       throw error;
     }
   }

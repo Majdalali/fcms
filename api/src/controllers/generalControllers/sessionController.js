@@ -31,6 +31,7 @@ async function createSession(req, res) {
     res.status(500).json({ error: "Internal server error" });
   }
 }
+
 async function getSession(req, res) {
   const { sessionTitle } = req.params;
 
@@ -45,4 +46,17 @@ async function getSession(req, res) {
     res.status(500).json({ error: "Internal server error" });
   }
 }
-module.exports = { createSession, getSession };
+
+async function deleteSession(req, res) {
+  const { sessionId } = req.params;
+
+  try {
+    await Session.deleteSession(sessionId);
+    res.status(200).json({ message: "Session deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+module.exports = { createSession, getSession, deleteSession };
