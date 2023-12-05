@@ -79,6 +79,12 @@ async function loginUser(req, res) {
     const responseUser = { ...user };
     delete responseUser.password;
 
+    res.cookie("token", token, {
+      maxAge: 3600000, // 1 hour in milliseconds
+      httpOnly: true,
+      // Other cookie options as needed
+    });
+
     return res
       .status(200)
       .json({ message: "Login successful", user: responseUser, token });
