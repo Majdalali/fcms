@@ -1,6 +1,6 @@
 <template>
   <header>
-    <div class="col-12 bg-light">
+    <div class="col-12">
       <router-view />
     </div>
   </header>

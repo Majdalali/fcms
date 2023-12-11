@@ -54,7 +54,11 @@
 <script setup>
 import { ref } from "vue";
 import axios from "axios";
+import { useStore } from "vuex";
+import { useRouter } from "vue-router";
 
+const router = useRouter();
+const store = useStore();
 const valid = ref(false);
 const email = ref("");
 const validEmail = ref(true);
@@ -105,8 +109,13 @@ const login = async () => {
     );
 
     if (response.status === 200) {
+      store.dispatch("loginUser", {
+        user: response.data.user,
+        access_token: response.data.token,
+      });
       // Redirect to another page or perform necessary actions upon successful login
-      console.log("Login successful:", response.data);
+      console.log("Login successful:");
+      router.push("/");
     } else {
       // Handle failed login (display error message, etc.)
       console.error("Login failed:", response.data.error);

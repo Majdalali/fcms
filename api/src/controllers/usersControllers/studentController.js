@@ -40,7 +40,7 @@ async function registerUser(req, res) {
 
     await admin.auth().generateEmailVerificationLink(email);
 
-    return res.status(201).json({ message: "User registered successfully" });
+    return res.status(200).json({ message: "User registered successfully" });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "Internal server error" });
@@ -73,17 +73,11 @@ async function loginUser(req, res) {
         user_program: user.user_program,
       },
       secretKey,
-      { expiresIn: "1h" }
+      { expiresIn: "1 week" }
     );
 
     const responseUser = { ...user };
     delete responseUser.password;
-
-    res.cookie("token", token, {
-      maxAge: 3600000, // 1 hour in milliseconds
-      httpOnly: true,
-      // Other cookie options as needed
-    });
 
     return res
       .status(200)
@@ -297,6 +291,31 @@ async function updateStudentExaminers(req, res) {
   }
 }
 
+async function updateStudentProjectInfo(req, res) {
+  const { projectInfo } = req.body;
+
+  try {
+    const token = req.headers.authorization;
+    const decoded = jwt.verify(token, process.env.SECRET_TOKEN);
+    const userId = decoded.user_id;
+    // Find the student by ID
+    const student = await Student.getUserById(userId);
+    if (!student) {
+      return res.status(404).json({ error: "Student not found" });
+    }
+
+    // Update the project information using the new method
+    await student.updateProjectInfo(projectInfo);
+
+    return res
+      .status(200)
+      .json({ message: "The project information has been updated!" });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
 module.exports = {
   registerUser,
   loginUser,
@@ -306,4 +325,5 @@ module.exports = {
   assignSupervisor,
   getSupervisorDetails,
   updateStudentExaminers,
+  updateStudentProjectInfo,
 };

@@ -28,4 +28,10 @@ router.post(
 );
 router.get("/getFile/:fileName", fileUploadController.displayFile);
 router.get("/mycomments/:studentId", commentsController.getStudentComments);
+
+router.post(
+  "/updateProjectInfo",
+  verifyToken,
+  studentController.updateStudentProjectInfo
+);
 module.exports = router;

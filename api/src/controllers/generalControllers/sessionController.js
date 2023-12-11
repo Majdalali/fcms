@@ -4,6 +4,7 @@ async function createSession(req, res) {
   const {
     session_id,
     session_title,
+    presentationAndDemo,
     session_semester,
     progress_one,
     progress_two,
@@ -16,11 +17,13 @@ async function createSession(req, res) {
     session_id,
     session_title,
     session_semester,
+    presentationAndDemo,
     progress_one,
     progress_two,
     finalSubmission,
     proposal,
     correction,
+    createdAt: new Date(),
   });
 
   try {
@@ -47,6 +50,19 @@ async function getSession(req, res) {
   }
 }
 
+async function getLatestSession(req, res) {
+  try {
+    const latestSession = await Session.getLatestSession();
+    if (!latestSession) {
+      return res.status(404).json({ error: "Latest session not found" });
+    }
+    res.status(200).json(latestSession);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+}
+
 async function deleteSession(req, res) {
   const { sessionId } = req.params;
 
@@ -59,4 +75,4 @@ async function deleteSession(req, res) {
   }
 }
 
-module.exports = { createSession, getSession, deleteSession };
+module.exports = { createSession, getSession, deleteSession, getLatestSession };

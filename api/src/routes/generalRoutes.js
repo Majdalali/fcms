@@ -12,11 +12,11 @@ const lecturerController = require("../controllers/usersControllers/lecturerCont
 
 router.post(
   "/createSession",
-  verifyToken,
-  adminGuard,
+
   sessionController.createSession
 );
 router.get("/currentSession/:sessionTitle", sessionController.getSession);
+router.get("/currentSession", sessionController.getLatestSession);
 router.delete("/session/:sessionId", sessionController.deleteSession);
 
 // Nominations Routes

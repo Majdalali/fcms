@@ -14,6 +14,7 @@ class Student {
     user_id = null,
     supervisor = null,
     examiners = [],
+    projectInfo = {},
   }) {
     this.user_id = user_id; // Generates a new random ID if user_id is not provided
     this.username = username;
@@ -25,6 +26,7 @@ class Student {
     this.isActivated = isActivated;
     this.supervisor = supervisor;
     this.examiners = examiners;
+    this.projectInfo = projectInfo;
   }
 
   static async getUserByEmail(email) {
@@ -67,6 +69,7 @@ class Student {
         isActivated: this.isActivated,
         supervisor: this.supervisor,
         examiners: this.examiners,
+        projectInfo: this.projectInfo,
       });
     } catch (error) {
       throw error;
@@ -86,6 +89,7 @@ class Student {
         isActivated: this.isActivated,
         supervisor: this.supervisor,
         examiners: this.examiners,
+        projectInfo: this.projectInfo,
       });
     } catch (error) {
       throw error;
@@ -104,6 +108,24 @@ class Student {
       }
 
       await userCollection.doc(this.user_id).update(updatedData);
+    } catch (error) {
+      throw error;
+    }
+  }
+  async updateProjectInfo(projectInfo) {
+    try {
+      // Check if projectInfo is defined and is an object before updating
+      if (
+        projectInfo &&
+        typeof projectInfo === "object" &&
+        Object.keys(projectInfo).length > 0
+      ) {
+        await userCollection.doc(this.user_id).update({
+          projectInfo: projectInfo,
+        });
+      } else {
+        throw new Error("Project information is invalid");
+      }
     } catch (error) {
       throw error;
     }
