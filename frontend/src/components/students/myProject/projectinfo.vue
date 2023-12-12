@@ -44,7 +44,7 @@
           >Edit Project</v-btn
         >
       </div>
-      <template v-elsev-else>
+      <template v-else>
         <v-skeleton-loader
           :elevation="4"
           type="list-item-avatar"

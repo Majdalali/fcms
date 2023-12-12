@@ -20,14 +20,22 @@ router.get(
   "/getSupervisorDetails/:studentId",
   studentController.getSupervisorDetails
 );
+
+router.post(
+  "/checkExistingSubmission",
+  fileUploadController.checkExistingSubmission
+);
+
 router.post(
   "/uploadFile",
   verifyToken,
-  fileUploadController.upload.single("file"),
+  fileUploadController.upload.array("file", 5), // Change the "10" to the maximum number of files allowed
   fileUploadController.uploadFile
 );
+
 router.get("/getFile/:fileName", fileUploadController.displayFile);
 router.get("/mycomments/:studentId", commentsController.getStudentComments);
+router.get("/myfiles", verifyToken, fileUploadController.getStudentFiles);
 
 router.post(
   "/updateProjectInfo",

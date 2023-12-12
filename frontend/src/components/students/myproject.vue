@@ -34,7 +34,7 @@
                   <projectinfo />
                 </v-window-item>
 
-                <v-window-item value="two"> Two </v-window-item>
+                <v-window-item value="two"> <proposal /> </v-window-item>
 
                 <v-window-item value="three"> Three </v-window-item>
                 <v-window-item value="four"> <comments /> </v-window-item>
@@ -51,6 +51,7 @@
 import Navigation from "../navigation.vue";
 import projectinfo from "./myProject/projectinfo.vue";
 import comments from "./myProject/comments.vue";
+import proposal from "./myProject/proposal.vue";
 import { ref } from "vue";
 import { useDark } from "@vueuse/core";
 
@@ -73,7 +74,6 @@ const tab = ref("");
 }
 .tempDiv {
   background-color: #fdfefb !important;
-  padding-left: 10px;
 }
 .tempDiv-dark {
   background-color: #0d0d0d !important;
