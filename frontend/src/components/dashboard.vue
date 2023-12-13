@@ -69,7 +69,6 @@ const tab = ref("");
 }
 .tempDiv {
   background-color: #fdfefb !important;
-  padding-left: 10px;
 }
 .tempDiv-dark {
   background-color: #0d0d0d !important;

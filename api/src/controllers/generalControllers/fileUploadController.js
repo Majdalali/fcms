@@ -76,7 +76,9 @@ async function uploadFile(req, res) {
     // Call the saveDataSubmission function from your model with submissionType and fileSubmissionData
     await FileSubmission.saveDataSubmission(submissionType, fileSubmissionData);
 
-    return res.status(200).json({ message: "File info uploaded successfully" });
+    return res
+      .status(200)
+      .json({ message: "File info uploaded successfully", fileSubmissionData });
   } catch (error) {
     console.error(error);
     return res.status(401).json({ error: "Unauthorized" });
@@ -143,7 +145,41 @@ async function getStudentFiles(req, res) {
       studentId
     );
 
+    if (studentFiles.error) {
+      return res.status(400).json({ error: studentFiles.error });
+    }
+
     return res.status(200).json(studentFiles);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+async function deleteFileByFileName(req, res) {
+  const token = req.headers.authorization;
+  const { fileName } = req.params;
+  const { submissionType } = req.body;
+
+  try {
+    const decoded = jwt.verify(token, process.env.SECRET_TOKEN);
+    const studentId = decoded.user_id;
+
+    const deleteResult = await FileSubmission.deleteFileByName(
+      submissionType,
+      studentId,
+      fileName
+    );
+
+    if (!deleteResult) {
+      return res.status(404).json({ error: "File not found" });
+    }
+
+    // Delete the file from the uploads folder
+    const filePath = path.join("./uploads", fileName);
+    await fs.unlink(filePath);
+
+    return res.status(200).json(deleteResult);
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "Internal server error" });
@@ -196,5 +232,6 @@ module.exports = {
   checkExistingSubmission,
   getStudentFiles,
   displayFile,
+  deleteFileByFileName,
   getSupervisorFiles,
 };

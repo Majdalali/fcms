@@ -37,7 +37,9 @@
                 <v-window-item value="two"> <proposal /> </v-window-item>
 
                 <v-window-item value="three"> Three </v-window-item>
-                <v-window-item value="four"> <comments /> </v-window-item>
+                <v-window-item class="w-2/3" value="four">
+                  <comments />
+                </v-window-item>
               </v-window>
             </v-card-text>
           </div>

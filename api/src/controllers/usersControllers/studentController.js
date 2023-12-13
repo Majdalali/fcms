@@ -157,7 +157,9 @@ async function getUserByEmail(req, res) {
 
 async function assignSupervisor(req, res) {
   const { email } = req.body;
-  const studentId = req.user.user_id;
+  const token = req.headers.authorization;
+  const decoded = jwt.verify(token, process.env.SECRET_TOKEN);
+  const studentId = decoded.user_id;
 
   try {
     // Find the supervisor by email
@@ -186,11 +188,15 @@ async function assignSupervisor(req, res) {
     // Save the updated student and lecturer data
     await student.save();
     await lecturer.save();
-
+    const supervisorresponse = await Lecturer.getUserById(student.supervisor);
+    const supervisorDetails = {
+      name: supervisorresponse.username,
+      email: supervisorresponse.email,
+    };
     // Return success response
     return res
       .status(200)
-      .json({ message: "Supervisor assigned successfully" });
+      .json({ message: "Supervisor assigned successfully", supervisorDetails });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "Internal server error" });

@@ -36,7 +36,11 @@ router.post(
 router.get("/getFile/:fileName", fileUploadController.displayFile);
 router.get("/mycomments/:studentId", commentsController.getStudentComments);
 router.get("/myfiles", verifyToken, fileUploadController.getStudentFiles);
-
+router.delete(
+  "/deleteFile/:fileName",
+  verifyToken,
+  fileUploadController.deleteFileByFileName
+);
 router.post(
   "/updateProjectInfo",
   verifyToken,

@@ -7,7 +7,7 @@
         your project
       </p>
     </div>
-    <div class="pt-10 h-full w-2/3">
+    <div class="pt-10 h-full">
       <v-expansion-panels>
         <v-expansion-panel
           class="mt-5 expantionPanel"
