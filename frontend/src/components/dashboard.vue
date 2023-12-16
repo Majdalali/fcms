@@ -8,7 +8,7 @@
         <v-col cols="2" class="nav">
           <Navigation />
         </v-col>
-        <v-col cols="10" class="main">
+        <v-col class="main">
           <div class="pt-4 upperDiv">
             <h1 class="text-3xl font-medium title">Dashboard</h1>
             <p class="text-lg titleDes font-light">
@@ -33,10 +33,10 @@
               <v-window v-model="tab">
                 <v-window-item value="one"> <Session /> </v-window-item>
 
-                <v-window-item value="two"> Two </v-window-item>
+                <v-window-item value="two"> <Projects /> </v-window-item>
 
-                <v-window-item value="three"> Three </v-window-item>
-                <v-window-item value="four"> four </v-window-item>
+                <v-window-item value="three"> <Students /> </v-window-item>
+                <v-window-item value="four"> <Lecturers /> </v-window-item>
                 <v-window-item value="five">five </v-window-item>
               </v-window>
             </v-card-text>
@@ -49,6 +49,9 @@
 <script setup>
 import Navigation from "./navigation.vue";
 import Session from "./dashboard/session.vue";
+import Students from "./dashboard/students.vue";
+import Lecturers from "./dashboard/lecturers.vue";
+import Projects from "./dashboard/projects.vue";
 import { useDark } from "@vueuse/core";
 import { ref } from "vue";
 

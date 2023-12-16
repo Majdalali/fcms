@@ -103,6 +103,8 @@ async function getAllUsers(req, res) {
         user_type,
         supervisor,
         examiners,
+        user_program,
+        projectInfo,
       }) => ({
         user_id,
         username,
@@ -111,6 +113,31 @@ async function getAllUsers(req, res) {
         user_type,
         supervisor,
         examiners,
+        user_program,
+        projectInfo,
+      })
+    );
+
+    res.status(200).json(sanitizedUsers); // Send the sanitized array of User instances in the response
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+async function getAllProjects(req, res) {
+  try {
+    const usersData = await userHandler.getAllUsers();
+    const users = usersData.map((userData) => new Student(userData)); // Convert data to User instances
+
+    // Create a sanitized version of the users array without the password property
+    const sanitizedUsers = users.map(
+      ({ user_id, username, email, user_program, projectInfo }) => ({
+        user_id,
+        username,
+        email,
+        user_program,
+        projectInfo,
       })
     );
 
@@ -131,6 +158,25 @@ async function getUserById(req, res) {
     // Remove password from the response
     const responseUser = { ...user };
     delete responseUser.password;
+    return res.status(200).json(responseUser);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+async function getStudent(req, res) {
+  const { userId } = req.params;
+  try {
+    const user = await Student.getUserById(userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found 4" });
+    }
+    // Remove password from the response
+    const responseUser = {
+      name: user.username,
+      email: user.email,
+    };
     return res.status(200).json(responseUser);
   } catch (error) {
     console.error(error);
@@ -240,7 +286,21 @@ async function getSupervisorDetails(req, res) {
     return res.status(500).json({ error: "Internal server error" });
   }
 }
-
+async function getExaminersDetails(req, res) {
+  const { userId } = req.params;
+  try {
+    const user = await Lecturer.getUserById(userId);
+    if (!user) {
+      return res.status(404).json({ error: "Examiner not found" });
+    }
+    // Remove password from the response
+    const responseUser = { name: user.username, email: user.email };
+    return res.status(200).json(responseUser);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
 async function updateStudentExaminers(req, res) {
   const studentId = req.params.userId;
   const { examinerId } = req.body; // Assuming you receive an array of examiner IDs
@@ -326,10 +386,13 @@ module.exports = {
   registerUser,
   loginUser,
   getAllUsers,
+  getAllProjects,
   getUserById,
+  getStudent,
   getUserByEmail,
   assignSupervisor,
   getSupervisorDetails,
+  getExaminersDetails,
   updateStudentExaminers,
   updateStudentProjectInfo,
 };

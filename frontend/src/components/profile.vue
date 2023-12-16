@@ -19,6 +19,7 @@
             <div v-if="userInfo">
               <v-sheet
                 :height="200"
+                border
                 class="w-[90%] drop-shadow-lg p-10 rounded-lg"
               >
                 <div class="flex flex-row items-center h-full pl-20">
@@ -83,7 +84,14 @@
               v-model="tab"
             >
               <v-tab class="v-tab" value="one">Supervisor</v-tab>
-              <v-tab class="v-tab" value="two">Examiners</v-tab>
+              <v-tab
+                v-for="(examiner, index) in examinersInfo"
+                :key="index"
+                class="v-tab"
+                :value="'examiner-' + index"
+                >Examiner {{ index + 1 }}</v-tab
+              >
+              <v-tab class="v-tab" value="four">Comments</v-tab>
             </v-tabs>
             <v-divider class="w-[90%]"></v-divider>
 
@@ -91,7 +99,16 @@
               <v-window v-model="tab">
                 <v-window-item value="one"> <Supervisor /> </v-window-item>
 
-                <v-window-item value="two"> Two </v-window-item>
+                <v-window-item
+                  v-for="(examiner, index) in examinersInfo"
+                  :key="index"
+                  :value="'examiner-' + index"
+                >
+                  <Examiner :name="examiner.name" :email="examiner.email" />
+                </v-window-item>
+                <v-window-item class="w-[60%]" value="four">
+                  <Comments />
+                </v-window-item>
               </v-window>
             </v-card-text>
           </div>
@@ -107,6 +124,8 @@ import { useDark } from "@vueuse/core";
 import axios from "axios";
 import Navigation from "./navigation.vue";
 import Supervisor from "./profile/supervisor.vue";
+import Examiner from "./profile/examiner.vue";
+import Comments from "./students/myProject/comments.vue";
 // Icons
 import Email from "@/assets/icons/email.vue";
 import UserCard from "@/assets/icons/userCard.vue";
@@ -116,6 +135,7 @@ import Flag from "@/assets/icons/flag.vue";
 const isDark = useDark();
 const tab = ref("");
 const userInfo = ref(null);
+const examinersInfo = ref([]);
 const getInitials = (username) => {
   const names = username.split(" ");
   return names
@@ -132,6 +152,23 @@ onMounted(async () => {
   } catch (error) {
     console.error("Error fetching user info:", error);
     // Handle error, display an error message, or redirect if needed
+  }
+  try {
+    // Get user from local storage
+    const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+    // get user examiners array from storedUser data
+    const userExaminers = storedUser.examiners;
+    // Loop through userExaminers array
+    for (let i = 0; i < userExaminers.length; i++) {
+      // Get examiner details from userExaminers array
+      const response = await axios.get(
+        `http://localhost:8000/getExaminersDetails/${userExaminers[i]}`
+      );
+      // Push examiner details to examinersInfo array
+      examinersInfo.value.push(response.data);
+    }
+  } catch (error) {
+    console.log(error);
   }
 });
 </script>

@@ -12,6 +12,7 @@ class Lecturer {
     supervisedStudents = [],
     examinees = [],
     isAdmin = false,
+    department,
   }) {
     this.user_id = user_id; // Generates a new random ID if user_id is not provided
     this.username = username;
@@ -20,6 +21,7 @@ class Lecturer {
     this.user_type = user_type;
     this.isAdmin = isAdmin;
     this.examinees = examinees;
+    this.department = department;
     this.supervisedStudents = supervisedStudents;
   }
 
@@ -73,6 +75,7 @@ class Lecturer {
         examinees: this.examinees,
         isAdmin: this.isAdmin,
         supervisedStudents: this.supervisedStudents,
+        department: this.department,
       });
     } catch (error) {
       throw error;

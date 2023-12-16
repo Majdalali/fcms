@@ -8,7 +8,7 @@
         <v-col cols="2" class="nav">
           <Navigation />
         </v-col>
-        <v-col cols="10" class="main">
+        <v-col class="main">
           <div class="pt-4 upperDiv">
             <h1 class="text-3xl font-medium title">My Project</h1>
             <p class="text-lg titleDes font-light">

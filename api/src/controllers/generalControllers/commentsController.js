@@ -73,7 +73,7 @@ async function getStudentComments(req, res) {
 
     if (!studentComments || studentComments.length === 0) {
       return res
-        .status(404)
+        .status(400)
         .json({ message: "No comments found for this student" });
     }
 

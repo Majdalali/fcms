@@ -5,103 +5,117 @@
       class="dark:bg-[#0D0D0D]"
     >
       <v-list-item
-        class="pt-8 h-[8%]"
-        title="FCMS"
-        subtitle="Dashboard"
+        class="pt-8"
+        title="Masters Project"
+        subtitle="Faculty of Computing"
       ></v-list-item>
-      <v-divider></v-divider>
-      <ul class="pt-4 h-[90%] flex flex-col justify-between">
-        <div>
-          <v-list-item link class=""
-            ><router-link to="/dashboard">
-              <li class="flex">
-                <v-icon class=""><homeIconVue /></v-icon>
-                <span class="vli font-medium" link> Home </span>
-              </li></router-link
-            ></v-list-item
-          >
-          <v-list-item link>
-            <router-link to="/about">
-              <li class="flex">
-                <v-icon><bellVue /></v-icon>
-                <span class="vli font-medium" link> Notification </span>
-              </li></router-link
-            >
-          </v-list-item>
-          <v-list-item link>
+      <v-divider class="mt-2"></v-divider>
+      <v-list class="h-[90%]">
+        <ul class="pt-2 h-full flex flex-col justify-between">
+          <div>
+            <router-link to="/dashboard">
+              <v-list-item
+                :prepend-icon="homeIconVue"
+                title="Home"
+                link
+                class="vli"
+              ></v-list-item>
+            </router-link>
+
+            <router-link to="/activity-feed">
+              <v-list-item
+                :prepend-icon="bellVue"
+                title="Notification"
+                link
+                class="vli"
+              ></v-list-item
+            ></router-link>
             <router-link to="/myproject">
-              <li class="flex">
-                <v-icon><bookmarkVue /></v-icon>
-                <span class="vli font-medium" link> My Project </span>
-              </li></router-link
-            >
-          </v-list-item>
+              <v-list-item
+                :prepend-icon="bookmarkVue"
+                title="My Project"
+                link
+                class="vli"
+              ></v-list-item
+            ></router-link>
 
-          <v-list-item link>
             <router-link to="/profile">
-              <li class="flex">
-                <v-icon><userVue /></v-icon>
-                <span class="vli font-medium" link> Profile </span>
-              </li></router-link
+              <v-list-item
+                :prepend-icon="userVue"
+                title="Profile"
+                link
+                class="vli"
+              ></v-list-item>
+            </router-link>
+          </div>
+          <div>
+            <v-menu
+              v-model="menu"
+              :close-on-content-click="false"
+              location="end"
             >
-          </v-list-item>
-        </div>
-        <div>
-          <v-menu v-model="menu" :close-on-content-click="false" location="end">
-            <template v-slot:activator="{ props }">
-              <v-list-item v-bind="props" link>
-                <li class="flex">
-                  <v-icon><settings /></v-icon>
-                  <span class="vli font-medium" link> Settings </span>
-                </li>
-              </v-list-item>
-            </template>
-            <v-card min-width="300">
-              <div class="p-2">
-                <v-switch
-                  v-model="currentMode"
-                  @change="toggleDark()"
-                  color="indigo"
-                  inset
-                  label="Night Mode"
-                  hide-details
-                ></v-switch>
-              </div>
-            </v-card>
-          </v-menu>
-
-          <v-list-item link>
-            <li class="flex">
-              <v-icon><question /></v-icon>
-              <span class="vli font-medium" link> Contact Us </span>
-            </li>
-          </v-list-item>
-          <v-dialog width="500">
-            <template v-slot:activator="{ props }">
-              <v-list-item v-bind="props" link>
-                <li class="flex">
-                  <v-icon><logout /></v-icon>
-                  <span class="vli font-medium" link> Sign Out </span>
-                </li>
-              </v-list-item>
-            </template>
-
-            <template v-slot:default="{ isActive }">
-              <v-card title="Signing Out!">
-                <v-card-text class="text-red-400">
-                  Are you sure you want to sign out?
-                </v-card-text>
-
-                <v-card-actions>
-                  <v-spacer></v-spacer>
-                  <v-btn text="Cancel" @click="isActive.value = false"></v-btn>
-                  <v-btn text="Sign Out" @click="signout()"></v-btn>
-                </v-card-actions>
+              <template v-slot:activator="{ props }">
+                <v-list-item
+                  :prepend-icon="settings"
+                  title="Settings"
+                  v-bind="props"
+                  link
+                  class="vli"
+                >
+                </v-list-item>
+              </template>
+              <v-card min-width="300">
+                <div class="p-2">
+                  <v-switch
+                    v-model="currentMode"
+                    @change="toggleDark()"
+                    color="indigo"
+                    inset
+                    label="Night Mode"
+                    hide-details
+                  ></v-switch>
+                </div>
               </v-card>
-            </template>
-          </v-dialog>
-        </div>
-      </ul>
+            </v-menu>
+
+            <v-list-item
+              :prepend-icon="question"
+              title="Contact Us"
+              class="vli"
+              link
+            >
+            </v-list-item>
+            <v-dialog width="500">
+              <template v-slot:activator="{ props }">
+                <v-list-item
+                  :prepend-icon="logout"
+                  title="Sign Out"
+                  v-bind="props"
+                  link
+                >
+                </v-list-item>
+              </template>
+
+              <template v-slot:default="{ isActive }">
+                <v-card title="Signing Out!">
+                  <v-card-text class="text-red-400">
+                    Are you sure you want to sign out?
+                  </v-card-text>
+
+                  <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn
+                      text="Cancel"
+                      @click="isActive.value = false"
+                    ></v-btn>
+                    <v-btn text="Sign Out" @click="signout()"></v-btn>
+                  </v-card-actions>
+                </v-card>
+              </template>
+            </v-dialog>
+          </div>
+        </ul>
+      </v-list>
 
       <!-- Add more items as needed -->
     </v-navigation-drawer>
@@ -138,16 +152,11 @@ const signout = () => {
 </script>
 
 <style lang="scss" scoped>
-li {
-  padding-top: 0.5rem /* 8px */;
-  padding-bottom: 0.5rem /* 8px */;
-}
-
 .vli {
   font-family: "Dm Sans", sans-serif;
-  font-size: 16px;
-  text-transform: capitalize;
-  padding-left: 10px;
+}
+.vli :deep(.v-list-item-title) {
+  font-weight: 500;
 }
 .router-link-active {
   color: #6589ff; /* Change text color */

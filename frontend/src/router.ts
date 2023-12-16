@@ -10,6 +10,7 @@ import Profile from './components/profile.vue'
 import Users from './components/users.vue'
 import Dashboard from './components/dashboard.vue'
 import MyProject from './components/students/myproject.vue'
+import notificationCenter from './components/notificationCenter.vue';
 const routes = [
   {
     path: '/',
@@ -35,6 +36,11 @@ const routes = [
     path: '/dashboard',
     name: 'dashboard',
     component: Dashboard,
+  },
+  {
+    path: '/activity-feed',
+    name: 'activity-feed',
+    component: notificationCenter,
   },
   {
     path: '/myproject',

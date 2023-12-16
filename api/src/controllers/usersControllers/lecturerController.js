@@ -98,16 +98,16 @@ async function getAllLecturers(req, res) {
         user_id,
         username,
         email,
-        matricCard,
-        user_type,
         supervisedStudents,
+        examinees,
+        department,
       }) => ({
         user_id,
         username,
+        department,
         email,
-        matricCard,
-        user_type,
         supervisedStudents,
+        examinees,
       })
     );
 

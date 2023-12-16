@@ -8,8 +8,17 @@
       </p>
     </div>
     <div class="pt-10 h-full">
-      <v-expansion-panels>
+      <v-alert
+        variant="outlined"
+        type="warning"
+        v-show="errorMessage !== ''"
+        :text="errorMessage"
+      >
+      </v-alert>
+      <v-expansion-panels class="mb-5 ml-1">
         <v-expansion-panel
+          :color="isDark ? '' : '#f5f5f5'"
+          :elevation="4"
           class="mt-5 expantionPanel"
           v-for="(comment, index) in comments"
           :key="index"
@@ -41,8 +50,10 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import axios from "axios";
-
+import { useDark } from "@vueuse/core";
+const isDark = useDark();
 const comments = ref(null);
+const errorMessage = ref("");
 const getLecturerName = async (lecturerId) => {
   try {
     const response = await axios.get(
@@ -62,6 +73,7 @@ onMounted(async () => {
     const response = await axios.get(
       `http://localhost:8000/mycomments/${studentId}`
     );
+
     comments.value = response.data;
 
     // Fetch lecturer names for comments
@@ -69,8 +81,15 @@ onMounted(async () => {
       comment.lecturerName = await getLecturerName(comment.lecturerId);
     }
   } catch (error) {
-    console.error("Error fetching user info:", error);
-    // Handle error, display an error message, or redirect if needed
+    if (
+      error.response &&
+      error.response.status === 400 &&
+      error.response.data.message === "No comments found for this student"
+    ) {
+      errorMessage.value = "Please check back later for comments";
+    } else {
+      errorMessage.value = "An error occurred while fetching comments";
+    }
   }
 });
 

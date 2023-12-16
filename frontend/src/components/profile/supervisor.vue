@@ -1,51 +1,36 @@
 <template>
   <div class="mt-10">
     <div v-if="userInfo">
-      <v-sheet border :height="75" class="w-1/2 drop-shadow-lg rounded-lg">
-        <div class="h-full w-full flex flex-row items-center">
-          <h1 class="text-lg title absolute left-10 font-bold">Name</h1>
-          <h1 class="text-lg font-Light titleDes absolute left-[40%]">
+      <v-sheet
+        border
+        :height="75"
+        class="w-1/2 rounded-lg"
+        :elevation="2"
+        :color="isDark ? '' : '#f5f5f5'"
+      >
+        <div class="h-full flex flex-row items-center">
+          <h1 class="text-lg title font-bold absolute left-10">Name</h1>
+          <h1 class="text-lg font-Light titleDes absolute left-[20%]">
             {{ userInfo.name }}
           </h1>
         </div>
       </v-sheet>
-      <v-sheet border :height="75" class="w-1/2 mt-4 drop-shadow-lg rounded-lg">
-        <div class="h-full w-full flex flex-row items-center">
+      <v-sheet
+        border
+        :height="75"
+        :elevation="2"
+        class="w-1/2 mt-4 rounded-lg"
+        :color="isDark ? '' : '#f5f5f5'"
+      >
+        <div class="h-full flex flex-row items-center">
           <h1 class="text-lg title absolute left-10 font-bold">Email</h1>
-          <h1 class="text-lg font-Light titleDes absolute left-[40%]">
+          <h1 class="text-lg font-Light titleDes absolute left-[20%]">
             {{ userInfo.email }}
           </h1>
         </div>
       </v-sheet>
     </div>
-    <div class="w-1/2 mt-5 flex flex-row justify-between">
-      <div>
-        <v-dialog v-model="dialogComments" width="1250">
-          <template v-slot:activator="{ props }">
-            <v-btn v-bind="props" class="w-52" size="large" variant="outlined"
-              >Comments</v-btn
-            >
-          </template>
-          <v-card color="#0d0d0d">
-            <v-card-text>
-              <v-container>
-                <Comments />
-              </v-container>
-            </v-card-text>
-            <v-card-actions>
-              <v-spacer></v-spacer>
-              <v-btn
-                color="warning"
-                variant="outlined"
-                class="w-32"
-                @click="dialogComments = false"
-              >
-                Close
-              </v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
-      </div>
+    <div class="w-1/2 mt-5">
       <div>
         <v-dialog v-model="dialog" persistent width="1024">
           <template v-slot:activator="{ props }">
@@ -54,6 +39,7 @@
               size="large"
               variant="elevated"
               :color="isDark ? '' : 'black'"
+              :disabled="userInfo.name !== 'Not Selected Yet'"
               >Select Supervisor</v-btn
             >
           </template>
@@ -90,6 +76,7 @@
                 color="indigo"
                 variant="elevated"
                 class="w-32"
+                :disabled="userInfo.name !== 'Not Selected Yet'"
               >
                 Select
               </v-btn>
@@ -105,13 +92,10 @@
 import { ref, onMounted } from "vue";
 import axios from "axios";
 import { useDark } from "@vueuse/core";
-import Comments from "../students/myProject/comments.vue";
-import router from "../../router";
 
 // Constants
 const isDark = useDark();
 const dialog = ref(false);
-const dialogComments = ref(false);
 const email = ref("");
 const userInfo = ref({
   name: "Not Selected Yet",
