@@ -11,8 +11,10 @@
         <v-col class="main">
           <div class="pt-4 upperDiv">
             <h1 class="text-3xl font-medium title">My Project</h1>
-            <p class="text-lg titleDes font-light">
-              The MDMS System For Semester 2023/2024 - 1
+            <p class="text-lg titleDes font-light" v-if="sessionDate">
+              The Masters System For Semester
+              {{ sessionDate.session_semester }} -
+              {{ sessionDate.session_title }}
             </p>
           </div>
           <div class="lowerDiv pt-10">
@@ -54,12 +56,25 @@ import Navigation from "../navigation.vue";
 import projectinfo from "./myProject/projectinfo.vue";
 import comments from "./myProject/comments.vue";
 import proposal from "./myProject/proposal.vue";
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import { useDark } from "@vueuse/core";
+import axios from "axios";
 
 // Constants
 const isDark = useDark();
 const tab = ref("");
+const sessionDate = ref(null);
+
+// Methods
+onMounted(async () => {
+  try {
+    const response = await axios.get(`http://localhost:8000/currentSession`);
+    sessionDate.value = response.data;
+  } catch (error) {
+    console.error("Error fetching proposal deadline:", error);
+    // Handle error for proposal deadline request
+  }
+});
 </script>
 
 <style lang="scss" scoped>

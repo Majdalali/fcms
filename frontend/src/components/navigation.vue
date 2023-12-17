@@ -3,12 +3,15 @@
     <v-navigation-drawer
       :theme="isDark ? 'dark' : 'light'"
       class="dark:bg-[#0D0D0D]"
+      rail
+      expand-on-hover
     >
-      <v-list-item
-        class="pt-8"
-        title="Masters Project"
-        subtitle="Faculty of Computing"
-      ></v-list-item>
+      <v-list>
+        <v-list-item
+          title="Masters Project"
+          subtitle="Faculty of Computing"
+        ></v-list-item
+      ></v-list>
       <v-divider class="mt-2"></v-divider>
       <v-list class="h-[90%]">
         <ul class="pt-2 h-full flex flex-col justify-between">

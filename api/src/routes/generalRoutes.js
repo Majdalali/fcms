@@ -38,9 +38,14 @@ router.delete(
   "/notification/:notificationId",
   notificationsController.deleteNotification
 );
+// router.get(
+//   "/notifications/:userId",
+//   notificationsController.getNotificationByUserId
+// );
 router.get(
-  "/notifications/:userId",
-  notificationsController.getNotificationByUserId
+  "/myNotifications",
+  verifyToken,
+  notificationsController.getMyNotifications
 );
 
 // Examiners Routes

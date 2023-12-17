@@ -25,20 +25,30 @@
     ></v-alert>
     <div v-show="!editMode" class="pt-10 h-full w-2/3">
       <div v-if="userInfo">
-        <div
+        <v-card
+          v-for="(value, key) in projectInfo"
+          :key="key"
+          :title="getTitle(key)"
+          :subtitle="userInfo.projectInfo[key]"
+          :color="isDark ? '' : '#f5f5f5'"
+          :elevation="2"
+          class="card title p-10 rounded-lg"
+        >
+        </v-card>
+        <!-- <div
           v-for="(value, key) in projectInfo"
           :key="key"
           class="card drop-shadow-lg p-10 flex items-center rounded-lg bg-[#f5f5f5] dark:bg-gray-800"
         >
-          <h1 class="title font-bold text-lg">{{ getTitle(key) }}</h1>
-          <h1 class="cardValue uppercase text-lg pl-12">
+          <h1 class="title w-[15%] font-bold text-lg">{{ getTitle(key) }}</h1>
+          <h1 class="cardValue w-[85%] uppercase text-lg pl-5">
             {{ userInfo.projectInfo[key] }}
           </h1>
-        </div>
+        </div> -->
         <v-btn
           class="w-56 mt-5"
           variant="elevated"
-          color="grey-darken-4"
+          color="deep-purple-darken-4"
           size="large"
           @click="toggleEditMode"
           >Edit Project</v-btn
@@ -110,10 +120,10 @@
 <script setup>
 import { ref, onMounted, computed } from "vue";
 import axios from "axios";
-import { useStore } from "vuex";
-import router from "@/router";
+import { useDark } from "@vueuse/core";
+
 // Constants
-const store = useStore();
+const isDark = useDark();
 const projectTitle = ref("");
 const projectArea = ref("");
 const projectType = ref("");

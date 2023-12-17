@@ -38,7 +38,7 @@
               v-bind="props"
               size="large"
               variant="elevated"
-              :color="isDark ? '' : 'black'"
+              :color="isDark ? 'deep-purple-darken-4' : 'black'"
               :disabled="userInfo.name !== 'Not Selected Yet'"
               >Select Supervisor</v-btn
             >

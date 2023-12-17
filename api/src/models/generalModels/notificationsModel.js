@@ -3,10 +3,21 @@ const notificationsCollection = firestore().collection("notifications");
 const short = require("short-uuid");
 
 class Notifications {
-  constructor({ notificationId, userId, message, createdAt }) {
+  constructor({
+    notificationId,
+    fromUser,
+    toUsers = [],
+    message,
+    creator,
+    type,
+    createdAt,
+  }) {
     this.notificationId = notificationId || short.generate();
-    this.userId = userId;
+    this.fromUser = fromUser;
+    this.toUsers = toUsers;
     this.message = message;
+    this.creator = creator;
+    this.type = type;
     this.createdAt = createdAt;
   }
 
@@ -14,8 +25,11 @@ class Notifications {
     try {
       await notificationsCollection.doc(this.notificationId).set({
         notificationId: this.notificationId,
-        userId: this.userId,
+        fromUser: this.fromUser,
+        toUsers: this.toUsers,
         message: this.message,
+        creator: this.creator,
+        type: this.type,
         createdAt: this.createdAt,
       });
     } catch (error) {
@@ -46,10 +60,10 @@ class Notifications {
     }
   }
 
-  static async getNotificationByUserId(userId) {
+  static async getNotificationsByUserId(userId) {
     try {
       const querySnapshot = await notificationsCollection
-        .where("userId", "==", userId)
+        .where("toUsers", "array-contains", userId)
         .get();
 
       const notifications = [];

@@ -5,12 +5,15 @@ async function createNotification(req, res) {
   const token = req.headers.authorization;
   try {
     const decoded = jwt.verify(token, process.env.SECRET_TOKEN);
-    const userId = decoded.user_id;
-    const { message } = req.body;
+    const fromUser = decoded.user_id;
+    const { message, toUsers, creator, type } = req.body;
 
     const newNotification = new Notifications({
-      userId,
+      fromUser,
+      toUsers,
       message,
+      creator,
+      type,
       createdAt: new Date(),
     });
 
@@ -53,20 +56,42 @@ async function deleteNotification(req, res) {
   }
 }
 
-async function getNotificationByUserId(req, res) {
-  const { userId } = req.params;
+// async function getNotificationByUserId(req, res) {
+//   const { userId } = req.params;
 
+//   try {
+//     const notifications = await Notifications.getNotificationByUserId(userId);
+
+//     if (!notifications || notifications.length === 0) {
+//       return res.status(404).json({ message: "No notifications found" });
+//     }
+
+//     res.status(200).json(notifications);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ error: "Internal server error" });
+//   }
+// }
+
+async function getMyNotifications(req, res) {
+  const token = req.headers.authorization;
+  const decoded = jwt.verify(token, process.env.SECRET_TOKEN);
+  const userId = decoded.user_id;
   try {
-    const notifications = await Notifications.getNotificationByUserId(userId);
-
-    if (!notifications || notifications.length === 0) {
-      return res.status(404).json({ message: "No notifications found" });
+    // Retrieve notifications for the user
+    const userNotifications = await Notifications.getNotificationsByUserId(
+      userId
+    );
+    // Filter notifications that match the user's ID in the 'toUsers' array
+    if (userNotifications.length === 0) {
+      // Send a specific message if there are no notifications
+      res.status(200).json({ message: "No notifications found for this user" });
+    } else {
+      // Send the filtered notifications as a response
+      res.status(200).json(userNotifications);
     }
-
-    res.status(200).json(notifications);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ error: "Failed to retrieve notifications" });
   }
 }
 
@@ -74,5 +99,5 @@ module.exports = {
   createNotification,
   getAllNotifications,
   deleteNotification,
-  getNotificationByUserId,
+  getMyNotifications,
 };
