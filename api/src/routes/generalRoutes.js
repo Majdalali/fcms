@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const verifyToken = require("../middleware/verifyToken");
+const { verifyToken, clientToken } = require("../middleware/verifyToken");
 const adminGuard = require("../middleware/adminGuard");
 
 const sessionController = require("../controllers/generalControllers/sessionController");
@@ -59,4 +59,6 @@ router.post(
   lecturerController.updateLecturerExaminees
 );
 
+// Client Token Validation Route
+router.post("/validateToken", clientToken);
 module.exports = router;

@@ -105,6 +105,7 @@ async function getAllUsers(req, res) {
         examiners,
         user_program,
         projectInfo,
+        coSupervisors,
       }) => ({
         user_id,
         username,
@@ -115,6 +116,7 @@ async function getAllUsers(req, res) {
         examiners,
         user_program,
         projectInfo,
+        coSupervisors,
       })
     );
 
@@ -301,6 +303,7 @@ async function getExaminersDetails(req, res) {
     return res.status(500).json({ error: "Internal server error" });
   }
 }
+
 async function updateStudentExaminers(req, res) {
   const studentId = req.params.userId;
   const { examinerId } = req.body; // Assuming you receive an array of examiner IDs
@@ -357,6 +360,72 @@ async function updateStudentExaminers(req, res) {
   }
 }
 
+async function updateStudentCoSupervisors(req, res) {
+  const token = req.headers.authorization;
+  const decoded = jwt.verify(token, process.env.SECRET_TOKEN);
+  const studentId = decoded.user_id;
+  const { email } = req.body;
+
+  try {
+    // Find the student by ID
+    const student = await Student.getUserById(studentId);
+    if (!student) {
+      return res.status(404).json({ error: "Student not found" });
+    }
+
+    // Find the supervisor by email
+    const supervisor = await Lecturer.getUserByEmail(email);
+    if (!supervisor || supervisor.user_type !== "lecturer") {
+      return res.status(404).json({ error: "Supervisor not found" });
+    }
+
+    // Check if the supervisor already exists in student's coSupervisors
+    if (student.coSupervisors.includes(supervisor.user_id)) {
+      return res.status(400).json({
+        error: "Supervisor already assigned as co-supervisor to student",
+      });
+    }
+    if (!supervisor.coSupervisedStudents.includes(studentId)) {
+      supervisor.coSupervisedStudents.push(studentId);
+    }
+    // Assign the supervisor to the student
+    student.coSupervisors.push(supervisor.user_id);
+
+    // Update the supervisor's coSupervisedStudents array with the student's ID
+
+    // Save the updated student and supervisor data
+    await student.save();
+    await supervisor.save();
+    const supervisorDetails = {
+      name: supervisor.username,
+      email: supervisor.email,
+    };
+    // Return success response
+    return res
+      .status(200)
+      .json({ message: "Supervisor assigned successfully", supervisorDetails });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+async function getCoSuperVisorsDetails(req, res) {
+  const { userId } = req.params;
+  try {
+    const user = await Lecturer.getUserById(userId);
+    if (!user) {
+      return res.status(404).json({ error: "Co Supervisors not found" });
+    }
+    // Remove password from the response
+    const responseUser = { name: user.username, email: user.email };
+    return res.status(200).json(responseUser);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
 async function updateStudentProjectInfo(req, res) {
   const { projectInfo } = req.body;
 
@@ -382,6 +451,46 @@ async function updateStudentProjectInfo(req, res) {
   }
 }
 
+async function updateStudentDetails(req, res) {
+  const { username, email, matricCard, user_program, password } = req.body;
+
+  try {
+    const token = req.headers.authorization;
+    const decoded = jwt.verify(token, process.env.SECRET_TOKEN);
+    const userId = decoded.user_id;
+    // Find the student by ID
+    const student = await Student.getUserById(userId);
+    if (!student) {
+      return res.status(404).json({ error: "Student not found" });
+    }
+
+    // Update the project information using the new method
+    if (username !== undefined) {
+      student.username = username;
+    }
+    if (email !== undefined) {
+      student.email = email;
+    }
+    if (matricCard !== undefined) {
+      student.matricCard = matricCard;
+    }
+    if (user_program !== undefined) {
+      student.user_program = user_program;
+    }
+    if (password !== undefined) {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      student.password = hashedPassword;
+    }
+    await student.update();
+
+    return res
+      .status(200)
+      .json({ message: "The student details has been updated!" });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
 module.exports = {
   registerUser,
   loginUser,
@@ -395,4 +504,7 @@ module.exports = {
   getExaminersDetails,
   updateStudentExaminers,
   updateStudentProjectInfo,
+  updateStudentDetails,
+  updateStudentCoSupervisors,
+  getCoSuperVisorsDetails,
 };

@@ -1,6 +1,18 @@
 import { createStore } from "vuex";
+import socketModule from './socket'
 
-const store = createStore({
+interface User {
+  // properties of the user
+  user_type: string; 
+}
+
+interface RootState {
+  user: User | null; 
+  access_token: string | null;
+  tokenExpiration: number | null;
+}
+
+const store = createStore<RootState>({
   state: {
     user: null,
     access_token: null,
@@ -24,6 +36,7 @@ const store = createStore({
       state.access_token = null;
       state.tokenExpiration = null;
       localStorage.removeItem("user");
+      localStorage.removeItem("user_id");
       localStorage.removeItem("access_token");
       localStorage.removeItem("tokenExpiration");
     },
@@ -43,7 +56,14 @@ const store = createStore({
         commit("CLEAR_USER");
       }
     },
+    checkLoginStatus({ state }) {
+      return state.user !== null && state.access_token !== null;
+    }
   },
+  modules: {
+    socket: socketModule, // Register the socket module
+  },
+
 });
 
 function getUserFromLocalStorage() {

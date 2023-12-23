@@ -38,7 +38,13 @@ async function uploadFile(req, res) {
       "corrections",
       "presentationAndDemos",
       "finalReport",
-      "others",
+      "proposalsExtras",
+      "progressOneExtras",
+      "progressTwoExtras",
+      "finalSubmissionExtras",
+      "correctionsExtras",
+      "presentationAndDemosExtras",
+      "finalReportExtras",
     ];
 
     // Check if the provided submissionType is in the allowed types array
@@ -92,9 +98,27 @@ async function checkExistingSubmission(req, res) {
   try {
     const decoded = jwt.verify(token, process.env.SECRET_TOKEN);
     const studentId = decoded.user_id;
-
-    if (submissionType == "others") {
-      // For submission types "others", skip the existingSubmission check
+    const allowedSubmissionTypes = [
+      "proposals",
+      "progressOne",
+      "progressTwo",
+      "finalSubmission",
+      "corrections",
+      "presentationAndDemos",
+      "finalReport",
+      "proposalsExtras",
+      "progressOneExtras",
+      "progressTwoExtras",
+      "finalSubmissionExtras",
+      "correctionsExtras",
+      "presentationAndDemosExtras",
+      "finalReportExtras",
+    ];
+    if (!allowedSubmissionTypes.includes(submissionType)) {
+      return res.status(400).json({ error: "Invalid submission type" });
+    }
+    if (submissionType.includes("Extras")) {
+      // For "Extras" categories, skip the existingSubmission check
       return res
         .status(200)
         .json({ message: "No existing submission check required" });

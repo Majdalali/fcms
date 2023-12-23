@@ -7,7 +7,7 @@ const nominationController = require("../controllers/generalControllers/nominati
 const commentsController = require("../controllers/generalControllers/commentsController");
 
 const authGuard = require("../middleware/roleAuth"); // Import the middleware
-const verifyToken = require("../middleware/verifyToken");
+const { verifyToken } = require("../middleware/verifyToken");
 
 // END POINTS FOR USER ROUTES
 router.post("/lecturer/register", lecturerController.registerLecturer);
@@ -26,21 +26,23 @@ router.post(
   verifyToken,
   nominationController.createNomination
 );
-
-router.post(
-  "/lecturer/newcomment",
-  verifyToken,
-  commentsController.createComment
-);
-
 router.get(
   "/lecturer/mycomments/:lecturerId",
   commentsController.getLecturerComments
 );
+
+module.exports = function (io, connectedUsers) {
+  router.post(
+    "/lecturer/newcomment",
+    verifyToken, // Assuming verifyToken is defined elsewhere
+    commentsController.createComment.bind(null, io, connectedUsers)
+  );
+
+  return router;
+};
 
 // router.get(
 //   "/mycomments",
 //   verifyToken,
 //   commentsController.getMyLecturerComments
 // );
-module.exports = router;

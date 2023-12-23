@@ -15,11 +15,13 @@
     "@vueuse/core": "^10.7.0",
     "axios": "^1.6.2",
     "js-cookie": "^3.0.5",
+    "socket.io-client": "^4.7.2",
     "vue": "^3.3.4",
     "vue-iconsax": "^1.6.0",
     "vue-router": "^4.2.5",
     "vuetify": "^3.4.4",
-    "vuex": "^4.0.2"
+    "vuex": "^4.0.2",
+    "ws": "^8.15.1"
   },
   "devDependencies": {
     "@tsconfig/node18": "^18.2.2",

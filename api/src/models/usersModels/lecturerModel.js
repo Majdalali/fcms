@@ -11,6 +11,7 @@ class Lecturer {
     user_id = null,
     supervisedStudents = [],
     examinees = [],
+    coSupervisedStudents = [],
     isAdmin = false,
     department,
   }) {
@@ -23,6 +24,7 @@ class Lecturer {
     this.examinees = examinees;
     this.department = department;
     this.supervisedStudents = supervisedStudents;
+    this.coSupervisedStudents = coSupervisedStudents;
   }
 
   static async getUserByEmail(email) {
@@ -76,6 +78,7 @@ class Lecturer {
         isAdmin: this.isAdmin,
         supervisedStudents: this.supervisedStudents,
         department: this.department,
+        coSupervisedStudents: this.coSupervisedStudents,
       });
     } catch (error) {
       throw error;
@@ -90,6 +93,9 @@ class Lecturer {
         password: this.password,
         user_type: this.user_type,
         examinees: this.examinees,
+        supervisedStudents: this.supervisedStudents,
+        department: this.department,
+        coSupervisedStudents: this.coSupervisedStudents,
         isAdmin: this.isAdmin,
       });
     } catch (error) {

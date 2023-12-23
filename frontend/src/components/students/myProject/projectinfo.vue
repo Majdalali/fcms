@@ -35,16 +35,7 @@
           class="card title p-10 rounded-lg"
         >
         </v-card>
-        <!-- <div
-          v-for="(value, key) in projectInfo"
-          :key="key"
-          class="card drop-shadow-lg p-10 flex items-center rounded-lg bg-[#f5f5f5] dark:bg-gray-800"
-        >
-          <h1 class="title w-[15%] font-bold text-lg">{{ getTitle(key) }}</h1>
-          <h1 class="cardValue w-[85%] uppercase text-lg pl-5">
-            {{ userInfo.projectInfo[key] }}
-          </h1>
-        </div> -->
+
         <v-btn
           class="w-56 mt-5"
           variant="elevated"
@@ -77,12 +68,14 @@
         <v-text-field
           required
           v-model="projectTitle"
+          variant="outlined"
           :rules="rules"
           label="Project Title"
         ></v-text-field>
         <v-text-field
           required
           v-model="projectArea"
+          variant="outlined"
           :rules="rules"
           label="Project Area"
           class="mt-2"
@@ -90,6 +83,7 @@
         <v-text-field
           required
           v-model="projectType"
+          variant="outlined"
           :rules="rules"
           label="Project Type"
           class="mt-2"
@@ -100,7 +94,7 @@
           variant="flat"
           color="blue-darken-4"
           size="large"
-          :disabled="!valid"
+          :disabled="!isFormChanged || !valid"
           @click="updateProjectInfo"
           >Submit</v-btn
         >
@@ -143,7 +137,7 @@ const rules = [
   },
 ];
 const alertText = ref("");
-const alertType = ref("");
+const alertType = ref("warning");
 
 // functions
 const getTitle = (key) => {
@@ -158,6 +152,14 @@ const getTitle = (key) => {
       return key;
   }
 };
+
+const isFormChanged = computed(() => {
+  return (
+    projectTitle.value !== userInfo.value?.projectInfo?.projectTitle ||
+    projectArea.value !== userInfo.value?.projectInfo?.projectArea ||
+    projectType.value !== userInfo.value?.projectInfo?.projectType
+  );
+});
 
 const toggleEditMode = () => {
   editMode.value = true;
@@ -252,5 +254,8 @@ const updateProjectInfo = async () => {
 .card:nth-child(2),
 .card:nth-child(3) {
   margin-top: 20px;
+}
+.card :deep(.v-card-subtitle) {
+  font-weight: 500;
 }
 </style>

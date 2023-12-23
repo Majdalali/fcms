@@ -1,7 +1,7 @@
 const express = require("express");
 const studentController = require("../controllers/usersControllers/studentController");
 const router = express.Router();
-const verifyToken = require("../middleware/verifyToken");
+const { verifyToken } = require("../middleware/verifyToken");
 const fileUploadController = require("../controllers/generalControllers/fileUploadController");
 const commentsController = require("../controllers/generalControllers/commentsController");
 
@@ -50,5 +50,16 @@ router.post(
   "/updateProjectInfo",
   verifyToken,
   studentController.updateStudentProjectInfo
+);
+router.post("/updateUser", verifyToken, studentController.updateStudentDetails);
+
+router.post(
+  "/udateCoSupervisors",
+  verifyToken,
+  studentController.updateStudentCoSupervisors
+);
+router.get(
+  "/getCoSuperVisorsDetails/:userId",
+  studentController.getCoSuperVisorsDetails
 );
 module.exports = router;

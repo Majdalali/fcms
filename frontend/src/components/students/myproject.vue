@@ -26,7 +26,11 @@
               <v-tab class="v-tab" value="one">Project Info</v-tab>
               <v-tab class="v-tab" value="two">Proposal</v-tab>
               <v-tab class="v-tab" value="three">Progress 1</v-tab>
-              <v-tab class="v-tab" value="four">Comments</v-tab>
+              <v-tab class="v-tab" value="four">Progress 2</v-tab>
+              <v-tab class="v-tab" value="five">Final Submission</v-tab>
+              <v-tab class="v-tab" value="six">Corrections</v-tab>
+              <v-tab class="v-tab" value="seven">Presentation & Demo</v-tab>
+              <v-tab class="v-tab" value="eight">Comments</v-tab>
             </v-tabs>
             <v-divider class="w-[90%]"></v-divider>
 
@@ -35,11 +39,56 @@
                 <v-window-item value="one">
                   <projectinfo />
                 </v-window-item>
-
-                <v-window-item value="two"> <proposal /> </v-window-item>
-
-                <v-window-item value="three"> Three </v-window-item>
-                <v-window-item class="w-2/3" value="four">
+                <v-window-item value="two">
+                  <fileUpload
+                    type="proposals"
+                    extrasType="proposalsExtras"
+                    name="Proposal"
+                    dateType="proposal"
+                  />
+                  <!-- <proposal /> -->
+                </v-window-item>
+                <v-window-item value="three">
+                  <fileUpload
+                    type="progressOne"
+                    extrasType="progressOneExtras"
+                    :name="typeNameP1"
+                    dateType="progress_one"
+                  />
+                  <!-- <progressOne /> -->
+                </v-window-item>
+                <v-window-item value="four">
+                  <fileUpload
+                    type="progressTwo"
+                    extrasType="progressTwoExtras"
+                    :name="typeNameP2"
+                    dateType="progress_two"
+                  />
+                </v-window-item>
+                <v-window-item value="five"
+                  ><fileUpload
+                    type="finalSubmission"
+                    extrasType="finalSubmissionExtras"
+                    name="Final Submission"
+                    dateType="finalSubmission"
+                /></v-window-item>
+                <v-window-item value="six">
+                  <fileUpload
+                    type="corrections"
+                    extrasType="correctionsExtras"
+                    name="Corrections"
+                    dateType="correction"
+                  />
+                </v-window-item>
+                <v-window-item value="seven">
+                  <fileUpload
+                    type="presentationAndDemos"
+                    extrasType="presentationAndDemosExtras"
+                    name="Presentation"
+                    dateType="presentationAndDemo"
+                  />
+                </v-window-item>
+                <v-window-item class="w-2/3" value="eight">
                   <comments />
                 </v-window-item>
               </v-window>
@@ -55,7 +104,9 @@
 import Navigation from "../navigation.vue";
 import projectinfo from "./myProject/projectinfo.vue";
 import comments from "./myProject/comments.vue";
-import proposal from "./myProject/proposal.vue";
+// import proposal from "./myProject/proposal.vue";
+// import progressOne from "./myProject/progressOne.vue";
+import fileUpload from "./myProject/fileUpload.vue";
 import { ref, onMounted } from "vue";
 import { useDark } from "@vueuse/core";
 import axios from "axios";
@@ -64,6 +115,8 @@ import axios from "axios";
 const isDark = useDark();
 const tab = ref("");
 const sessionDate = ref(null);
+const typeNameP2 = ref("Progress 2");
+const typeNameP1 = ref("Progress 1");
 
 // Methods
 onMounted(async () => {

@@ -3,8 +3,6 @@
     <v-navigation-drawer
       :theme="isDark ? 'dark' : 'light'"
       class="dark:bg-[#0D0D0D]"
-      rail
-      expand-on-hover
     >
       <v-list>
         <v-list-item
@@ -14,38 +12,16 @@
       ></v-list>
       <v-divider class="mt-2"></v-divider>
       <v-list class="h-[90%]">
-        <ul class="pt-2 h-full flex flex-col justify-between">
+        <ul class="h-full flex flex-col justify-between">
           <div>
-            <router-link to="/dashboard">
+            <router-link
+              v-for="navigation in navigationMenu"
+              :to="navigation.link"
+            >
               <v-list-item
-                :prepend-icon="homeIconVue"
-                title="Home"
-                link
-                class="vli"
-              ></v-list-item>
-            </router-link>
-
-            <router-link to="/activity-feed">
-              <v-list-item
-                :prepend-icon="bellVue"
-                title="Notification"
-                link
-                class="vli"
-              ></v-list-item
-            ></router-link>
-            <router-link to="/myproject">
-              <v-list-item
-                :prepend-icon="bookmarkVue"
-                title="My Project"
-                link
-                class="vli"
-              ></v-list-item
-            ></router-link>
-
-            <router-link to="/profile">
-              <v-list-item
-                :prepend-icon="userVue"
-                title="Profile"
+                v-if="navigation.condidtion"
+                :prepend-icon="navigation.icon"
+                :title="navigation.title"
                 link
                 class="vli"
               ></v-list-item>
@@ -128,7 +104,7 @@
 <script setup>
 // Import System requirements
 import { useDark, useToggle } from "@vueuse/core";
-import { ref } from "vue";
+import { ref, markRaw } from "vue";
 import { useStore } from "vuex";
 import router from "@/router";
 // Import icons
@@ -146,6 +122,40 @@ const isDark = useDark();
 const toggleDark = useToggle(isDark);
 const menu = ref(false);
 const currentMode = ref(isDark.value);
+const user = JSON.parse(localStorage.getItem("user"));
+const userType = user.user_type;
+const navigationMenu = ref({
+  home: {
+    icon: markRaw(homeIconVue),
+    title: "Home",
+    condidtion: userType === "student",
+    link: "/dashboard",
+  },
+  notification: {
+    icon: markRaw(bellVue),
+    title: "Notification",
+    link: "/activity-feed",
+    condidtion: userType === "student",
+  },
+  myProject: {
+    icon: markRaw(bookmarkVue),
+    title: "My Project",
+    link: "/myproject",
+    condidtion: userType === "student",
+  },
+  profile: {
+    icon: markRaw(userVue),
+    title: "Profile",
+    link: "/profile",
+    condidtion: userType === "student",
+  },
+  // lecturer: {
+  //   icon: markRaw(homeIconVue),
+  //   title: "Lecturer Dashboard",
+  //   link: "/lecturer-dashboard",
+  //   condidtion: userType === "lecturer",
+  // },
+});
 
 // Functions
 const signout = () => {

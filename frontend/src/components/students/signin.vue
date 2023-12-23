@@ -74,7 +74,7 @@
                   class="mr-4 inputText"
                   @click="login"
                 >
-                  Sign In
+                  {{ responseMessage == "" ? "Sign In" : "Welcome back!" }}
                 </v-btn>
               </v-col>
               <v-col cols="12" lg="8">
@@ -104,6 +104,20 @@
         <v-img cover :src="SignInBg"></v-img>
       </div>
     </div>
+    <v-snackbar
+      :timeout="2000"
+      color="indigo"
+      variant="elevated"
+      v-model="snackbar"
+    >
+      {{ responseMessage }}
+
+      <template v-slot:actions>
+        <v-btn color="white" variant="transparent" @click="snackbar = false">
+          X
+        </v-btn>
+      </template>
+    </v-snackbar>
   </v-app>
 </template>
 
@@ -122,6 +136,9 @@ const router = useRouter();
 const isDark = useDark();
 const store = useStore();
 const valid = ref(false);
+const snackbar = ref(false);
+const responseMessage = ref("");
+const delay = new Promise((resolve) => setTimeout(resolve, 3000));
 const email = ref("");
 const validEmail = ref(true);
 const visiblePass = ref(false);
@@ -176,16 +193,20 @@ const login = async () => {
         user: response.data.user,
         access_token: response.data.token,
       });
-      // Redirect to another page or perform necessary actions upon successful login
-      console.log("Login successful:");
-      router.push("/");
+      const userId = response.data.user.user_id;
+      localStorage.setItem("user_id", userId);
+      store.dispatch("connectSocket", userId);
+      responseMessage.value = "Sign in successful";
+      snackbar.value = true;
+      await delay;
+      router.push("/dashboard");
     } else {
       // Handle failed login (display error message, etc.)
-      console.error("Login failed:", response.data.error);
+      console.error("Sign in failed:", response.data.error);
       // Reset form fields or handle error state as needed
     }
   } catch (error) {
-    console.error("Login error:", error);
+    console.error("Sign in error:", error);
     // Handle error, e.g., display a generic error message to the user
   }
 };

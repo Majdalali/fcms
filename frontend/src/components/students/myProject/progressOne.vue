@@ -1,9 +1,9 @@
 <template>
   <div>
     <div class="pt-10">
-      <h1 class="title text-xl font-medium">Proposal Submission</h1>
-      <p v-if="proposalDate" class="titleDes text-base font-light">
-        Don't forget to submit by {{ proposalDate.proposal }}
+      <h1 class="title text-xl font-medium">Progress One Submission</h1>
+      <p v-if="progressOneDate" class="titleDes text-base font-light">
+        Don't forget to submit by {{ progressOneDate.progress_one }}
       </p>
     </div>
     <div class="pt-10 h-full w-[80%]">
@@ -62,11 +62,11 @@
                   <v-row>
                     <v-col cols="12">
                       <v-file-input
-                        v-if="key === 'Proposal'"
-                        v-model="proposalFile"
-                        variant="outlined"
+                        v-if="key === 'ProgressOne'"
+                        v-model="progressOneFile"
                         clearable
-                        label="Proposal File"
+                        variant="outlined"
+                        label="Progress One File"
                         show-size
                         counter
                       ></v-file-input>
@@ -74,8 +74,8 @@
                         v-else
                         v-model="otherFiles"
                         multiple
-                        variant="outlined"
                         chips
+                        variant="outlined"
                         clearable
                         label="Other Files"
                         show-size
@@ -86,7 +86,9 @@
                 </v-container>
                 <small
                   class="text-red-500 font-bold text-base"
-                  v-if="key === 'Proposal' && filesInfo.Proposal.length > 0"
+                  v-if="
+                    key === 'ProgressOne' && filesInfo.ProgressOne.length > 0
+                  "
                   >*Please Delete the old file first to upload a new one</small
                 >
                 <v-alert
@@ -109,15 +111,15 @@
                 </v-btn>
                 <v-btn
                   @click="
-                    key === 'Proposal'
-                      ? submitProposalFiles()
+                    key === 'ProgressOne'
+                      ? submitprogressOneFiles()
                       : submitOtherFiles()
                   "
                   class="cardValue w-32"
                   variant="elevated"
                   color="indigo"
                   :disabled="
-                    key === 'Proposal' && filesInfo.Proposal.length > 0
+                    key === 'ProgressOne' && filesInfo.ProgressOne.length > 0
                   "
                 >
                   <v-icon class="mr-2"><upload /></v-icon>
@@ -142,27 +144,27 @@ import { useDark } from "@vueuse/core";
 // Constants
 const isDark = useDark();
 const filesInfo = ref({
-  Proposal: [],
+  ProgressOne: [],
   Others: [],
 });
-const proposalFile = ref(null); // For single proposal file
+const progressOneFile = ref(null); // For single proposal file
 const otherFiles = ref([]); // For multiple other files
 const dialog = ref({
-  Proposal: false,
+  ProgressOne: false,
   Others: false,
 });
 const dialogTypes = {
-  Proposal: "proposals",
-  Others: "others",
+  ProgressOne: "progressOne",
+  Others: "progressOneExtras",
 };
-const proposalDate = ref(null);
+const progressOneDate = ref(null);
 const errorMessage = ref("");
 // Functions
 
 const closeDialog = (key) => {
   dialog.value[key] = false;
-  if (key == "Proposal") {
-    proposalFile.value = null;
+  if (key == "ProgressOne") {
+    progressOneFile.value = null;
   } else {
     otherFiles.value = [];
   }
@@ -172,10 +174,10 @@ onMounted(async () => {
   try {
     const token = localStorage.getItem("access_token");
 
-    // Get proposals
+    // Get progress One
     try {
-      const responseProposal = await axios.get(
-        `http://localhost:8000/myfiles?submissionType=proposals`,
+      const responseprogressOne = await axios.get(
+        `http://localhost:8000/myfiles?submissionType=progressOne`,
         {
           headers: {
             Authorization: token,
@@ -183,20 +185,20 @@ onMounted(async () => {
           },
         }
       );
-      if (responseProposal.data.length === 0) {
-        filesInfo.value.Proposal = [];
+      if (responseprogressOne.data.length === 0) {
+        filesInfo.value.ProgressOne = [];
       } else {
-        filesInfo.value.Proposal = responseProposal.data;
+        filesInfo.value.ProgressOne = responseprogressOne.data;
       }
     } catch (error) {
-      console.error("Error fetching proposals:", error);
-      // Handle error for proposals request
+      console.error("Error fetching files:", error);
+      // Handle error for  request
     }
 
     // Get other files
     try {
       const responseOthers = await axios.get(
-        `http://localhost:8000/myfiles?submissionType=proposalsExtras`,
+        `http://localhost:8000/myfiles?submissionType=progressOneExtras`,
         {
           headers: {
             Authorization: token,
@@ -217,7 +219,7 @@ onMounted(async () => {
     // Get Proposal deadline
     try {
       const response = await axios.get(`http://localhost:8000/currentSession`);
-      proposalDate.value = response.data;
+      progressOneDate.value = response.data;
     } catch (error) {
       console.error("Error fetching proposal deadline:", error);
       // Handle error for proposal deadline request
@@ -228,15 +230,15 @@ onMounted(async () => {
   }
 });
 
-const submitProposalFiles = async () => {
+const submitprogressOneFiles = async () => {
   console.log("Submitting Proposal Files...");
   try {
     const token = localStorage.getItem("access_token");
     const formData = new FormData();
 
-    if (proposalFile.value) {
+    if (progressOneFile.value) {
       const submissionCheckData = {
-        submissionType: "proposals", // Set the submission type for checking existing submission
+        submissionType: "progressOne", // Set the submission type for checking existing submission
       };
 
       // First request: Check for existing submission
@@ -265,8 +267,8 @@ const submitProposalFiles = async () => {
       }
 
       // If no existing submission, proceed with file upload
-      formData.append("file", proposalFile.value[0]);
-      formData.append("submissionType", "proposals");
+      formData.append("file", progressOneFile.value[0]);
+      formData.append("submissionType", "progressOne");
 
       const uploadFileResponse = await axios.post(
         "http://localhost:8000/uploadFile",
@@ -279,15 +281,15 @@ const submitProposalFiles = async () => {
         }
       );
 
-      filesInfo.value.Proposal = uploadFileResponse.data.fileSubmissionData;
-      dialog.value.Proposal = false;
-      proposalFile.value = null;
+      filesInfo.value.ProgressOne = uploadFileResponse.data.fileSubmissionData;
+      dialog.value.ProgressOne = false;
+      progressOneFile.value = null;
     } else {
-      console.error("No proposal file uploaded.");
-      console.log("proposalFile:", proposalFile.value);
+      console.error("No progress One file uploaded.");
+      console.log("progressOneFile:", progressOneFile.value);
     }
   } catch (error) {
-    console.error("Error uploading proposal file:", error);
+    console.error("Error uploading progress one file:", error);
     errorMessage.value = error.response.data.message;
   }
 };
@@ -301,7 +303,7 @@ const submitOtherFiles = async () => {
       otherFiles.value.forEach((file) => {
         formData.append("file", file);
       });
-      formData.append("submissionType", "proposalsExtras");
+      formData.append("submissionType", "progressOneExtras");
 
       const response = await axios.post(
         "http://localhost:8000/uploadFile",

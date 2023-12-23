@@ -15,6 +15,7 @@ class Student {
     supervisor = null,
     examiners = [],
     projectInfo = {},
+    coSupervisors = [],
   }) {
     this.user_id = user_id; // Generates a new random ID if user_id is not provided
     this.username = username;
@@ -26,6 +27,7 @@ class Student {
     this.isActivated = isActivated;
     this.supervisor = supervisor;
     this.examiners = examiners;
+    this.coSupervisors = coSupervisors;
     this.projectInfo = projectInfo;
   }
 
@@ -69,6 +71,7 @@ class Student {
         isActivated: this.isActivated,
         supervisor: this.supervisor,
         examiners: this.examiners,
+        coSupervisors: this.coSupervisors,
         projectInfo: this.projectInfo,
       });
     } catch (error) {
@@ -89,6 +92,7 @@ class Student {
         isActivated: this.isActivated,
         supervisor: this.supervisor,
         examiners: this.examiners,
+        coSupervisors: this.coSupervisors,
         projectInfo: this.projectInfo,
       });
     } catch (error) {
@@ -112,6 +116,28 @@ class Student {
       throw error;
     }
   }
+
+  async updateCoSupervisors(coSupervisors) {
+    try {
+      const updatedData = {};
+
+      // Check if coSupervisors array is defined and not empty before updating
+      if (
+        coSupervisors &&
+        Array.isArray(coSupervisors) &&
+        coSupervisors.length > 0
+      ) {
+        updatedData.coSupervisors = coSupervisors;
+      } else {
+        throw new Error("Co-supervisors data is invalid");
+      }
+
+      await userCollection.doc(this.user_id).update(updatedData);
+    } catch (error) {
+      throw error;
+    }
+  }
+
   async updateProjectInfo(projectInfo) {
     try {
       // Check if projectInfo is defined and is an object before updating

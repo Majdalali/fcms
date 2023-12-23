@@ -1,7 +1,7 @@
 const Comment = require("../../models/generalModels/commentsModel");
 const jwt = require("jsonwebtoken");
 
-async function createComment(req, res) {
+async function createComment(io, connectedUsers, req, res) {
   const token = req.headers.authorization;
   try {
     const decoded = jwt.verify(token, process.env.SECRET_TOKEN);
@@ -16,11 +16,21 @@ async function createComment(req, res) {
     });
 
     await newComment.save();
+    const userId = studentId;
+
+    const studentSocketId = connectedUsers[userId];
+    if (studentSocketId) {
+      io.to(studentSocketId).emit("comment", {
+        message: "New comment from lecturer",
+        // Additional data if needed
+      });
+    }
 
     res.status(201).json({
       message: "Comment created successfully",
     });
   } catch (error) {
+    console.error("Error creating comment:", error);
     res.status(500).json({ error: error.message });
   }
 }

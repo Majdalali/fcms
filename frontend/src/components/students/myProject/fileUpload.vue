@@ -1,16 +1,18 @@
 <template>
   <div>
     <div class="pt-10">
-      <h1 class="title text-xl font-medium">Proposal Submission</h1>
-      <p v-if="proposalDate" class="titleDes text-base font-light">
-        Don't forget to submit by {{ proposalDate.proposal }}
+      <h1 class="title text-xl font-medium">{{ name }} Submission</h1>
+      <p v-if="submissionDate" class="titleDes text-base font-light">
+        Don't forget to submit by {{ submissionDate[dateType] }}
       </p>
     </div>
     <div class="pt-10 h-full w-[80%]">
       <v-card
         v-for="(value, key) in filesInfo"
         :key="key"
-        :title="key"
+        :title="
+          key === 'Others' ? 'Other Files' : seperateName(name) + ' Files'
+        "
         :elevation="2"
         :color="isDark ? '' : '#f5f5f5'"
         class="card title rounded-lg"
@@ -62,11 +64,11 @@
                   <v-row>
                     <v-col cols="12">
                       <v-file-input
-                        v-if="key === 'Proposal'"
-                        v-model="proposalFile"
+                        v-if="key === 'Main'"
+                        v-model="mainFile"
                         variant="outlined"
                         clearable
-                        label="Proposal File"
+                        :label="name + ' File'"
                         show-size
                         counter
                       ></v-file-input>
@@ -81,12 +83,17 @@
                         show-size
                         counter
                       ></v-file-input>
+                      <small v-if="key === 'Main'"
+                        >*Only One file is allowed, if you would like to upload
+                        multiple files, you can use .rar or upload in the
+                        "Othres" section</small
+                      >
                     </v-col>
                   </v-row>
                 </v-container>
                 <small
                   class="text-red-500 font-bold text-base"
-                  v-if="key === 'Proposal' && filesInfo.Proposal.length > 0"
+                  v-if="key === 'Main' && filesInfo.Main.length > 0"
                   >*Please Delete the old file first to upload a new one</small
                 >
                 <v-alert
@@ -109,16 +116,12 @@
                 </v-btn>
                 <v-btn
                   @click="
-                    key === 'Proposal'
-                      ? submitProposalFiles()
-                      : submitOtherFiles()
+                    key === 'Main' ? submitMainFiles() : submitOtherFiles()
                   "
                   class="cardValue w-32"
                   variant="elevated"
                   color="indigo"
-                  :disabled="
-                    key === 'Proposal' && filesInfo.Proposal.length > 0
-                  "
+                  :disabled="key === 'Main' && filesInfo.Main.length > 0"
                 >
                   <v-icon class="mr-2"><upload /></v-icon>
                   Upload
@@ -140,42 +143,54 @@ import axios from "axios";
 import { useDark } from "@vueuse/core";
 
 // Constants
+const props = defineProps({
+  type: String,
+  extrasType: String,
+  name: String,
+  dateType: String,
+});
 const isDark = useDark();
 const filesInfo = ref({
-  Proposal: [],
+  Main: [],
   Others: [],
 });
-const proposalFile = ref(null); // For single proposal file
+const mainFile = ref(null); // For single Main file
 const otherFiles = ref([]); // For multiple other files
 const dialog = ref({
-  Proposal: false,
+  Main: false,
   Others: false,
 });
 const dialogTypes = {
-  Proposal: "proposals",
+  Main: "main",
   Others: "others",
 };
-const proposalDate = ref(null);
+const submissionDate = ref(null);
 const errorMessage = ref("");
 // Functions
 
 const closeDialog = (key) => {
   dialog.value[key] = false;
-  if (key == "Proposal") {
-    proposalFile.value = null;
+  if (key == "Main") {
+    mainFile.value = null;
   } else {
     otherFiles.value = [];
   }
+};
+
+const seperateName = (name) => {
+  const splitName = name.split(" ");
+  const newName = splitName.join(" ");
+  return newName;
 };
 
 onMounted(async () => {
   try {
     const token = localStorage.getItem("access_token");
 
-    // Get proposals
+    // Get main file
     try {
-      const responseProposal = await axios.get(
-        `http://localhost:8000/myfiles?submissionType=proposals`,
+      const responseMain = await axios.get(
+        `http://localhost:8000/myfiles?submissionType=${props.type}`,
         {
           headers: {
             Authorization: token,
@@ -183,20 +198,19 @@ onMounted(async () => {
           },
         }
       );
-      if (responseProposal.data.length === 0) {
-        filesInfo.value.Proposal = [];
+      if (responseMain.data.length === 0) {
+        filesInfo.value.Main = [];
       } else {
-        filesInfo.value.Proposal = responseProposal.data;
+        filesInfo.value.Main = responseMain.data;
       }
     } catch (error) {
-      console.error("Error fetching proposals:", error);
-      // Handle error for proposals request
+      // Handle error for main request
     }
 
     // Get other files
     try {
       const responseOthers = await axios.get(
-        `http://localhost:8000/myfiles?submissionType=proposalsExtras`,
+        `http://localhost:8000/myfiles?submissionType=${props.extrasType}`,
         {
           headers: {
             Authorization: token,
@@ -210,17 +224,16 @@ onMounted(async () => {
         filesInfo.value.Others = responseOthers.data;
       }
     } catch (error) {
-      console.error("Error fetching other files:", error);
       // Handle error for other files request
     }
 
-    // Get Proposal deadline
+    // Get Date deadline
     try {
       const response = await axios.get(`http://localhost:8000/currentSession`);
-      proposalDate.value = response.data;
+      submissionDate.value = response.data;
     } catch (error) {
-      console.error("Error fetching proposal deadline:", error);
-      // Handle error for proposal deadline request
+      console.error(`Error fetching ${dateType} deadline:`, error);
+      // Handle error for  deadline request
     }
   } catch (error) {
     console.error("Error fetching user info:", error);
@@ -228,15 +241,15 @@ onMounted(async () => {
   }
 });
 
-const submitProposalFiles = async () => {
-  console.log("Submitting Proposal Files...");
+const submitMainFiles = async () => {
+  console.log("Submitting Main Files...");
   try {
     const token = localStorage.getItem("access_token");
     const formData = new FormData();
 
-    if (proposalFile.value) {
+    if (mainFile.value) {
       const submissionCheckData = {
-        submissionType: "proposals", // Set the submission type for checking existing submission
+        submissionType: props.type, // Set the submission type for checking existing submission
       };
 
       // First request: Check for existing submission
@@ -265,8 +278,8 @@ const submitProposalFiles = async () => {
       }
 
       // If no existing submission, proceed with file upload
-      formData.append("file", proposalFile.value[0]);
-      formData.append("submissionType", "proposals");
+      formData.append("file", mainFile.value[0]);
+      formData.append("submissionType", props.type);
 
       const uploadFileResponse = await axios.post(
         "http://localhost:8000/uploadFile",
@@ -279,15 +292,15 @@ const submitProposalFiles = async () => {
         }
       );
 
-      filesInfo.value.Proposal = uploadFileResponse.data.fileSubmissionData;
-      dialog.value.Proposal = false;
-      proposalFile.value = null;
+      filesInfo.value.Main = uploadFileResponse.data.fileSubmissionData;
+      dialog.value.Main = false;
+      mainFile.value = null;
     } else {
-      console.error("No proposal file uploaded.");
-      console.log("proposalFile:", proposalFile.value);
+      console.error("No Main file uploaded.");
+      console.log("mainFile:", mainFile.value);
     }
   } catch (error) {
-    console.error("Error uploading proposal file:", error);
+    console.error("Error uploading Main file:", error);
     errorMessage.value = error.response.data.message;
   }
 };
@@ -301,7 +314,7 @@ const submitOtherFiles = async () => {
       otherFiles.value.forEach((file) => {
         formData.append("file", file);
       });
-      formData.append("submissionType", "proposalsExtras");
+      formData.append("submissionType", props.extrasType);
 
       const response = await axios.post(
         "http://localhost:8000/uploadFile",
@@ -328,7 +341,12 @@ const submitOtherFiles = async () => {
 const deleteFile = async (autogeneratedName, dialogType) => {
   try {
     const token = localStorage.getItem("access_token");
-    const submissionType = dialogTypes[dialogType];
+    let submissionType = dialogTypes[dialogType];
+    if (dialogType === "Main") {
+      submissionType = props.type;
+    } else if (dialogType === "Others") {
+      submissionType = props.extrasType;
+    }
     const response = await axios.delete(
       `http://localhost:8000/deleteFile/${autogeneratedName}`,
       {
@@ -352,6 +370,12 @@ const deleteFile = async (autogeneratedName, dialogType) => {
     // Handle error if needed
   }
 };
+// const rules = ref([
+//   (files) =>
+//     !files ||
+//     !files.some((file) => file.size > 2000000) ||
+//     "File size should be less than 2 MB!",
+// ]);
 </script>
 
 <style lang="scss" scoped>

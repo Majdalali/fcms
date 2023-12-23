@@ -45,16 +45,15 @@
 </template>
 
 <script setup>
-import { computed } from "vue";
+import { ref, onMounted, computed } from "vue";
+import io from "socket.io-client";
 import { useStore } from "vuex";
 import { useDark, useToggle } from "@vueuse/core";
 import UTMLogo from "@/assets/images/utmLogo.png";
 import UTMLogoBlack from "@/assets/images/utmLogoBlack.png";
-
 // Constants
 const isDark = useDark();
 const toggleDark = useToggle(isDark);
-
 const store = useStore();
 console.log(isDark.value);
 // Computed property to get the user from the store
@@ -69,6 +68,23 @@ const isAdminUser = computed(
 const logout = () => {
   store.dispatch("logoutUser");
 };
+
+const socket = ref(null);
+
+// onMounted(() => {
+//   socket.value = io("http://localhost:8000");
+//   socket.value.on("connect", () => {
+//     console.log("Socket.IO connected");
+//   });
+
+//   socket.value.on("message", (data) => {
+//     console.log("Received:", data);
+//   });
+//   // Handle disconnect (if needed)
+//   socket.value.on("disconnect", () => {
+//     console.log("Socket.IO disconnected");
+//   });
+// });
 </script>
 
 <style lang="scss" scoped>
