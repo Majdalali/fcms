@@ -115,6 +115,7 @@ import userVue from "@/assets/icons/user.vue";
 import logout from "@/assets/icons/logout.vue";
 import question from "@/assets/icons/question.vue";
 import settings from "@/assets/icons/settings.vue";
+import dashboard from "@/assets/icons/dashboard.vue";
 
 // Constants
 const store = useStore();
@@ -128,8 +129,8 @@ const navigationMenu = ref({
   home: {
     icon: markRaw(homeIconVue),
     title: "Home",
-    condidtion: userType === "student",
-    link: "/dashboard",
+    condidtion: true,
+    link: "/home",
   },
   notification: {
     icon: markRaw(bellVue),
@@ -149,12 +150,12 @@ const navigationMenu = ref({
     link: "/profile",
     condidtion: userType === "student",
   },
-  // lecturer: {
-  //   icon: markRaw(homeIconVue),
-  //   title: "Lecturer Dashboard",
-  //   link: "/lecturer-dashboard",
-  //   condidtion: userType === "lecturer",
-  // },
+  lecturer: {
+    icon: markRaw(dashboard),
+    title: "Dashboard",
+    link: "/lecturer-dashboard",
+    condidtion: userType === "lecturer",
+  },
 });
 
 // Functions

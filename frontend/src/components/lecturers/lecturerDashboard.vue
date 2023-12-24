@@ -10,7 +10,7 @@
         </v-col>
         <v-col class="main">
           <div class="pt-4 upperDiv">
-            <h1 class="text-3xl font-medium title">Dashboard</h1>
+            <h1 class="text-3xl font-medium title">Lecturer Dashboard</h1>
             <p class="text-lg titleDes font-light">
               The MDMS System For Semester 2023/2024 - 1
             </p>
@@ -21,22 +21,24 @@
               bg-color="transparent"
               v-model="tab"
             >
-              <v-tab class="v-tab" value="one">Session</v-tab>
-              <v-tab class="v-tab" value="two">Projects</v-tab>
-              <v-tab class="v-tab" value="three">Students</v-tab>
-              <v-tab class="v-tab" value="four">Supervisors</v-tab>
-              <v-tab class="v-tab" value="five">Archive</v-tab>
+              <v-tab class="v-tab" value="one">Supervised Students</v-tab>
+              <v-tab class="v-tab" value="two">Examinees</v-tab>
+              <v-tab class="v-tab" value="three">Comments</v-tab>
+              <v-tab class="v-tab" value="four">Evaluation</v-tab>
+              <v-tab class="v-tab" value="five">Nominations</v-tab>
             </v-tabs>
             <v-divider class="w-[90%]"></v-divider>
 
             <v-card-text class="pl-0">
               <v-window v-model="tab">
-                <v-window-item value="one"> <Session /> </v-window-item>
+                <v-window-item value="one"><MyStudents /> </v-window-item>
 
-                <v-window-item value="two"> <Projects /> </v-window-item>
+                <v-window-item value="two"><Examinees /> </v-window-item>
 
-                <v-window-item value="three"> <Students /> </v-window-item>
-                <v-window-item value="four"> <Lecturers /> </v-window-item>
+                <v-window-item value="three"
+                  ><LecturerComments />
+                </v-window-item>
+                <v-window-item value="four"> </v-window-item>
                 <v-window-item value="five">five </v-window-item>
               </v-window>
             </v-card-text>
@@ -46,14 +48,15 @@
     </v-container>
   </v-app>
 </template>
+
 <script setup>
-import Navigation from "./navigation.vue";
-import Session from "./dashboard/session.vue";
-import Students from "./dashboard/students.vue";
-import Lecturers from "./dashboard/lecturers.vue";
-import Projects from "./dashboard/projects.vue";
 import { useDark } from "@vueuse/core";
 import { ref } from "vue";
+
+import Navigation from "../navigation.vue";
+import MyStudents from "./lecturerDashboard/mystudents.vue";
+import LecturerComments from "./lecturerDashboard/lecturerComments.vue";
+import Examinees from "./lecturerDashboard/examinees.vue";
 
 // Constants
 const isDark = useDark();
@@ -61,11 +64,6 @@ const tab = ref("");
 </script>
 
 <style lang="scss" scoped>
-@media screen and (max-width: 1500px) {
-  .nav {
-    display: none;
-  }
-}
 .title,
 .titleDes {
   font-family: "DM Sans", sans-serif;

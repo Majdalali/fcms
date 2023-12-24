@@ -35,7 +35,7 @@
                   :rules="emailRules"
                   variant="outlined"
                   hide-details
-                  placeholder="Enter your email address or matric number"
+                  placeholder="Enter your email address"
                   required
                 ></v-text-field>
               </v-col>
@@ -178,7 +178,7 @@ const passwordRules = [
 const login = async () => {
   try {
     const response = await axios.post(
-      "http://localhost:8000/login",
+      "http://localhost:8000/lecturer/login",
       {
         email: email.value,
         password: password.value,

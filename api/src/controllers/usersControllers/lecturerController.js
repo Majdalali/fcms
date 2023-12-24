@@ -72,7 +72,7 @@ async function loginLecturer(req, res) {
         isAdmin: user.isAdmin,
       },
       secretKey,
-      { expiresIn: "1h" }
+      { expiresIn: "1 week" }
     );
     // Remove password from the response
     const responseUser = { ...user };
@@ -165,6 +165,71 @@ async function getMyStudents(req, res) {
     const studentPromises = userSupervisedStudents.map(async (studentId) => {
       const student = await Student.getUserById(studentId);
       const responseStudent = {
+        user_id: student.user_id,
+        username: student.username,
+        email: student.email,
+        matricCard: student.matricCard,
+      };
+
+      return responseStudent; // Return the student object
+    });
+
+    // Wait for all promises to resolve using Promise.all()
+    const students = await Promise.all(studentPromises);
+
+    return res.status(200).json(students);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+async function myCoSupervisedStudents(req, res) {
+  const { userId } = req.params;
+  try {
+    const user = await Lecturer.getUserById(userId);
+    if (!user) {
+      return res.status(404).json({ error: "No Assigned students" });
+    }
+    const userSupervisedStudents = user.coSupervisedStudents;
+
+    // Use Promise.all() with map() to fetch students asynchronously
+    const studentPromises = userSupervisedStudents.map(async (studentId) => {
+      const student = await Student.getUserById(studentId);
+      const responseStudent = {
+        user_id: student.user_id,
+        username: student.username,
+        email: student.email,
+        matricCard: student.matricCard,
+      };
+
+      return responseStudent; // Return the student object
+    });
+
+    // Wait for all promises to resolve using Promise.all()
+    const students = await Promise.all(studentPromises);
+
+    return res.status(200).json(students);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+async function myExaminees(req, res) {
+  const { userId } = req.params;
+  try {
+    const user = await Lecturer.getUserById(userId);
+    if (!user) {
+      return res.status(404).json({ error: "No Assigned students" });
+    }
+    const userSupervisedStudents = user.examinees;
+
+    // Use Promise.all() with map() to fetch students asynchronously
+    const studentPromises = userSupervisedStudents.map(async (studentId) => {
+      const student = await Student.getUserById(studentId);
+      const responseStudent = {
+        user_id: student.user_id,
         username: student.username,
         email: student.email,
         matricCard: student.matricCard,
@@ -246,5 +311,7 @@ module.exports = {
   getLecturerById,
   getLecturerByEmail,
   getMyStudents,
+  myExaminees,
+  myCoSupervisedStudents,
   updateLecturerExaminees,
 };

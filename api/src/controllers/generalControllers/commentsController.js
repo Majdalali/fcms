@@ -26,7 +26,7 @@ async function createComment(io, connectedUsers, req, res) {
       });
     }
 
-    res.status(201).json({
+    res.status(200).json({
       message: "Comment created successfully",
     });
   } catch (error) {

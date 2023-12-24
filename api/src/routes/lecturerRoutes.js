@@ -21,6 +21,11 @@ router.get(
 router.get("/lecturer/userByEmail", lecturerController.getLecturerByEmail);
 router.get("/lecturer/:userId", lecturerController.getLecturerById);
 router.get("/lecturer/mystudents/:userId", lecturerController.getMyStudents);
+router.get(
+  "/lecturer/myCoSupervisedStudents/:userId",
+  lecturerController.myCoSupervisedStudents
+);
+router.get("/lecturer/myExaminees/:userId", lecturerController.myExaminees);
 router.post(
   "/lecturer/newnomination",
   verifyToken,
