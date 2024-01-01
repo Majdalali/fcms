@@ -8,13 +8,10 @@ const nominationsController = require("../controllers/generalControllers/nominat
 const notificationsController = require("../controllers/generalControllers/notificationsController");
 const studentController = require("../controllers/usersControllers/studentController");
 const lecturerController = require("../controllers/usersControllers/lecturerController");
+const fileUploadController = require("../controllers/generalControllers/fileUploadController");
 // Session Routes
 
-router.post(
-  "/createSession",
-
-  sessionController.createSession
-);
+router.post("/createSession", adminGuard, sessionController.createSession);
 router.get("/currentSession/:sessionTitle", sessionController.getSession);
 router.get("/currentSession", sessionController.getLatestSession);
 router.delete("/session/:sessionId", sessionController.deleteSession);
@@ -23,6 +20,7 @@ router.delete("/session/:sessionId", sessionController.deleteSession);
 
 router.get(
   "/nomination/:nominationId",
+  adminGuard,
   nominationsController.getNominationById
 );
 
@@ -61,4 +59,16 @@ router.post(
 
 // Client Token Validation Route
 router.post("/validateToken", clientToken);
+
+// Admin Routes
+router.get(
+  "/getProposals",
+  adminGuard,
+  fileUploadController.getProposalsForAdmin
+);
+router.post(
+  "/updateProposal",
+  adminGuard,
+  fileUploadController.updateProposalStatusAndRemarks
+);
 module.exports = router;

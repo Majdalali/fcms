@@ -6,7 +6,7 @@ import Home from './components/home.vue'
 import About from './components/about.vue'
 import Register from './components/students/register.vue'
 import Signin from './components/students/signin.vue'
-import Profile from './components/profile.vue'
+import Profile from './components/students/profile.vue'
 import Users from './components/users.vue'
 import UserHome from './components/userHome.vue'
 import MyProject from './components/students/myproject.vue'
@@ -14,6 +14,8 @@ import notificationCenter from './components/notificationCenter.vue';
 import clientTokenMiddleware from './middleware/tokenGuard';
 import lecturerSignin from './components/lecturers/lecturerSignin.vue';
 import lecturerDashboard from './components/lecturers/lecturerDashboard.vue';
+import lecturerProfile from './components/lecturers/lecturerProfile.vue';
+import adminDashboard from './components/admin/adminDashboard.vue';
 
 const routes = [
   {
@@ -67,7 +69,7 @@ const routes = [
     path: '/profile',
     name: 'profile',
     component: Profile,
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, allowedUserType: 'student' },
   },
 
   // Lecturer routes
@@ -82,7 +84,19 @@ const routes = [
     name: 'lecturer-dashboard',
     component: lecturerDashboard,
     meta: { requiresAuth: true, allowedUserType: 'lecturer' },
-  }
+  },
+  {
+    path: '/lecturer-profile',
+    name: 'lecturer-profile',
+    component: lecturerProfile,
+    meta: { requiresAuth: true, allowedUserType: 'lecturer' },
+  },
+  {
+    path: '/admin',
+    name: 'admin',
+    component: adminDashboard,
+    meta: { requiresAuth: true, requiresAdmin: true , allowedUserType: 'lecturer'},
+  },
 ];
 
 const router = createRouter({

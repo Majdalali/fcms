@@ -28,7 +28,7 @@ async function createSession(req, res) {
 
   try {
     await session.save();
-    res.status(201).json(session);
+    res.status(200).json(session);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal server error" });

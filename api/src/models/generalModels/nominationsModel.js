@@ -1,6 +1,21 @@
 const { firestore } = require("../../services/firebase");
 
-class Examiner {
+class InternalExaminer {
+  constructor({ name, email, phoneNumber }) {
+    this.name = name;
+    this.email = email;
+    this.phoneNumber = phoneNumber;
+  }
+  toPlainObject() {
+    return {
+      name: this.name,
+      email: this.email,
+      phoneNumber: this.phoneNumber,
+    };
+  }
+}
+
+class ExternalExaminer {
   constructor({ name, email, phoneNumber, institution, expertise }) {
     this.name = name;
     this.email = email;
@@ -152,7 +167,8 @@ class Nominations {
 }
 module.exports = {
   Nominations,
-  Examiner,
+  InternalExaminer,
+  ExternalExaminer,
   CoSupervisor,
   Student,
 };

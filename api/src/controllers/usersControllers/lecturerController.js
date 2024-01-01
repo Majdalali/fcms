@@ -304,6 +304,41 @@ async function updateLecturerExaminees(req, res) {
   }
 }
 
+async function updateLecturerDetails(req, res) {
+  const { username, email, password } = req.body;
+
+  try {
+    const token = req.headers.authorization;
+    const decoded = jwt.verify(token, process.env.SECRET_TOKEN);
+    const userId = decoded.user_id;
+    // Find the student by ID
+    const lecturer = await Lecturer.getUserById(userId);
+    if (!lecturer) {
+      return res.status(404).json({ error: "Lecturer not found" });
+    }
+
+    // Update the project information using the new method
+    if (username !== undefined) {
+      lecturer.username = username;
+    }
+    if (email !== undefined) {
+      lecturer.email = email;
+    }
+    if (password !== undefined) {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      lecturer.password = hashedPassword;
+    }
+    await lecturer.update();
+
+    return res
+      .status(200)
+      .json({ message: "The lecturer details has been updated!" });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
 module.exports = {
   registerLecturer,
   loginLecturer,
@@ -314,4 +349,5 @@ module.exports = {
   myExaminees,
   myCoSupervisedStudents,
   updateLecturerExaminees,
+  updateLecturerDetails,
 };

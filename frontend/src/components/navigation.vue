@@ -2,7 +2,7 @@
   <div>
     <v-navigation-drawer
       :theme="isDark ? 'dark' : 'light'"
-      class="dark:bg-[#0D0D0D]"
+      class="dark:bg-[#151515]"
     >
       <v-list>
         <v-list-item
@@ -116,7 +116,7 @@ import logout from "@/assets/icons/logout.vue";
 import question from "@/assets/icons/question.vue";
 import settings from "@/assets/icons/settings.vue";
 import dashboard from "@/assets/icons/dashboard.vue";
-
+import admin from "@/assets/icons/admin.vue";
 // Constants
 const store = useStore();
 const isDark = useDark();
@@ -131,6 +131,18 @@ const navigationMenu = ref({
     title: "Home",
     condidtion: true,
     link: "/home",
+  },
+  lecturer: {
+    icon: markRaw(dashboard),
+    title: "Dashboard",
+    link: "/lecturer-dashboard",
+    condidtion: userType === "lecturer",
+  },
+  admin: {
+    icon: markRaw(admin),
+    title: "Admin",
+    link: "/admin",
+    condidtion: userType === "lecturer" && user.isAdmin === true,
   },
   notification: {
     icon: markRaw(bellVue),
@@ -147,14 +159,8 @@ const navigationMenu = ref({
   profile: {
     icon: markRaw(userVue),
     title: "Profile",
-    link: "/profile",
-    condidtion: userType === "student",
-  },
-  lecturer: {
-    icon: markRaw(dashboard),
-    title: "Dashboard",
-    link: "/lecturer-dashboard",
-    condidtion: userType === "lecturer",
+    link: userType === "student" ? "/profile" : "/lecturer-profile",
+    condidtion: true,
   },
 });
 

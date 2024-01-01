@@ -37,6 +37,19 @@
             >
               Delete
             </span>
+            <template v-if="props.type === 'proposals'">
+              <div v-if="fileInfo.proposalStatus !== undefined">
+                <p>
+                  Proposal Status:
+                  <span class="font-semibold">{{
+                    fileInfo.proposalStatus
+                  }}</span>
+                </p>
+              </div>
+              <div v-if="fileInfo.remarksFromCoordinator !== undefined">
+                <p>Remarks: {{ fileInfo.remarksFromCoordinator }}</p>
+              </div>
+            </template>
           </h1>
           <h1 v-else class="cardValue uppercase text-lg">
             No file was uploaded

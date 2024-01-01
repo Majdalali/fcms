@@ -2,14 +2,24 @@ const express = require("express");
 const router = express.Router();
 const {
   Nominations,
-  Examiner,
   CoSupervisor,
   Student,
+  ExternalExaminer,
+  InternalExaminer,
 } = require("../../models/generalModels/nominationsModel");
 
 const jwt = require("jsonwebtoken");
 
 // POST endpoint to create a new nomination entry
+const hasNonEmptyField = (data) => {
+  for (const key in data) {
+    if (data[key] !== null && data[key] !== undefined && data[key] !== "") {
+      return true;
+    }
+  }
+  return false;
+};
+
 async function createNomination(req, res) {
   const token = req.headers.authorization;
   try {
@@ -25,6 +35,15 @@ async function createNomination(req, res) {
       examinersNotified,
     } = req.body;
 
+    // Check if all fields are empty
+    if (
+      !hasNonEmptyField(student) &&
+      !coSupervisors.some(hasNonEmptyField) &&
+      !internalExaminers.some(hasNonEmptyField) &&
+      !externalExaminers.some(hasNonEmptyField)
+    ) {
+      return res.status(400).json({ error: "All fields cannot be empty" });
+    }
     // Create instances for related classes
     const coSupervisorsInstances = coSupervisors.map(
       (coSupervisor) => new CoSupervisor(coSupervisor)
@@ -33,10 +52,10 @@ async function createNomination(req, res) {
     const studentInstance = new Student(student);
 
     const internalExaminersInstances = internalExaminers.map(
-      (examiner) => new Examiner(examiner)
+      (examiner) => new InternalExaminer(examiner)
     );
     const externalExaminersInstances = externalExaminers.map(
-      (examiner) => new Examiner(examiner)
+      (examiner) => new ExternalExaminer(examiner)
     );
 
     // Create a new Nominations instance
@@ -62,7 +81,7 @@ async function createNomination(req, res) {
     const nominationId = await newNomination.save();
 
     return res
-      .status(201)
+      .status(200)
       .json({ message: "Nomination created successfully", nominationId });
   } catch (error) {
     console.error(error);

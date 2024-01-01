@@ -9,7 +9,7 @@ class evaluationsModel {
     evaluationObjects = {},
     remarksForCord,
     finalMark = 0,
-    type,
+    typeOfEvaluator,
     createdAt,
   }) {
     this.evaluationId = evaluationId || this.generateRandomId();
@@ -18,13 +18,13 @@ class evaluationsModel {
     this.evaluationObjects = evaluationObjects;
     this.finalMark = finalMark;
     this.remarksForCord = remarksForCord;
-    const allowedTypes = ["Supervisor", "Examiner"];
-    if (!allowedTypes.includes(type)) {
+    const allowedTypes = ["Supervisor", "Examiner", "Co-Supervisor"];
+    if (!allowedTypes.includes(typeOfEvaluator)) {
       throw new Error(
-        `Invalid type: ${type}. Must be either 'Supervisor' or 'Examiner'.`
+        `Invalid type: ${typeOfEvaluator}. Must be either 'Supervisor', 'Co-Supervisor', or 'Examiner'.`
       );
     }
-    this.type = type;
+    this.typeOfEvaluator = typeOfEvaluator;
     this.createdAt = createdAt;
   }
   generateRandomId() {
@@ -41,11 +41,9 @@ class evaluationsModel {
         evaluationObjects: this.evaluationObjects,
         finalMark: this.finalMark,
         remarksForCord: this.remarksForCord,
-        type: this.type,
+        typeOfEvaluator: this.typeOfEvaluator,
         createdAt: this.createdAt,
       });
-      console.log("Evaluation has been created");
-      console.log("Evaluation id: ", this.evaluationId);
     } catch (error) {
       throw error;
     }

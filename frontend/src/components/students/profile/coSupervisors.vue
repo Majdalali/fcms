@@ -48,10 +48,7 @@
               >Add Co-Supervisor</v-btn
             >
           </template>
-          <v-card>
-            <v-card-title>
-              <span class="text-h5">Add a Co-Supervisor</span>
-            </v-card-title>
+          <v-card title="Add a Co-Supervisor">
             <v-form v-model="valid">
               <v-card-text>
                 <v-container>
@@ -85,7 +82,7 @@
                   class="w-32"
                   @click="closeDialog()"
                 >
-                  Close
+                  Cancel
                 </v-btn>
                 <v-btn
                   color="indigo"

@@ -82,12 +82,13 @@ async function createANomination(req, res) {
     const decoded = jwt.verify(token, process.env.SECRET_TOKEN);
     const lecturerId = decoded.user_id;
 
-    const { studentId, evaluationObjects, remarksForCord, type } = req.body;
+    const { studentId, evaluationObjects, remarksForCord, typeOfEvaluator } =
+      req.body;
 
     // Calculate the final mark based on the provided evaluation criteria
     let finalMark = 0;
     for (const criterion in evaluationObjects) {
-      finalMark += evaluationObjects[criterion];
+      finalMark += parseFloat(evaluationObjects[criterion]);
     }
 
     // Create the evaluation model instance
@@ -97,7 +98,7 @@ async function createANomination(req, res) {
       evaluationObjects,
       remarksForCord,
       finalMark,
-      type,
+      typeOfEvaluator,
       createdAt: new Date(),
     });
 

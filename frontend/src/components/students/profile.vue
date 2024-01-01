@@ -237,10 +237,10 @@
 import { ref, onMounted, computed } from "vue";
 import { useDark } from "@vueuse/core";
 import axios from "axios";
-import Navigation from "./navigation.vue";
+import Navigation from "../navigation.vue";
 import Supervisor from "./profile/supervisor.vue";
 import Examiner from "./profile/examiner.vue";
-import Comments from "./students/myProject/comments.vue";
+import Comments from "./myProject/comments.vue";
 import CoSupervisors from "./profile/coSupervisors.vue";
 // Icons
 import Email from "@/assets/icons/email.vue";
@@ -383,9 +383,11 @@ const getInitials = (username) => {
     .toUpperCase();
 };
 onMounted(async () => {
+  const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+  const userId = storedUser.user_id;
+  const userExaminers = storedUser.examiners;
+
   try {
-    const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
-    const userId = storedUser.user_id;
     const response = await axios.get(`http://localhost:8000/user/${userId}`);
     const userData = { ...response.data };
     userInfo.value = { ...response.data };
@@ -400,10 +402,6 @@ onMounted(async () => {
     // Handle error, display an error message, or redirect if needed
   }
   try {
-    // Get user from local storage
-    const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
-    // get user examiners array from storedUser data
-    const userExaminers = storedUser.examiners;
     // Loop through userExaminers array
     for (let i = 0; i < userExaminers.length; i++) {
       // Get examiner details from userExaminers array
