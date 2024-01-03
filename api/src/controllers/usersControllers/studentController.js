@@ -410,19 +410,35 @@ async function updateStudentCoSupervisors(req, res) {
   }
 }
 
-async function getCoSuperVisorsDetails(req, res) {
-  const { userId } = req.params;
+async function getStudentCoSupervisors(req, res) {
+  const token = req.headers.authorization;
+  const decoded = jwt.verify(token, process.env.SECRET_TOKEN);
+  const studentId = decoded.user_id;
+
   try {
-    const user = await Lecturer.getUserById(userId);
-    if (!user) {
-      return res.status(404).json({ error: "Co Supervisors not found" });
+    const student = await Student.getUserById(studentId);
+    if (!student) {
+      return res.status(404).json({ error: "Student not found" });
     }
-    // Remove password from the response
-    const responseUser = { name: user.username, email: user.email };
-    return res.status(200).json(responseUser);
+
+    const coSupervisors = student.coSupervisors; // Array of co-supervisor IDs
+
+    const coSupervisorsDetailsPromises = coSupervisors.map((lecturerId) =>
+      Lecturer.getUserById(lecturerId)
+    );
+
+    const coSupervisorsDetails = await Promise.all(
+      coSupervisorsDetailsPromises
+    );
+
+    const formattedDetails = coSupervisorsDetails.map((lecturer) => ({
+      email: lecturer.email,
+      name: lecturer.username,
+    }));
+
+    res.status(200).json(formattedDetails);
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ error: "Internal server error" });
   }
 }
 
@@ -506,5 +522,5 @@ module.exports = {
   updateStudentProjectInfo,
   updateStudentDetails,
   updateStudentCoSupervisors,
-  getCoSuperVisorsDetails,
+  getStudentCoSupervisors,
 };

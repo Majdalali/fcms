@@ -24,6 +24,7 @@
               <v-tab class="v-tab" value="one">Supervised Students</v-tab>
               <v-tab class="v-tab" value="two">Examinees</v-tab>
               <v-tab class="v-tab" value="three">Comments</v-tab>
+              <v-tab class="v-tab" value="six">Submissions</v-tab>
               <v-tab class="v-tab" value="four">Evaluation</v-tab>
               <v-tab class="v-tab" value="five">Nominations</v-tab>
             </v-tabs>
@@ -38,6 +39,7 @@
                 <v-window-item value="three"
                   ><LecturerComments />
                 </v-window-item>
+                <v-window-item value="six"><Submissions /> </v-window-item>
                 <v-window-item value="four"><Evaluation /> </v-window-item>
                 <v-window-item value="five"><Nominations /> </v-window-item>
               </v-window>
@@ -59,6 +61,7 @@ import LecturerComments from "./lecturerDashboard/lecturerComments.vue";
 import Examinees from "./lecturerDashboard/examinees.vue";
 import Nominations from "./lecturerDashboard/nominations.vue";
 import Evaluation from "./lecturerDashboard/evaluation.vue";
+import Submissions from "./lecturerDashboard/submissions.vue";
 
 // Constants
 const isDark = useDark();

@@ -3,53 +3,26 @@ const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
 dotenv.config();
 const secretKey = process.env.SECRET_TOKEN;
-const { firestore } = require("../services/firebase");
 
 // Models
 
 const evaluationsModel = require("../models/evaluationsModels/evaluationsModel");
+const studentModel = require("../models/usersModels/studentModel");
+const lecturerModel = require("../models/usersModels/lecturerModel");
 
 // Functions
 
 async function getEvaluationsById(req, res) {
   const { id } = req.params;
 
-  const EvaluationsCollection = firestore().collection("Evaluations");
-
   try {
-    const querySnapshot = await EvaluationsCollection.where(
-      "studentId",
-      "==",
-      id
-    ).get();
+    const evaluations = await evaluationsModel.getEvaluationsById(id);
 
-    if (querySnapshot.empty) {
-      const evaluatorSnapshot = await EvaluationsCollection.where(
-        "evaluatorId",
-        "==",
-        id
-      ).get();
-
-      if (evaluatorSnapshot.empty) {
-        return res
-          .status(404)
-          .json({ message: `No evaluations found for id ${id}` });
-      }
-
-      const evaluations = [];
-      evaluatorSnapshot.forEach((doc) => {
-        const data = doc.data();
-        evaluations.push(data);
-      });
-
-      return res.status(200).json(evaluations);
+    if (!evaluations.length) {
+      return res
+        .status(404)
+        .json({ message: `No evaluations found for id ${id}` });
     }
-
-    const evaluations = [];
-    querySnapshot.forEach((doc) => {
-      const data = doc.data();
-      evaluations.push(data);
-    });
 
     return res.status(200).json(evaluations);
   } catch (error) {
@@ -57,21 +30,18 @@ async function getEvaluationsById(req, res) {
     return res.status(500).json({ error: "Internal server error" });
   }
 }
+
 async function getAllEvaluations(req, res) {
-  const evaluationsCollection = firestore().collection("Evaluations");
+  const token = req.headers.authorization;
 
   try {
-    const querySnapshot = await evaluationsCollection.get();
-
-    if (querySnapshot.empty) {
-      return res.status(404).json({ message: `No evaluations found` });
+    const evaluations = await evaluationsModel.getAllEvaluations();
+    if (evaluations.length === 0) {
+      return res.status(404).json({ message: "No evaluations found" });
     }
-
-    const evaluations = querySnapshot.docs.map((doc) => doc.data());
 
     return res.status(200).json(evaluations);
   } catch (error) {
-    console.error("Error getting evaluations:", error);
     return res.status(500).json({ error: "Internal server error" });
   }
 }
@@ -79,8 +49,10 @@ async function getAllEvaluations(req, res) {
 async function createANomination(req, res) {
   const token = req.headers.authorization;
   try {
-    const decoded = jwt.verify(token, process.env.SECRET_TOKEN);
+    const decoded = jwt.verify(token, secretKey);
     const lecturerId = decoded.user_id;
+    const lecturer = await lecturerModel.getUserById(lecturerId);
+    const lecturerName = lecturer.username;
 
     const { studentId, evaluationObjects, remarksForCord, typeOfEvaluator } =
       req.body;
@@ -90,6 +62,7 @@ async function createANomination(req, res) {
     for (const criterion in evaluationObjects) {
       finalMark += parseFloat(evaluationObjects[criterion]);
     }
+    const student = await studentModel.getUserById(studentId);
 
     // Create the evaluation model instance
     const newEvaluation = new evaluationsModel({
@@ -100,6 +73,8 @@ async function createANomination(req, res) {
       finalMark,
       typeOfEvaluator,
       createdAt: new Date(),
+      lecturerName: lecturerName,
+      studentName: student.username,
     });
 
     // Save the evaluation

@@ -58,8 +58,10 @@ router.post(
   verifyToken,
   studentController.updateStudentCoSupervisors
 );
+
 router.get(
-  "/getCoSuperVisorsDetails/:userId",
-  studentController.getCoSuperVisorsDetails
+  "/myCoSupervisors",
+  verifyToken,
+  studentController.getStudentCoSupervisors
 );
 module.exports = router;

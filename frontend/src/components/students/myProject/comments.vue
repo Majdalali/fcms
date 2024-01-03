@@ -54,17 +54,6 @@ import { useDark } from "@vueuse/core";
 const isDark = useDark();
 const comments = ref(null);
 const errorMessage = ref("");
-const getLecturerName = async (lecturerId) => {
-  try {
-    const response = await axios.get(
-      `http://localhost:8000/lecturer/${lecturerId}`
-    );
-    return response.data.username;
-  } catch (error) {
-    console.error("Error:", error);
-    return null;
-  }
-};
 
 onMounted(async () => {
   try {
@@ -75,11 +64,6 @@ onMounted(async () => {
     );
 
     comments.value = response.data;
-
-    // Fetch lecturer names for comments
-    for (const comment of comments.value) {
-      comment.lecturerName = await getLecturerName(comment.lecturerId);
-    }
   } catch (error) {
     if (
       error.response &&
@@ -110,6 +94,8 @@ const getLecturerRole = (lecturerId) => {
     return "Supervisor";
   } else if (storedUser.examiners.includes(lecturerId)) {
     return "Examiner";
+  } else if (storedUser.coSupervisors.includes(lecturerId)) {
+    return "Co-Supervisor";
   }
   return "";
 };

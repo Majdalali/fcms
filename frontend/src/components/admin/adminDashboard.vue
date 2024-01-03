@@ -21,22 +21,24 @@
               bg-color="transparent"
               v-model="tab"
             >
-              <v-tab class="v-tab" value="one">Sessions</v-tab>
-              <v-tab class="v-tab" value="two">Evaluations</v-tab>
-              <v-tab class="v-tab" value="three">Nominations</v-tab>
-              <v-tab class="v-tab" value="four">Proposals</v-tab>
-              <v-tab class="v-tab" value="five">Archive</v-tab>
+              <v-tab class="v-tab" value="one">General</v-tab>
+              <v-tab class="v-tab" value="two">Proposals</v-tab>
+              <v-tab class="v-tab" value="three">Evaluations</v-tab>
+              <v-tab class="v-tab" value="four">Nominations</v-tab>
+              <v-tab class="v-tab" value="five">???</v-tab>
             </v-tabs>
             <v-divider class="w-[90%]"></v-divider>
 
             <v-card-text class="pl-0">
               <v-window v-model="tab">
-                <v-window-item value="one"><AdminSession /> </v-window-item>
-
-                <v-window-item value="two"> </v-window-item>
-
-                <v-window-item value="three"> </v-window-item>
-                <v-window-item value="four"> <AdminProposals /></v-window-item>
+                <v-window-item value="one"><AdminMain /> </v-window-item>
+                <v-window-item value="two"> <AdminProposals /></v-window-item>
+                <v-window-item value="three"
+                  ><AdminEvaluations />
+                </v-window-item>
+                <v-window-item value="four"
+                  ><AdminNominations />
+                </v-window-item>
                 <v-window-item value="five">five </v-window-item>
               </v-window>
             </v-card-text>
@@ -52,8 +54,10 @@ import { useDark } from "@vueuse/core";
 import { ref } from "vue";
 
 import Navigation from "../navigation.vue";
-import AdminSession from "./adminPages/adminSession.vue";
+import AdminMain from "./adminPages/AdminMain.vue";
 import AdminProposals from "./adminPages/adminProposals.vue";
+import AdminEvaluations from "./adminPages/adminEvaluations.vue";
+import AdminNominations from "./adminPages/adminNominations.vue";
 
 // Constants
 const isDark = useDark();

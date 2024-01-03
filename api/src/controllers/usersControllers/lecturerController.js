@@ -339,6 +339,30 @@ async function updateLecturerDetails(req, res) {
   }
 }
 
+async function makeUserAdmin(req, res) {
+  const { email } = req.body;
+  const token = req.headers.authorization;
+  try {
+    const user = await Lecturer.getUserByEmail(email);
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    if (user.isAdmin) {
+      const username = user.username;
+      return res.status(400).json({ error: `${username} is already an admin` });
+    } else {
+      const username = user.username;
+      user.isAdmin = true;
+      await user.update();
+      return res.status(200).json({ message: `${username} is now an admin` });
+    }
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
 module.exports = {
   registerLecturer,
   loginLecturer,
@@ -350,4 +374,5 @@ module.exports = {
   myCoSupervisedStudents,
   updateLecturerExaminees,
   updateLecturerDetails,
+  makeUserAdmin,
 };

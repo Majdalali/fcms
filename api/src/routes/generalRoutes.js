@@ -11,7 +11,6 @@ const lecturerController = require("../controllers/usersControllers/lecturerCont
 const fileUploadController = require("../controllers/generalControllers/fileUploadController");
 // Session Routes
 
-router.post("/createSession", adminGuard, sessionController.createSession);
 router.get("/currentSession/:sessionTitle", sessionController.getSession);
 router.get("/currentSession", sessionController.getLatestSession);
 router.delete("/session/:sessionId", sessionController.deleteSession);
@@ -60,15 +59,4 @@ router.post(
 // Client Token Validation Route
 router.post("/validateToken", clientToken);
 
-// Admin Routes
-router.get(
-  "/getProposals",
-  adminGuard,
-  fileUploadController.getProposalsForAdmin
-);
-router.post(
-  "/updateProposal",
-  adminGuard,
-  fileUploadController.updateProposalStatusAndRemarks
-);
 module.exports = router;

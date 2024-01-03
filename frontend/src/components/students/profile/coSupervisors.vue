@@ -145,30 +145,14 @@ const headers = ref([
 // Functions
 onMounted(async () => {
   try {
-    // Get user from local storage
-    const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+    const token = localStorage.getItem("access_token");
 
-    if (
-      storedUser &&
-      storedUser.coSupervisors &&
-      Array.isArray(storedUser.coSupervisors)
-    ) {
-      const userCoSupervisors = storedUser.coSupervisors;
-      // Loop through userCoSupervisors array
-      for (let i = 0; i < userCoSupervisors.length; i++) {
-        // Get supervisor details from userCoSupervisors array
-        const response = await axios.get(
-          `http://localhost:8000/getCoSuperVisorsDetails/${userCoSupervisors[i]}`
-        );
-        // Push supervisor details to userInfo array
-        userInfo.value.push(response.data);
-      }
-    } else {
-      console.error(
-        "Invalid or missing coSupervisedStudents array in storedUser:",
-        storedUser
-      );
-    }
+    const response = await axios.get("http://localhost:8000/myCoSupervisors", {
+      headers: { Authorization: token },
+    });
+
+    // Push supervisor details to userInfo array
+    userInfo.value = response.data;
   } catch (error) {
     console.error("Error fetching supervisor details:", error);
   }

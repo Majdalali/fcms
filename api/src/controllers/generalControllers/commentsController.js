@@ -1,5 +1,6 @@
 const Comment = require("../../models/generalModels/commentsModel");
 const jwt = require("jsonwebtoken");
+const Lecturer = require("../../models/usersModels/lecturerModel");
 
 async function createComment(io, connectedUsers, req, res) {
   const token = req.headers.authorization;
@@ -86,6 +87,16 @@ async function getStudentComments(req, res) {
         .status(400)
         .json({ message: "No comments found for this student" });
     }
+    const lecturerIds = studentComments.map((comment) => comment.lecturerId);
+    const lecturerPromises = lecturerIds.map((lecturerId) =>
+      Lecturer.getUserById(lecturerId)
+    );
+
+    const lecturerNames = await Promise.all(lecturerPromises);
+
+    studentComments.forEach((comment, index) => {
+      comment.lecturerName = lecturerNames[index].username; // Assuming lecturer name property is 'name', adjust as per your data model
+    });
 
     res.status(200).json(studentComments);
   } catch (error) {

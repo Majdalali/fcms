@@ -16,7 +16,7 @@ router.get("/lecturers", lecturerController.getAllLecturers);
 router.get(
   "/lecturer/myfiles",
   verifyToken,
-  fileUploadController.getSupervisorFiles
+  fileUploadController.getAllLecturerStudentFiles
 );
 router.get("/lecturer/userByEmail", lecturerController.getLecturerByEmail);
 router.post(

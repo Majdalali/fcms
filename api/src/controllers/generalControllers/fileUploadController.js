@@ -256,43 +256,85 @@ async function deleteFileByFileName(req, res) {
     return res.status(500).json({ error: "Internal server error" });
   }
 }
-
-async function getSupervisorFiles(req, res) {
-  const token = req.headers.authorization;
+async function getAllLecturerStudentFiles(req, res) {
+  const collectionNames = [
+    "proposals",
+    "progressOne",
+    "progressTwo",
+    "finalSubmission",
+    "corrections",
+    "presentationAndDemos",
+    "finalReport",
+    "proposalsExtras",
+    "progressOneExtras",
+    "progressTwoExtras",
+    "finalSubmissionExtras",
+    "correctionsExtras",
+    "presentationAndDemosExtras",
+    "finalReportExtras",
+  ];
 
   try {
+    const token = req.headers.authorization;
     const decoded = jwt.verify(token, process.env.SECRET_TOKEN);
-    const userId = decoded.user_id;
-    const user = await Lecturer.getUserById(userId);
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
+    const lecturerId = decoded.user_id;
+    const lecturer = await Lecturer.getUserById(lecturerId); // Fetch lecturer
+
+    if (!lecturer) {
+      return res.status(404).json({ error: "Lecturer not found" });
     }
 
-    const userSupervisedStudents = user.supervisedStudents;
+    const allFiles = [];
+    const userStudentsList = [
+      ...lecturer.supervisedStudents,
+      ...lecturer.coSupervisedStudents,
+      ...lecturer.examinees,
+    ];
 
-    // Fetch files for each supervised student
-    const filesPromises = userSupervisedStudents.map(async (studentId) => {
-      try {
-        // Fetch files for the current student using their userId (not user_id)
-        const studentFiles = await FileSubmission.getFileSubmissionsByStudentId(
-          studentId
-        );
-        return studentFiles;
-      } catch (error) {
-        console.error(error);
-        return null;
-      }
-    });
+    await Promise.all(
+      collectionNames.map(async (collectionName) => {
+        const filesPromises = userStudentsList.map(async (studentId) => {
+          try {
+            const student = await Student.getUserById(studentId);
+            let studentType;
+            if (lecturer.supervisedStudents.includes(studentId)) {
+              studentType = "Supervised";
+            } else if (lecturer.coSupervisedStudents.includes(studentId)) {
+              studentType = "Co-Supervised";
+            } else if (lecturer.examinees.includes(studentId)) {
+              studentType = "Examinee";
+            } else {
+              studentType = "unknown";
+            }
 
-    // Wait for all promises to resolve
-    const files = await Promise.all(filesPromises);
+            const studentFiles =
+              await FileSubmission.getFileSubmissionsByStudentId(
+                collectionName,
+                studentId
+              );
+            if (studentFiles.length) {
+              const filesWithMetadata = studentFiles.map((file) => ({
+                ...file,
+                sType: collectionName,
+                studentName: student.username,
+                studentType: studentType,
+              }));
+              allFiles.push(...filesWithMetadata);
+            }
+          } catch (error) {
+            console.error(
+              `Error fetching ${collectionName} files for student ${studentId}:`,
+              error
+            );
+          }
+        });
+        await Promise.all(filesPromises);
+      })
+    );
 
-    // Filter out null values (errors in fetching files)
-    const validFiles = files.filter((file) => file !== null);
-
-    return res.status(200).json(validFiles);
+    return res.status(200).json(allFiles);
   } catch (error) {
-    console.error(error);
+    console.error("Error fetching all lecturer student files:", error);
     return res.status(500).json({ error: "Internal server error" });
   }
 }
@@ -305,6 +347,6 @@ module.exports = {
   displayFile,
   deleteFileByFileName,
   getProposalsForAdmin,
-  getSupervisorFiles,
   updateProposalStatusAndRemarks,
+  getAllLecturerStudentFiles,
 };
