@@ -52,7 +52,7 @@
           <!-- Content of your dialog goes here -->
           <v-card-title> <span class="text-h6">Supervisor</span></v-card-title>
           <v-card-text v-show="!spinner && supervisorInfo">
-            <v-table>
+            <v-table class="border">
               <thead>
                 <tr>
                   <th class="text-center text-base">Name</th>
@@ -95,7 +95,7 @@
       <v-card>
         <v-card-title>Student Examiners</v-card-title>
         <v-card-text v-show="!spinner && examinersInfo">
-          <v-table>
+          <v-table class="border">
             <thead>
               <tr>
                 <th class="text-center text-base">No.</th>

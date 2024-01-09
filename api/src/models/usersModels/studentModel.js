@@ -156,6 +156,24 @@ class Student {
       throw error;
     }
   }
+
+  static async getAllStudentsByProgram(program) {
+    try {
+      const users = [];
+      const querySnapshot = await userCollection
+        .where("user_program", "==", program)
+        .get();
+      querySnapshot.forEach((doc) => {
+        users.push(doc.data());
+      });
+      if (users.length === 0) {
+        return null;
+      }
+      return users;
+    } catch (error) {
+      throw error;
+    }
+  }
 }
 
 module.exports = Student;

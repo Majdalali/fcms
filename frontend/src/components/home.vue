@@ -41,6 +41,13 @@
         </div>
       </div>
     </v-sheet>
+    <div>
+      <h1
+        class="text-6xl absolute left-24 top-64 uppercase text-[#F8F6F6] w-2/5"
+      >
+        Masters System for Postgraduate students.
+      </h1>
+    </div>
   </v-app>
 </template>
 

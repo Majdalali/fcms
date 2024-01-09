@@ -507,6 +507,31 @@ async function updateStudentDetails(req, res) {
     return res.status(500).json({ error: "Internal server error" });
   }
 }
+
+async function getStudentsByProgram(req, res) {
+  const { program } = req.params;
+  try {
+    const studentsData = await Student.getAllStudentsByProgram(program);
+    if (!studentsData) {
+      return res.status(404).json({ error: "Student not found" });
+    }
+    // Create a sanitized version of the users array without the password property
+    const sanitizedStudents = studentsData.map(
+      ({ user_id, username, email, matricCard, user_program }) => ({
+        user_id,
+        username,
+        email,
+        matricCard,
+        user_program,
+      })
+    );
+
+    res.status(200).json(sanitizedStudents); // Send the sanitized array of User instances in the response
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+}
 module.exports = {
   registerUser,
   loginUser,
@@ -523,4 +548,5 @@ module.exports = {
   updateStudentDetails,
   updateStudentCoSupervisors,
   getStudentCoSupervisors,
+  getStudentsByProgram,
 };

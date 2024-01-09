@@ -75,7 +75,7 @@
           </a> </template
         ><template v-slot:item.index="{ item }">
           <v-btn @click="openDialog(item)" size="small" color="primary">
-            Click Me
+            Aceept/Reject
           </v-btn>
           <v-dialog v-model="item.dialog" width="800">
             <v-card title="Proposal Details">

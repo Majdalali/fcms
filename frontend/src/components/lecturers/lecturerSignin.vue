@@ -16,7 +16,7 @@
                   :src="isDark ? UTMLogoBlack : UTMLogo"
                   class="mb-10"
                 ></v-img>
-                <h1 class="text-4xl font-bold title">Welcome back !</h1>
+                <h1 class="text-4xl font-bold title">Staff Portal</h1>
                 <p class="text-lg font-light titleDes">
                   Don’t have an account ?
                   <router-link to="/register"

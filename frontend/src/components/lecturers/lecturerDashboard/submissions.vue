@@ -27,6 +27,7 @@
             <v-card title="Student Files ">
               <v-card-text class="mt-4">
                 <v-data-table
+                  class="border"
                   :headers="studentHeaders"
                   :items="item.submissions"
                 >

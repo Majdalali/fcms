@@ -26,4 +26,10 @@ router.post("/createSession", adminGuard, sessionController.createSession);
 
 router.post("/api/admin", adminGuard, lecturerController.makeUserAdmin);
 
+router.get(
+  "/api/students/:program",
+  adminGuard,
+  studentController.getStudentsByProgram
+);
+
 module.exports = router;

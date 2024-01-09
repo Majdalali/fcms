@@ -25,7 +25,12 @@
               <v-tab class="v-tab" value="two">Proposals</v-tab>
               <v-tab class="v-tab" value="three">Evaluations</v-tab>
               <v-tab class="v-tab" value="four">Nominations</v-tab>
-              <v-tab class="v-tab" value="five">???</v-tab>
+              <v-tab
+                v-for="program in programs"
+                class="v-tab"
+                :value="program.program"
+                >{{ program.program }} Students</v-tab
+              >
             </v-tabs>
             <v-divider class="w-[90%]"></v-divider>
 
@@ -39,7 +44,14 @@
                 <v-window-item value="four"
                   ><AdminNominations />
                 </v-window-item>
-                <v-window-item value="five">five </v-window-item>
+                <v-window-item
+                  v-for="program in programs"
+                  :value="program.program"
+                  ><ProgramStudents
+                    :program="program.program"
+                    :name="program.name"
+                  />
+                </v-window-item>
               </v-window>
             </v-card-text>
           </div>
@@ -58,10 +70,16 @@ import AdminMain from "./adminPages/AdminMain.vue";
 import AdminProposals from "./adminPages/adminProposals.vue";
 import AdminEvaluations from "./adminPages/adminEvaluations.vue";
 import AdminNominations from "./adminPages/adminNominations.vue";
+import ProgramStudents from "./adminPages/programStudents.vue";
 
 // Constants
 const isDark = useDark();
 const tab = ref("");
+const programs = ref([
+  { program: "MCSD", name: "MASTER OF CYBER SECURITY" },
+  { program: "MECC", name: "MASTER OF SCIENCE (DATA SCIENCE)" },
+  { program: "MCDD", name: "MASTER IN INNOVATIVE COMPUTING" },
+]);
 </script>
 
 <style lang="scss" scoped>

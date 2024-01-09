@@ -148,7 +148,7 @@ const navigationMenu = ref({
     icon: markRaw(bellVue),
     title: "Notification",
     link: "/activity-feed",
-    condidtion: userType === "student",
+    condidtion: true,
   },
   myProject: {
     icon: markRaw(bookmarkVue),

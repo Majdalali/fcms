@@ -51,6 +51,9 @@
               </template>
             </v-card>
           </div>
+          <h1 v-if="notificationsInfo == ''" class="title text-amber-400">
+            You don't have any notifications yet
+          </h1>
         </v-col>
       </v-row>
     </v-container>
