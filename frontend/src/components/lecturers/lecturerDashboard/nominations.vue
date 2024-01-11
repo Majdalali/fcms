@@ -207,7 +207,7 @@
               v-for="(externalExaminer, index) in externalExaminers"
               :key="index"
             >
-              <small class="titleDes">Internal Examiner {{ index + 1 }}</small>
+              <small class="titleDes">External Examiner {{ index + 1 }}</small>
               <v-row class="mt-1">
                 <v-col cols="12" md="4">
                   <v-text-field

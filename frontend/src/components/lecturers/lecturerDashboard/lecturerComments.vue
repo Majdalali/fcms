@@ -48,7 +48,7 @@
                   :key="comment"
                   :title="comment.username"
                   :text="comment.commentContent"
-                  color="blue-grey-darken-4"
+                  color="blue-grey-darken-4 mt-2"
                 ></v-expansion-panel>
               </v-expansion-panels>
             </v-card-text>

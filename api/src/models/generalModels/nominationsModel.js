@@ -89,6 +89,7 @@ class Nominations {
     passedElectivesAndCores = false,
     examinersNotified = false,
     createdAt,
+    status = "status",
   }) {
     this.nominationId = nominationId || this.generateRandomId();
     this.supervisorId = supervisorId;
@@ -100,6 +101,7 @@ class Nominations {
     this.passedElectivesAndCores = passedElectivesAndCores;
     this.examinersNotified = examinersNotified;
     this.createdAt = createdAt;
+    this.status = status;
   }
 
   generateRandomId() {
@@ -121,6 +123,7 @@ class Nominations {
         passedElectivesAndCores: this.passedElectivesAndCores,
         examinersNotified: this.examinersNotified,
         createdAt: this.createdAt,
+        status: this.status,
       });
       console.log("Nomination saved with ID: ", this.nominationId);
       return this.nominationId;
@@ -131,13 +134,11 @@ class Nominations {
   }
 
   static formatNominationData(nominationData) {
-    const createdAt = new Date(
-      nominationData.createdAt._seconds * 1000 +
-        nominationData.createdAt._nanoseconds / 1000000
-    );
     return {
       nominationId: nominationData.nominationId,
+      status: nominationData.status,
       supervisorId: nominationData.supervisorId,
+      supervisorName: nominationData.supervisorName,
       coSupervisors: nominationData.coSupervisors,
       student: nominationData.student,
       internalExaminers: nominationData.internalExaminers,
@@ -145,8 +146,21 @@ class Nominations {
       passedDisserationTwo: nominationData.passedDisserationTwo,
       passedElectivesAndCores: nominationData.passedElectivesAndCores,
       examinersNotified: nominationData.examinersNotified,
-      createdAt: createdAt.toUTCString(),
+      createdAt: nominationData.createdAt,
     };
+  }
+
+  async update() {
+    try {
+      const nominationsRef = firestore().collection("nominations");
+      await nominationsRef.doc(this.nominationId).update({
+        status: this.status,
+      });
+      return this.nominationId;
+    } catch (error) {
+      console.error("Error updating nomination: ", error);
+      throw error;
+    }
   }
 
   static async getNominationById(nominationId) {
@@ -161,6 +175,23 @@ class Nominations {
       return nominationDoc.data();
     } catch (error) {
       console.error("Error getting nomination by ID: ", error);
+      throw error;
+    }
+  }
+  static async getAllNominations() {
+    try {
+      const nominationsRef = firestore().collection("nominations");
+      const nominationsSnapshot = await nominationsRef.get();
+      const nominations = [];
+      nominationsSnapshot.forEach((doc) => {
+        nominations.push(doc.data());
+      });
+      if (nominations.length === 0) {
+        return null; // Return null if no nominations found
+      }
+      return nominations;
+    } catch (error) {
+      console.error("Error getting all nominations: ", error);
       throw error;
     }
   }

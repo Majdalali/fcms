@@ -114,9 +114,6 @@ class Lecturer {
         throw new Error("Examinees data is invalid");
       }
 
-      // Log the data before the update to see what's being sent to Firestore
-      console.log("Updated Data:", updatedData);
-
       await lecturerCollection.doc(this.user_id).update(updatedData);
     } catch (error) {
       // Log the error details to check the specific issue

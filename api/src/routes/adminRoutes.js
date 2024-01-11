@@ -32,4 +32,15 @@ router.get(
   studentController.getStudentsByProgram
 );
 
+router.get(
+  "/api/nominations",
+  adminGuard,
+  nominationsController.getAllNominations
+);
+
+router.post(
+  "/api/assignExaminers/:userId",
+  adminGuard,
+  studentController.updateStudentExaminers
+);
 module.exports = router;

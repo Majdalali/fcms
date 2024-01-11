@@ -324,36 +324,38 @@ async function updateStudentExaminers(req, res) {
       student.examiners = [];
     }
 
+    const updateExamineesPromises = examinerId.map(async (id) => {
+      const examiner = await Lecturer.getUserById(id);
+      if (examiner) {
+        if (!Array.isArray(examiner.examinees)) {
+          examiner.examinees = [];
+        }
+        if (!examiner.examinees.includes(studentId)) {
+          examiner.examinees.push(studentId);
+          await examiner.updateExaminees(examiner.examinees); // Update the examinees list
+        }
+      }
+    });
+
+    await Promise.all(updateExamineesPromises);
+
     // Check if any of the received examinerIds already exist in the student's examiners list
     const existingExaminers = student.examiners;
-    const newExaminers = [];
-    let examinerExists = false;
+    const newExaminers = examinerId.filter(
+      (id) => !existingExaminers.includes(id)
+    );
 
-    for (const id of examinerId) {
-      if (!existingExaminers.includes(id)) {
-        newExaminers.push(id);
-      } else {
-        examinerExists = true;
-      }
-    }
-
-    if (examinerExists) {
-      if (newExaminers.length === 0) {
-        return res
-          .status(400)
-          .json({ error: "Examminers has already been assigned to student" });
-      } else {
-        await student.updateExaminers(student.examiners.concat(newExaminers));
-        return res
-          .status(200)
-          .json({ message: "Student examiners updated successfully" });
-      }
-    } else {
-      await student.updateExaminers(student.examiners.concat(newExaminers));
+    if (newExaminers.length === 0) {
       return res
-        .status(200)
-        .json({ message: "Student examiners updated successfully" });
+        .status(400)
+        .json({ error: "Examiners have already been assigned to the student" });
     }
+
+    await student.updateExaminers(student.examiners.concat(newExaminers));
+
+    return res.status(200).json({
+      message: "Student examiners and lecturer examinees updated successfully",
+    });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "Internal server error" });
