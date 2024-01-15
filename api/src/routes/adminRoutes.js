@@ -9,6 +9,8 @@ const notificationsController = require("../controllers/generalControllers/notif
 const studentController = require("../controllers/usersControllers/studentController");
 const lecturerController = require("../controllers/usersControllers/lecturerController");
 const fileUploadController = require("../controllers/generalControllers/fileUploadController");
+const criteriaController = require("../controllers/evaluationsControllers/criteriaController");
+const ProgramController = require("../controllers/usersControllers/programController");
 
 // Admin Routes
 router.get(
@@ -43,4 +45,25 @@ router.post(
   adminGuard,
   studentController.updateStudentExaminers
 );
+
+router.post("/api/newCriteria", adminGuard, criteriaController.createCriteria);
+
+router.get("/api/criterias", criteriaController.getAllCriteria);
+
+router.delete(
+  "/api/criterias/:program",
+  adminGuard,
+  criteriaController.deleteCriteriaByProgram
+);
+
+router.post("/api/newProgram", adminGuard, ProgramController.createProgram);
+
+router.put(
+  "/api/updateProgram/:programId",
+  adminGuard,
+  ProgramController.updateProgram
+);
+
+router.get("/api/programs", ProgramController.getPrograms);
+
 module.exports = router;

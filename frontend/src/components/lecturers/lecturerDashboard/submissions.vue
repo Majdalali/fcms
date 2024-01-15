@@ -3,7 +3,7 @@
     <div class="w-1/2">
       <h1 class="title text-lg font-medium">Student files submissions</h1>
     </div>
-    <div class="w-3/5 mt-5">
+    <div class="w-4/5 mt-5">
       <v-card :rounded="0" :elevation="0">
         <v-text-field
           v-model="search"
@@ -15,7 +15,12 @@
           hide-details
         ></v-text-field>
       </v-card>
-      <v-data-table :headers="headers" :items="students" :search="search">
+      <v-data-table
+        class="border"
+        :headers="headers"
+        :items="students"
+        :search="search"
+      >
         <template v-slot:item.numSubmissions="{ item }">
           {{ item.submissions.length }}
         </template>
@@ -76,6 +81,7 @@ const students = ref([]);
 const search = ref("");
 const headers = ref([
   { key: "studentName", sortable: false, title: "Student Name" },
+  { key: "MatricNumber", sortable: false, title: "Matric Number" },
   { key: "studentType", sortable: true, title: "Student Type" },
   { key: "numSubmissions", sortable: true, title: "No. of Submissions" },
   { key: "index", sortable: false, title: "Action" },
@@ -113,6 +119,7 @@ const aggregateStudents = () => {
       studentsMap[file.studentId] = {
         studentId: file.studentId,
         studentName: file.studentName,
+        MatricNumber: file.MatricNumber,
         studentType: file.studentType,
         createdAt: file.createdAt,
         submissions: [],

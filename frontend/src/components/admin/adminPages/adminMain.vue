@@ -90,39 +90,214 @@
         <v-divider></v-divider>
       </div>
     </div>
-    <div class="adminMaker mt-5">
-      <div class="mt-5">
-        <h1 class="title text-xl font-medium">Admin privileges</h1>
-        <p class="titleDes text-sm font-light">Make a user an admin</p>
+    <div class="w-4/5 mt-5">
+      <div class="adminMaker w-1/2">
+        <div class="mt-5">
+          <h1 class="title text-xl font-medium">Admin privileges</h1>
+          <p class="titleDes text-sm font-light">Make a user an admin</p>
+        </div>
+        <div class="mt-4">
+          <v-form v-model="adminValid" ref="adminForm">
+            <v-row>
+              <v-col cols="12" md="10">
+                <v-alert
+                  v-show="adminError !== ''"
+                  class="py-1 mb-2"
+                  closable
+                  :text="adminError"
+                  type="error"
+                ></v-alert>
+                <v-text-field
+                  label="User email"
+                  hint="User should be a lecturer"
+                  v-model="adminEmail"
+                  :rules="emailRules"
+                ></v-text-field></v-col
+            ></v-row>
+            <v-btn
+              size="large"
+              variant="elevated"
+              color="deep-purple-darken-4"
+              class="mb-5 mt-4"
+              @click="makeAdmin()"
+              text="Make Admin"
+              :disabled="!adminValid"
+            ></v-btn>
+          </v-form>
+        </div>
       </div>
-      <div class="mt-4 w-1/2">
-        <v-form v-model="adminValid" ref="adminForm">
-          <v-row>
-            <v-col cols="12" md="10">
-              <v-alert
-                v-show="adminError !== ''"
-                class="py-1 mb-2"
-                closable
-                :text="adminError"
-                type="error"
-              ></v-alert>
-              <v-text-field
-                label="User email"
-                hint="User should be a lecturer"
-                v-model="adminEmail"
-                :rules="emailRules"
-              ></v-text-field></v-col
-          ></v-row>
+      <v-divider></v-divider>
+      <div class="programMaker">
+        <div class="mt-5">
+          <h1 class="title text-xl font-medium">Programs</h1>
+          <p class="titleDes text-sm font-light">
+            Create and edit avaliable programs
+          </p>
+        </div>
+        <v-alert
+          class="mb-3 py-2 mt-4"
+          color="warning  "
+          icon="$info"
+          border="start"
+          border-color="deep-purple-accent-4"
+          closable
+          text="Please Don't use this function unless you are sure that no program has been created before. And, You can edit the programs from the table below."
+        ></v-alert>
+        <div class="mt-4">
+          <v-form v-model="programValid" ref="programForm">
+            <div
+              class="pt-2"
+              v-for="(programType, index) in programTypes"
+              :key="index"
+            >
+              <small class="titleDes">Program {{ index + 1 }}</small>
+              <v-row class="mt-1">
+                <v-col cols="12" md="7">
+                  <v-text-field
+                    v-model="programType.name"
+                    label="Program name"
+                    hint="e.g. Master of Science in Cybersecurity"
+                    :rules="formRules"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" md="4">
+                  <v-text-field
+                    v-model="programType.abbreviation"
+                    label="Program abbreviation"
+                    hint="e.g. MCSD, MECC"
+                    :rules="formRules"
+                  ></v-text-field
+                ></v-col>
+                <v-col cols="12" md="1" class="mt-1">
+                  <v-btn
+                    size="large"
+                    color="success"
+                    v-if="index === 0"
+                    @click="
+                      addEntry(programTypes, { name: '', abbreviation: '' })
+                    "
+                    ><v-icon icon="mdi-plus-circle"></v-icon
+                  ></v-btn>
+                  <v-btn
+                    size="large"
+                    v-else
+                    color="error"
+                    @click="removeEntry(programTypes, index)"
+                    ><v-icon icon="mdi-delete"></v-icon
+                  ></v-btn>
+                </v-col>
+              </v-row>
+            </div>
+
+            <v-btn
+              size="large"
+              variant="elevated"
+              color="deep-purple-darken-4"
+              class="mb-5 mt-4"
+              @click="createProgram()"
+              text="Create Program"
+              :disabled="!programValid"
+            ></v-btn>
+          </v-form>
+          <v-divider> </v-divider>
+          <div v-show="!isEditingProgram" class="CurrnetPrograms mt-5">
+            <h1 class="title text-xl font-medium mb-5">Current Programs</h1>
+
+            <v-table class="border">
+              <thead>
+                <tr>
+                  <th class="text-left">Program Name</th>
+                  <th class="text-left">Program Abbreviation</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="(programType, index) in currnetPrograms.programTypes"
+                  :key="index"
+                >
+                  <td>{{ programType.name }}</td>
+                  <td>{{ programType.abbreviation }}</td>
+                </tr>
+              </tbody>
+            </v-table>
+          </div>
+          <div v-show="isEditingProgram" class="EditPrograms mt-5">
+            <v-form v-model="editProgramsValid" ref="editProgramsForm">
+              <div
+                class="mb-2"
+                v-for="(program, index) in editProgramsCopy"
+                :key="index"
+              >
+                <small class="titleDes">Program {{ index + 1 }}</small>
+                <v-row class="mt-1">
+                  <v-col cols="12" md="7">
+                    <v-text-field
+                      v-model="program.name"
+                      label="Program name"
+                      :rules="formRules"
+                    ></v-text-field>
+                  </v-col>
+                  <v-col cols="12" md="4">
+                    <v-text-field
+                      v-model="program.abbreviation"
+                      label="Program abbreviation"
+                      :rules="formRules"
+                    ></v-text-field>
+                  </v-col>
+                  <v-col cols="12" md="1" class="mt-1">
+                    <v-btn
+                      size="large"
+                      color="error"
+                      @click="removeEntry(editProgramsCopy, index)"
+                    >
+                      <v-icon icon="mdi-delete"></v-icon>
+                    </v-btn>
+                  </v-col>
+                </v-row>
+              </div>
+              <div class="mb-8">
+                <v-btn
+                  size="large"
+                  color="success"
+                  @click="
+                    addEntry(editProgramsCopy, { name: '', abbreviation: '' })
+                  "
+                >
+                  <v-icon icon="mdi-plus-circle"></v-icon> Add Program
+                </v-btn>
+              </div>
+              <v-btn
+                size="large"
+                color="warning"
+                variant="outlined"
+                @click="cancelEdit()"
+                text="Cancel"
+              ></v-btn>
+              <v-btn
+                size="large"
+                variant="elevated"
+                color="deep-purple-darken-4"
+                class="ml-5"
+                @click="updatePrograms()"
+                text="Save Changes"
+                :disabled="
+                  !editProgramsValid ||
+                  JSON.stringify(editProgramsCopy) ===
+                    JSON.stringify(editPrograms)
+                "
+              ></v-btn>
+            </v-form>
+          </div>
           <v-btn
             size="large"
-            variant="elevated"
             color="deep-purple-darken-4"
-            class="mb-5 mt-4"
-            @click="makeAdmin()"
-            text="Make Admin"
-            :disabled="!adminValid"
+            text="Edit Programs"
+            class="mt-5"
+            v-show="!isEditingProgram"
+            @click="isEditingProgram = true"
           ></v-btn>
-        </v-form>
+          <h1 class="mt-5">Program ID: {{ currnetPrograms.program_id }}</h1>
+        </div>
       </div>
     </div>
     <v-snackbar
@@ -143,7 +318,7 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import axios from "axios";
 
 // Constants
@@ -164,6 +339,20 @@ const presentationAndDemo = ref("");
 const proposal = ref("");
 const correction = ref("");
 const adminEmail = ref("");
+const programValid = ref(false);
+const programForm = ref(null);
+const programTypes = ref([
+  {
+    name: "",
+    abbreviation: "",
+  },
+]);
+const currnetPrograms = ref({});
+const editProgramsValid = ref(false);
+const editProgramsForm = ref(null);
+const editPrograms = ref([]);
+const editProgramsCopy = ref([]);
+const isEditingProgram = ref(false);
 
 const formRules = [(value) => !!value || "The field is required"];
 const emailRules = [
@@ -171,6 +360,94 @@ const emailRules = [
 ];
 
 // functions
+
+onMounted(async () => {
+  try {
+    const response = await axios.get("http://localhost:8000/api/programs");
+    if (response.status === 200) {
+      currnetPrograms.value = response.data.programs;
+      editPrograms.value = Array.isArray(currnetPrograms.value.programTypes)
+        ? [...currnetPrograms.value.programTypes]
+        : [];
+      editProgramsCopy.value = [...editPrograms.value];
+    } else {
+      console.log(response.data.message);
+    }
+  } catch (error) {
+    console.error("Error fetching programs:", error);
+  }
+});
+
+const cancelEdit = () => {
+  editProgramsCopy.value = [...editPrograms.value];
+  isEditingProgram.value = false;
+};
+
+const addEntry = (list) => {
+  list.push({ name: "", abbreviation: "" });
+};
+
+const removeEntry = (list, index) => {
+  list.splice(index, 1);
+};
+
+const updatePrograms = async () => {
+  try {
+    const token = localStorage.getItem("access_token");
+
+    const response = await axios.put(
+      `http://localhost:8000/api/updateProgram/${currnetPrograms.value.program_id}`,
+      {
+        programTypes: editProgramsCopy.value,
+      },
+      {
+        headers: {
+          Authorization: token,
+        },
+      }
+    );
+
+    if (response.status === 200) {
+      responseMessage.value = response.data.message;
+      currnetPrograms.value = response.data.programs;
+      snackbar.value = true;
+      isEditingProgram.value = false;
+      resetForm();
+    } else {
+      console.log(response.data.message);
+    }
+  } catch (error) {
+    console.error("Error updating programs:", error);
+  }
+};
+
+const createProgram = async () => {
+  try {
+    const token = localStorage.getItem("access_token");
+
+    const response = await axios.post(
+      `http://localhost:8000/api/newProgram`,
+      {
+        programTypes: programTypes.value,
+      },
+      {
+        headers: {
+          Authorization: token,
+        },
+      }
+    );
+    if (response.status === 200) {
+      responseMessage.value = response.data.message;
+      snackbar.value = true;
+      resetForm();
+    } else {
+      console.log(response.data.message);
+    }
+  } catch (error) {
+    console.error("Error creating program:", error);
+  }
+};
+
 const makeAdmin = async () => {
   try {
     const token = localStorage.getItem("access_token");
@@ -243,6 +520,8 @@ const createSession = async () => {
 const resetForm = () => {
   sessionForm.value.reset();
   adminForm.value.reset();
+  programForm.value.reset();
+  programTypes.value = [{ name: "", abbreviation: "" }];
 };
 </script>
 

@@ -169,6 +169,7 @@ async function getMyStudents(req, res) {
         username: student.username,
         email: student.email,
         matricCard: student.matricCard,
+        program: student.user_program,
       };
 
       return responseStudent; // Return the student object
@@ -201,6 +202,7 @@ async function myCoSupervisedStudents(req, res) {
         username: student.username,
         email: student.email,
         matricCard: student.matricCard,
+        program: student.user_program,
       };
 
       return responseStudent; // Return the student object
@@ -233,6 +235,7 @@ async function myExaminees(req, res) {
         username: student.username,
         email: student.email,
         matricCard: student.matricCard,
+        program: student.user_program,
       };
 
       return responseStudent; // Return the student object

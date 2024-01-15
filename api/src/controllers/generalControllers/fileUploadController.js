@@ -317,6 +317,7 @@ async function getAllLecturerStudentFiles(req, res) {
                 ...file,
                 sType: collectionName,
                 studentName: student.username,
+                MatricNumber: student.matricCard,
                 studentType: studentType,
               }));
               allFiles.push(...filesWithMetadata);

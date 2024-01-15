@@ -8,11 +8,12 @@ class evaluationsModel {
     studentId,
     evaluationObjects = {},
     remarksForCord,
-    finalMark = 0,
+    finalMark = {},
     typeOfEvaluator,
     createdAt,
     lecturerName,
     studentName,
+    criteriaProgram,
   }) {
     this.evaluationId = evaluationId || this.generateRandomId();
     this.evaluatorId = evaluatorId;
@@ -20,6 +21,7 @@ class evaluationsModel {
     this.evaluationObjects = evaluationObjects;
     this.finalMark = finalMark;
     this.remarksForCord = remarksForCord;
+    this.criteriaProgram = criteriaProgram;
     const allowedTypes = ["Supervisor", "Examiner", "Co-Supervisor"];
     if (!allowedTypes.includes(typeOfEvaluator)) {
       throw new Error(
@@ -49,6 +51,7 @@ class evaluationsModel {
         createdAt: this.createdAt,
         lecturerName: this.lecturerName,
         studentName: this.studentName,
+        criteriaProgram: this.criteriaProgram,
       });
     } catch (error) {
       throw error;
@@ -71,12 +74,9 @@ class evaluationsModel {
   }
 
   static async getEvaluationsById(id) {
-    const EvaluationsCollection = firestore().collection("Evaluations");
-    const querySnapshot = await EvaluationsCollection.where(
-      "studentId",
-      "==",
-      id
-    ).get();
+    const querySnapshot = await evaluationsCollection
+      .where("studentId", "==", id)
+      .get();
 
     const evaluations = [];
 
@@ -101,6 +101,25 @@ class evaluationsModel {
         evaluations.push(data);
       });
     }
+
+    return evaluations;
+  }
+
+  static async getLecturerEvaluationsById(id) {
+    const querySnapshot = await evaluationsCollection
+      .where("evaluatorId", "==", id)
+      .get();
+
+    const evaluations = [];
+
+    if (querySnapshot.empty) {
+      return evaluations;
+    }
+
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      evaluations.push(data);
+    });
 
     return evaluations;
   }

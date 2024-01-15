@@ -1,24 +1,12 @@
 <template>
   <div>
-    <div class="pt-10">
-      <h1 class="title text-lg font-medium">Student Evaluations</h1>
-      <p class="titleDes text-sm font-light">
-        The evaluations made by the lecturers
-      </p>
-    </div>
-    <div class="w-4/5 pt-10 h-full">
-      <v-card :rounded="0" :elevation="0">
-        <v-text-field
-          v-model="search"
-          label="Search"
-          prepend-inner-icon="mdi-magnify"
-          single-line
-          :rounded="0"
-          variant="outlined"
-          hide-details
-        ></v-text-field>
-      </v-card>
-      <v-data-table :headers="headers" :items="evaluationData" :search="search">
+    <div class="pt-5 w-4/5">
+      <v-divider class="mb-5"></v-divider>
+
+      <h1 class="title text-lg font-medium">Previous Evaluations</h1>
+      <p class="titleDes mb-5 text-sm font-light">View your evaluations</p>
+
+      <v-data-table class="border" :headers="headers" :items="evaluationData">
         <template v-slot:item.evaluationObjects="{ item }">
           <v-btn @click="openDialog(item)" size="small" color="primary">
             Details
@@ -54,15 +42,11 @@
                 </v-table>
                 <div class="mt-5">
                   <h1 class="title mb-2">Notes for Coordinator</h1>
-                  <v-sheet
-                    class="p-4 rounded-t-lg h-32 max-h-32 overflow-y-scroll no-scrollbar"
-                    elevation="4"
-                    color="amber-lighten-4"
-                  >
+                  <v-text-field readonly>
                     <h1>{{ item.remarksForCord }}</h1>
-                  </v-sheet>
+                  </v-text-field>
                 </div>
-                <h1 class="title mt-2">
+                <h1 class="title">
                   Final Mark
                   <v-chip class="ma-2" label color="teal" variant="elevated">
                     {{ item.finalMark.totalMarks }}
@@ -72,16 +56,7 @@
                     {{ item.finalMark.totalOutOf }}
                   </v-chip>
                 </h1>
-
-                <div v-if="item.selectedCriteriaData">
-                  <small class="title mt-5">
-                    {{ item.selectedCriteriaData.criteriaName }} ({{
-                      item.selectedCriteriaData.criteriaProgram
-                    }}) - {{ item.selectedCriteriaData.criteriaTotalMark }}
-                  </small>
-                </div>
               </v-card-text>
-
               <v-card-actions>
                 <v-spacer></v-spacer>
                 <v-btn
@@ -91,10 +66,8 @@
                   text="Cancel"
                   @click="closeDialog(item)"
                 ></v-btn>
-              </v-card-actions>
-            </v-card>
-          </v-dialog>
-        </template>
+              </v-card-actions> </v-card></v-dialog
+        ></template>
         <template v-slot:item.finalMark="{ item }">
           {{ item.finalMark.totalMarks }}
           /
@@ -102,37 +75,57 @@
         </template>
       </v-data-table>
     </div>
-    <AdminCriteria :criteriaData="criteriasData" />
+    <v-snackbar
+      :timeout="2000"
+      color="indigo"
+      variant="elevated"
+      v-model="snackbar"
+    >
+      {{ responseMessage }}
+
+      <template v-slot:actions>
+        <v-btn color="white" variant="transparent" @click="snackbar = false">
+          X
+        </v-btn>
+      </template>
+    </v-snackbar>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from "vue";
 import axios from "axios";
-import AdminCriteria from "./adminCriteria.vue";
 
-const search = ref("");
+// Constants
+const evaluationData = ref([]);
 const headers = ref([
-  { key: "evaluationId", sortable: false, title: "ID" },
-  { key: "lecturerName", sortable: false, title: "Lecturer" },
-  { key: "typeOfEvaluator", sortable: false, title: "Type of Evaluator" },
+  { key: "evaluationId", sortable: false, title: "ID." },
   { key: "studentName", sortable: false, title: "Student" },
-  { key: "createdAt", sortable: true, title: "Date" },
+  { key: "typeOfEvaluator", sortable: false, title: "Type" },
+  { key: "criteriaProgram", sortable: false, title: "Program" },
+  { key: "createdAt", sortable: false, title: "Created At" },
   { key: "finalMark", sortable: false, title: "Final Mark" },
   { key: "evaluationObjects", sortable: true, title: "Action" },
 ]);
 
-const evaluationData = ref([]);
-const criteriasData = ref([]);
+// Request Body
+
+// Feedback
+
+// Functions
 
 onMounted(async () => {
   const token = localStorage.getItem("access_token");
   try {
-    const response = await axios.get("http://localhost:8000/evaluations", {
-      headers: {
-        Authorization: token,
-      },
-    });
+    const response = await axios.get(
+      "http://localhost:8000/myEvaluations",
+
+      {
+        headers: {
+          Authorization: token,
+        },
+      }
+    );
     evaluationData.value = response.data.map((evaluation) => {
       return {
         ...evaluation,
@@ -140,69 +133,43 @@ onMounted(async () => {
       };
     });
   } catch (error) {
-    console.error("Error fetching proposal files:", error);
-    // Handle error
-  }
-  // Fetch criteria data
-  try {
-    const response = await axios.get("http://localhost:8000/api/criterias");
-    if (response.status === 200) {
-      // Handle success
-      criteriasData.value = response.data;
-    } else {
-      // Handle other status codes or errors
-      console.error("Error fetching evaluation criteria:", response.data);
-      // Optionally, display an error message
-    }
-  } catch (error) {
-    console.error("Error fetching evaluation criteria:", error);
-    // Handle error, display an error message, or redirect if needed
+    console.log(error);
   }
 });
+
+const openDialog = (item) => {
+  item.dialog = true;
+};
+
+const closeDialog = (item) => {
+  item.dialog = false;
+};
 
 const formatDate = (timestamp) => {
   const date = new Date(timestamp._seconds * 1000); // Convert seconds to milliseconds
   return date.toLocaleString("en-US", {
-    day: "numeric",
-    month: "numeric",
     year: "numeric",
+    month: "long",
+    day: "numeric",
     hour: "numeric",
     minute: "numeric",
   });
-};
-
-// Function to open the dialog and set selectedItem
-const openDialog = (item) => {
-  item.dialog = true;
-
-  // Get the criteriaProgram from the selected evaluation item
-  const criteriaProgram = item.criteriaProgram;
-
-  // Filter criteriasData based on criteriaProgram
-  const matchingCriterias = criteriasData.value.filter(
-    (criteria) => criteria.criteriaProgram === criteriaProgram
-  );
-
-  // Update the selectedCriteriaData with the matching criterias
-  item.selectedCriteriaData = matchingCriterias[0];
-};
-
-// Function to close the dialog and reset selectedItem
-const closeDialog = (item) => {
-  item.dialog = false;
 };
 </script>
 
 <style lang="scss" scoped>
 .title {
   font-family: "DM Sans", sans-serif;
+  font-weight: 400;
+  font-size: 1.125rem /* 18px */;
+  line-height: 1.75rem /* 28px */;
 }
 .titleDes {
   font-family: "Work Sans", sans-serif;
   font-size: 1rem /* 18px */;
   line-height: 1.75rem /* 28px */;
 }
-.commentContent {
-  font-family: "Source Sans Pro", sans-serif;
+.formText {
+  font-family: "Work Sans", sans-serif;
 }
 </style>

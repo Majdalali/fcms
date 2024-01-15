@@ -4,19 +4,53 @@
       <h1 class="title text-lg font-medium">Evaluation Form</h1>
     </div>
     <div class="w-4/5 my-5">
+      <v-alert
+        :title="criteriaErrorMessages"
+        type="error"
+        class="py-2 mb-5"
+        v-show="criteriaErrorMessages !== ''"
+      ></v-alert>
+      <v-select
+        v-model="selectedStudent"
+        :rules="studentRules"
+        :items="students"
+        :item-props="itemProps"
+        item-title="name"
+        item-value="id"
+        label="Select Student"
+        @update:model-value="assignCriteria()"
+      >
+      </v-select>
       <v-form ref="evaluationForm" v-model="valid">
-        <v-autocomplete
-          v-model="selectedStudent"
-          clearable
-          :rules="studentRules"
-          :items="students"
-          :item-props="itemProps"
-          item-title="name"
-          item-value="id"
-          label="Select Student"
-        >
-        </v-autocomplete>
         <v-divider></v-divider>
+        <div class="mt-5 mb-2 flex flex-row text-center justify-between">
+          <v-card
+            class="w-[60%] ml-2 rounded-lg flex items-center p-4"
+            title="Criteria"
+            v-if="selectedStudent && criteriaErrorMessages === ''"
+          >
+            <template v-slot:text>
+              <span class="title"
+                ><strong
+                  >{{ selectedCriteriaName }} ({{
+                    selectedStudentProgram
+                  }})</strong
+                ></span
+              >
+            </template>
+          </v-card>
+          <v-card
+            class="w-[30%] rounded-lg flex flex-row items-center"
+            title="Total Mark"
+            v-if="selectedStudent && criteriaErrorMessages === ''"
+            ><template v-slot:text
+              ><span class="title"
+                ><strong>{{ selectedCriteriaTotalMark }}</strong></span
+              ></template
+            >
+          </v-card>
+        </div>
+
         <div
           class="pt-2"
           v-for="(evaluationCriteria, index) in evaluationCriterias"
@@ -24,36 +58,29 @@
         >
           <small class="titleDes">Criteria {{ index + 1 }}</small>
           <v-row class="mt-1">
-            <v-col cols="12" md="7">
+            <v-col cols="12" md="6">
               <v-text-field
                 v-model="evaluationCriteria.name"
-                :rules="nameRules"
+                readonly
+                :disabled="evaluationCriteria.name == ''"
                 label="Evaluation Criteria"
-                hint="e.g. Project Managment Progress 1, Project Performance, etc."
               ></v-text-field>
             </v-col>
-            <v-col cols="12" md="4">
+            <v-col cols="12" md="3">
               <v-text-field
-                :rules="gradeRules"
+                :rules="getGradeRules(evaluationCriteria)"
                 v-model="evaluationCriteria.grade"
                 label="Grade"
-              ></v-text-field
-            ></v-col>
-            <v-col cols="12" md="1" class="mt-1">
-              <v-btn
-                size="large"
-                color="success"
-                v-if="index === 0"
-                @click="addEntry(evaluationCriterias, { name: '', grade: '' })"
-                ><v-icon icon="mdi-plus-circle"></v-icon
-              ></v-btn>
-              <v-btn
-                size="large"
-                v-else
-                color="error"
-                @click="removeEntry(evaluationCriterias, index)"
-                ><v-icon icon="mdi-delete"></v-icon
-              ></v-btn>
+                :disabled="evaluationCriteria.name == ''"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" md="3">
+              <v-text-field
+                v-model="evaluationCriteria.outOf"
+                :readonly="!dark"
+                :disabled="dark"
+                label="Out of"
+              ></v-text-field>
             </v-col>
           </v-row>
         </div>
@@ -83,8 +110,9 @@
           >Submit Evaluation</v-btn
         >
       </v-form>
+      <h1 class="mt-2">{{ selectedStudent }}</h1>
     </div>
-    <h1>{{ selectedStudent }}</h1>
+    <LecturerEvaluations />
     <v-snackbar
       :timeout="2000"
       color="indigo"
@@ -106,29 +134,51 @@
 import { ref, onMounted } from "vue";
 import axios from "axios";
 import { useDark } from "@vueuse/core";
+import LecturerEvaluations from "./lecturerEvaluations.vue";
 
 // Constants
 const students = ref([]);
 const selectedStudent = ref(null);
 const snackbar = ref(false);
 const responseMessage = ref("");
+const dark = useDark();
 
 const valid = ref(false);
 const evaluationForm = ref(null);
-const evaluationCriterias = ref([{ name: "", grade: "" }]); // criteria and it's grade
+const evaluationCriterias = ref([{ name: "", grade: "", from: "" }]); // criteria and it's grade
 const remarksForCord = ref("");
 const typeOfEvaluator = ref("");
+const criteriasData = ref([]);
+const criteriaErrorMessages = ref("");
+const selectedStudentProgram = ref("");
+const selectedCriteriaName = ref("");
+const selectedCriteriaTotalMark = ref(0);
 
-const nameRules = [
-  (value) =>
-    (value && value.trim().length >= 2 && /^[a-zA-Z0-9\s]*$/.test(value)) ||
-    "Criteria must be at least 2 characters, alphanumeric and space only.",
-];
+const getGradeRules = (evaluationCriteria) => [
+  (value) => {
+    const trimmedValue = value.trim();
 
-const gradeRules = [
-  (value) =>
-    (value.trim() !== "" && !isNaN(value.trim()) && value === value.trim()) ||
-    "Grade must be a valid number without leading or trailing spaces.",
+    // Check if the value is empty
+    if (trimmedValue === "") {
+      return "Grade cannot be empty.";
+    }
+
+    // Check if the value is a valid number
+    const isNumeric = !isNaN(trimmedValue) && trimmedValue === value;
+
+    if (!isNumeric) {
+      return "Grade must be a valid number without leading or trailing spaces.";
+    }
+
+    // Check if the entered grade is not higher than the specified "outOf" value
+    const isValidGrade =
+      parseFloat(trimmedValue) <= parseFloat(evaluationCriteria.outOf);
+
+    return (
+      isValidGrade ||
+      `Grade must not be higher than the specified value (${evaluationCriteria.outOf}).`
+    );
+  },
 ];
 
 // Rules for other fields
@@ -143,25 +193,10 @@ const typeOfEvaluatorRules = [
 ];
 // Functions
 
-// Function to add and remove an entry to the respective array
-const addEntry = (list) => {
-  list.push({ name: "", grade: "" });
-};
-
-const removeEntry = (list, index) => {
-  list.splice(index, 1);
-};
-
-const formatName = (input) => {
-  const words = input.split(" ");
-  const formattedName = words
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join("");
-  return formattedName;
-};
 // Function to reset form fields
 const resetForm = () => {
   evaluationForm.value.reset();
+  evaluationCriterias.value = [{ name: "", grade: "", outOf: "" }];
 };
 
 // Function to handle the submission of evaluation
@@ -175,12 +210,15 @@ const submitEvaluation = async () => {
       evaluationObjects: {}, // Object to hold evaluation criteria and grades
       remarksForCord: remarksForCord.value,
       typeOfEvaluator: typeOfEvaluator.value,
+      criteriaProgram: selectedStudentProgram.value,
     };
 
     // Fill in evaluationObjects with data from evaluationCriterias
     evaluationCriterias.value.forEach((criteria) => {
-      const formattedName = formatName(criteria.name);
-      evaluationPayload.evaluationObjects[formattedName] = criteria.grade;
+      evaluationPayload.evaluationObjects[criteria.name] = {
+        mark: criteria.grade,
+        outOf: criteria.outOf,
+      };
     });
 
     // Make the POST request to submit the evaluation
@@ -206,7 +244,6 @@ const submitEvaluation = async () => {
     }
   } catch (error) {
     console.error("Internal error submitting evaluation:", error);
-    // Handle internal errors, display an error message, or redirect if needed
   }
 };
 
@@ -223,6 +260,7 @@ onMounted(async () => {
     const studentsFromFirstEndpoint = response1.data.map((student) => ({
       name: student.username,
       id: student.user_id,
+      program: student.program,
       isCoSupervised: false,
     }));
 
@@ -235,6 +273,7 @@ onMounted(async () => {
     const studentsFromSecondEndpoint = response2.data.map((student) => ({
       name: student.username,
       id: student.user_id,
+      program: student.program,
       isCoSupervised: true,
     }));
 
@@ -247,6 +286,7 @@ onMounted(async () => {
     const studentsFromThirdEndpoint = response3.data.map((student) => ({
       name: student.username,
       id: student.user_id,
+      program: student.program,
       isCoSupervised: false,
       isExaminee: true,
     }));
@@ -263,16 +303,68 @@ onMounted(async () => {
     console.error("Error fetching user info:", error);
     // Handle error, display an error message, or redirect if needed
   }
+
+  // Fetch criteria data
+  try {
+    const response = await axios.get("http://localhost:8000/api/criterias");
+    if (response.status === 200) {
+      // Handle success
+      criteriasData.value = response.data;
+    } else {
+      // Handle other status codes or errors
+      console.error("Error fetching evaluation criteria:", response.data);
+      // Optionally, display an error message
+    }
+  } catch (error) {
+    console.error("Error fetching evaluation criteria:", error);
+    // Handle error, display an error message, or redirect if needed
+  }
 });
+
+const assignCriteria = () => {
+  const studentProgram = students.value.find(
+    (student) => student.id === selectedStudent.value
+  )?.program;
+
+  if (!studentProgram) {
+    return;
+  }
+
+  // Find the criteria with matching program
+  const criteriaForProgram = criteriasData.value.find(
+    (criteria) => criteria.criteriaProgram === studentProgram
+  );
+
+  // Map criteriasObjects to evaluationCriterias
+  if (criteriaForProgram) {
+    evaluationCriterias.value = Object.keys(
+      criteriaForProgram.criteriasObjects
+    ).map((key) => ({
+      name: key,
+      grade: "", // Set initial grade to empty
+      outOf: criteriaForProgram.criteriasObjects[key], // Use the value from criteriasObjects as "from"
+    }));
+    selectedStudentProgram.value = studentProgram;
+    selectedCriteriaName.value = criteriaForProgram?.criteriaName || "";
+    selectedCriteriaTotalMark.value =
+      criteriaForProgram?.criteriaTotalMark || 0;
+    criteriaErrorMessages.value = "";
+  } else {
+    // Handle the case where no matching criteria is found
+    evaluationCriterias.value = [{ name: "", grade: "", from: "" }];
+    criteriaErrorMessages.value = `No criteria found for program: ${studentProgram}. Please contact the coordinator for assistance.`;
+  }
+  evaluationForm.value.reset();
+};
 
 // Add a subtitle for students who are co-supervised or examinees
 const itemProps = (item) => ({
   title: item.name,
   subtitle: item.isCoSupervised
-    ? "Co-supervised"
+    ? `Co-supervised - ${item.program}`
     : "" || item.isExaminee
-    ? "Examinee"
-    : "",
+    ? `Examinee - ${item.program}`
+    : `Supervised - ${item.program}`,
 });
 </script>
 

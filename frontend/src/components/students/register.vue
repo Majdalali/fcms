@@ -47,10 +47,13 @@
             <v-col cols="12" md="4">
               <v-select
                 v-model="user_program"
-                :items="programOptions"
                 label="Program"
                 required
+                :items="currnetPrograms.programTypes"
+                item-title="name"
+                item-value="abbreviation"
               ></v-select>
+              <h1>Selected Program abbre: {{ user_program }}</h1>
             </v-col>
             <v-col cols="12" md="4">
               <v-btn
@@ -73,7 +76,7 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
 import { useDark } from "@vueuse/core";
@@ -86,12 +89,7 @@ const email = ref("");
 const password = ref("");
 const matricCard = ref("");
 const user_program = ref("");
-const programOptions = [
-  "MECC",
-  "MCSD",
-  "MCEE",
-  // Add other program options here if needed
-];
+
 const emailRules = [
   (value) => {
     if (value) return true;
@@ -144,6 +142,21 @@ const matricCardRules = [
     }
   },
 ];
+
+const currnetPrograms = ref({});
+
+onMounted(async () => {
+  try {
+    const response = await axios.get("http://localhost:8000/api/programs");
+    if (response.status === 200) {
+      currnetPrograms.value = response.data.programs;
+    } else {
+      console.log(response.data.message);
+    }
+  } catch (error) {
+    console.error("Error fetching programs:", error);
+  }
+});
 
 const register = async () => {
   try {
