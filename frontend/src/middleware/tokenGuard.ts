@@ -3,15 +3,15 @@ import axios, { AxiosResponse } from 'axios';
 const clientTokenMiddleware = (): Promise<any> => {
   return new Promise((resolve, reject) => {
     const token = localStorage.getItem('access_token');
-
+    
     if (!token) {
       // If token is not present, reject the Promise
       reject(new Error('Token is missing'));
       return;
     }
-
+    const apiUrl = import.meta.env.VITE_API_URL;
     // Validate the token by sending a POST request to the server's validateToken endpoint
-    axios.post('http://localhost:8000/validateToken', { token })
+    axios.post(`${apiUrl}/validateToken`, { token })
       .then((response: AxiosResponse<{ decoded: any }>) => {
         const { decoded } = response.data;
         if (decoded) {

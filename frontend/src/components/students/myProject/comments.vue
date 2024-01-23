@@ -54,14 +54,13 @@ import { useDark } from "@vueuse/core";
 const isDark = useDark();
 const comments = ref(null);
 const errorMessage = ref("");
+const apiUrl = import.meta.env.VITE_API_URL;
 
 onMounted(async () => {
   try {
     const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
     const studentId = storedUser.user_id;
-    const response = await axios.get(
-      `http://localhost:8000/mycomments/${studentId}`
-    );
+    const response = await axios.get(`${apiUrl}/mycomments/${studentId}`);
 
     comments.value = response.data;
   } catch (error) {

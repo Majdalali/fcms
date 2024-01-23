@@ -101,13 +101,15 @@ const userInfo = ref({
   name: "Not Selected Yet",
   email: "Not Selected Yet",
 });
+const apiUrl = import.meta.env.VITE_API_URL;
+
 // Functions
 onMounted(async () => {
   try {
     const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
     const userId = storedUser.user_id;
     const response = await axios.get(
-      `http://localhost:8000/getSupervisorDetails/${userId}`
+      `${apiUrl}/getSupervisorDetails/${userId}`
     ); // Replace with your API endpoint
     userInfo.value = response.data;
   } catch (error) {
@@ -120,7 +122,7 @@ const assignSupervisor = async () => {
   try {
     const token = localStorage.getItem("access_token");
     const response = await axios.post(
-      "http://localhost:8000/assignSupervisor",
+      `${apiUrl}/assignSupervisor`,
       {
         email: email.value,
       },

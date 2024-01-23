@@ -48,14 +48,14 @@ const headers = ref([
 ]);
 const search = ref("");
 const students = ref([]);
-
+const apiUrl = import.meta.env.VITE_API_URL;
 // Methods
 onMounted(async () => {
   const token = localStorage.getItem("access_token");
 
   try {
     const response = await axios.get(
-      `http://localhost:8000/api/students/${props.program}`,
+      `${apiUrl}/api/students/${props.program}`,
       {
         headers: {
           Authorization: token,

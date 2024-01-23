@@ -1,33 +1,32 @@
 <template>
-  <div class="mt-10">
+  <div>
     <div class="w-1/2">
       <h1 class="title text-lg font-medium">Evaluation Form</h1>
     </div>
-    <div class="w-4/5 my-5">
+    <div v-if="!isInfoLoading" class="my-5">
       <v-alert
         :title="criteriaErrorMessages"
         type="error"
         class="py-2 mb-5"
         v-show="criteriaErrorMessages !== ''"
       ></v-alert>
-      <v-select
-        v-model="selectedStudent"
-        :rules="studentRules"
-        :items="students"
-        :item-props="itemProps"
-        item-title="name"
-        item-value="id"
-        label="Select Student"
-        @update:model-value="assignCriteria()"
-      >
-      </v-select>
+      <div class="my-5 w-2/5">
+        <!--! student name and program from props -->
+        <v-chip size="large" color="primary" label
+          ><v-icon start icon="mdi-account-circle-outline"></v-icon>
+          {{ props.studentInfo.name }}</v-chip
+        >
+        <v-chip size="large" color="cyan" label class="ml-2">
+          <v-icon start icon="mdi-label"></v-icon>
+          {{ props.studentInfo.MatricNumber }}</v-chip
+        >
+      </div>
       <v-form ref="evaluationForm" v-model="valid">
-        <v-divider></v-divider>
         <div class="mt-5 mb-2 flex flex-row text-center justify-between">
           <v-card
             class="w-[60%] ml-2 rounded-lg flex items-center p-4"
             title="Criteria"
-            v-if="selectedStudent && criteriaErrorMessages === ''"
+            color="grey-darken-3"
           >
             <template v-slot:text>
               <span class="title"
@@ -40,9 +39,9 @@
             </template>
           </v-card>
           <v-card
+            color="grey-darken-3"
             class="w-[30%] rounded-lg flex flex-row items-center"
             title="Total Mark"
-            v-if="selectedStudent && criteriaErrorMessages === ''"
             ><template v-slot:text
               ><span class="title"
                 ><strong>{{ selectedCriteriaTotalMark }}</strong></span
@@ -112,7 +111,13 @@
       </v-form>
       <h1 class="mt-2">{{ selectedStudent }}</h1>
     </div>
-    <LecturerEvaluations :criteriaData="criteriasData" />
+    <div v-else class="flex w-full h-full justify-center items-center">
+      <v-progress-circular
+        :size="58"
+        :width="5"
+        indeterminate
+      ></v-progress-circular>
+    </div>
     <v-snackbar
       :timeout="2000"
       color="indigo"
@@ -134,11 +139,11 @@
 import { ref, onMounted } from "vue";
 import axios from "axios";
 import { useDark } from "@vueuse/core";
-import LecturerEvaluations from "./lecturerEvaluations.vue";
 
 // Constants
-const students = ref([]);
-const selectedStudent = ref(null);
+const props = defineProps({
+  studentInfo: Object,
+});
 const snackbar = ref(false);
 const responseMessage = ref("");
 const dark = useDark();
@@ -153,6 +158,7 @@ const criteriaErrorMessages = ref("");
 const selectedStudentProgram = ref("");
 const selectedCriteriaName = ref("");
 const selectedCriteriaTotalMark = ref(0);
+const isInfoLoading = ref(false);
 
 const getGradeRules = (evaluationCriteria) => [
   (value) => {
@@ -182,7 +188,6 @@ const getGradeRules = (evaluationCriteria) => [
 ];
 
 // Rules for other fields
-const studentRules = [(value) => !!value || "Please select a student."];
 
 const remarksForCordRules = [
   (value) => !!value || "Remarks for coordinator cannot be empty.",
@@ -199,7 +204,6 @@ const apiUrl = import.meta.env.VITE_API_URL;
 // Function to reset form fields
 const resetForm = () => {
   evaluationForm.value.reset();
-  evaluationCriterias.value = [{ name: "", grade: "", outOf: "" }];
 };
 
 // Function to handle the submission of evaluation
@@ -209,7 +213,7 @@ const submitEvaluation = async () => {
 
     // Prepare the payload for the evaluation submission
     const evaluationPayload = {
-      studentId: selectedStudent.value, // Assuming selectedStudent holds the student ID
+      studentId: props.studentInfo.id, // Assuming selectedStudent holds the student ID
       evaluationObjects: {}, // Object to hold evaluation criteria and grades
       remarksForCord: remarksForCord.value,
       typeOfEvaluator: typeOfEvaluator.value,
@@ -247,63 +251,8 @@ const submitEvaluation = async () => {
 };
 
 onMounted(async () => {
-  const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
-  const userId = storedUser.user_id;
-  try {
-    // Fetching data from the first endpoint
-    const response1 = await axios.get(
-      `${apiUrl}/lecturer/mystudents/${userId}`
-    );
-
-    // Mapping username and user_id from the first response into students array
-    const studentsFromFirstEndpoint = response1.data.map((student) => ({
-      name: student.username,
-      id: student.user_id,
-      program: student.program,
-      isCoSupervised: false,
-    }));
-
-    // Fetching data from the second endpoint
-    const response2 = await axios.get(
-      `${apiUrl}/lecturer/myCoSupervisedStudents/${userId}`
-    );
-
-    // Mapping username and user_id from the second response into students array
-    const studentsFromSecondEndpoint = response2.data.map((student) => ({
-      name: student.username,
-      id: student.user_id,
-      program: student.program,
-      isCoSupervised: true,
-    }));
-
-    // Fetching data from the third endpoint
-    const response3 = await axios.get(
-      `${apiUrl}/lecturer/myExaminees/${userId}`
-    );
-
-    // Mapping username and user_id from the third response into students array
-    const studentsFromThirdEndpoint = response3.data.map((student) => ({
-      name: student.username,
-      id: student.user_id,
-      program: student.program,
-      isCoSupervised: false,
-      isExaminee: true,
-    }));
-
-    // Concatenating the arrays in the desired order
-    const studentsConcat = studentsFromFirstEndpoint.concat(
-      studentsFromSecondEndpoint,
-      studentsFromThirdEndpoint
-    );
-
-    // Set the merged array to students.value
-    students.value = studentsConcat;
-  } catch (error) {
-    console.error("Error fetching user info:", error);
-    // Handle error, display an error message, or redirect if needed
-  }
-
   // Fetch criteria data
+  isInfoLoading.value = true;
   try {
     const response = await axios.get(`${apiUrl}/api/criterias`);
     if (response.status === 200) {
@@ -318,52 +267,40 @@ onMounted(async () => {
     console.error("Error fetching evaluation criteria:", error);
     // Handle error, display an error message, or redirect if needed
   }
-});
+  try {
+    const studentProgram = props.studentInfo.program;
 
-const assignCriteria = () => {
-  const studentProgram = students.value.find(
-    (student) => student.id === selectedStudent.value
-  )?.program;
+    if (!studentProgram) {
+      return;
+    }
 
-  if (!studentProgram) {
-    return;
+    // Find the criteria with matching program
+    const criteriaForProgram = criteriasData.value.find(
+      (criteria) => criteria.criteriaProgram === studentProgram
+    );
+
+    // Map criteriasObjects to evaluationCriterias
+    if (criteriaForProgram) {
+      evaluationCriterias.value = Object.keys(
+        criteriaForProgram.criteriasObjects
+      ).map((key) => ({
+        name: key,
+        grade: "", // Set initial grade to empty
+        outOf: criteriaForProgram.criteriasObjects[key], // Use the value from criteriasObjects as "from"
+      }));
+      selectedStudentProgram.value = studentProgram;
+      selectedCriteriaName.value = criteriaForProgram?.criteriaName || "";
+      selectedCriteriaTotalMark.value =
+        criteriaForProgram?.criteriaTotalMark || 0;
+      criteriaErrorMessages.value = "";
+      isInfoLoading.value = false;
+    } else {
+      // Handle the case where no matching criteria is found
+      criteriaErrorMessages.value = `No criteria found for program: ${studentProgram}. Please contact the coordinator for assistance.`;
+    }
+  } catch (error) {
+    console.log(error);
   }
-
-  // Find the criteria with matching program
-  const criteriaForProgram = criteriasData.value.find(
-    (criteria) => criteria.criteriaProgram === studentProgram
-  );
-
-  // Map criteriasObjects to evaluationCriterias
-  if (criteriaForProgram) {
-    evaluationCriterias.value = Object.keys(
-      criteriaForProgram.criteriasObjects
-    ).map((key) => ({
-      name: key,
-      grade: "", // Set initial grade to empty
-      outOf: criteriaForProgram.criteriasObjects[key], // Use the value from criteriasObjects as "from"
-    }));
-    selectedStudentProgram.value = studentProgram;
-    selectedCriteriaName.value = criteriaForProgram?.criteriaName || "";
-    selectedCriteriaTotalMark.value =
-      criteriaForProgram?.criteriaTotalMark || 0;
-    criteriaErrorMessages.value = "";
-  } else {
-    // Handle the case where no matching criteria is found
-    evaluationCriterias.value = [{ name: "", grade: "", from: "" }];
-    criteriaErrorMessages.value = `No criteria found for program: ${studentProgram}. Please contact the coordinator for assistance.`;
-  }
-  evaluationForm.value.reset();
-};
-
-// Add a subtitle for students who are co-supervised or examinees
-const itemProps = (item) => ({
-  title: item.name,
-  subtitle: item.isCoSupervised
-    ? `Co-supervised - ${item.program}`
-    : "" || item.isExaminee
-    ? `Examinee - ${item.program}`
-    : `Supervised - ${item.program}`,
 });
 </script>
 

@@ -1,6 +1,7 @@
 const Comment = require("../../models/generalModels/commentsModel");
 const jwt = require("jsonwebtoken");
 const Lecturer = require("../../models/usersModels/lecturerModel");
+const { createNotification } = require("./notificationsController");
 
 async function createComment(io, connectedUsers, req, res) {
   const token = req.headers.authorization;
@@ -17,11 +18,19 @@ async function createComment(io, connectedUsers, req, res) {
     });
 
     await newComment.save();
+
     const userId = studentId;
 
+    await createNotification({
+      fromUser: lecturerId,
+      message: "New comment from lecturer",
+      toUsers: [studentId],
+      creator: "Lecturer",
+      type: "Comment",
+    });
     const studentSocketId = connectedUsers[userId];
     if (studentSocketId) {
-      io.to(studentSocketId).emit("comment", {
+      io.to(studentSocketId).emit("notification", {
         message: "New comment from lecturer",
         // Additional data if needed
       });

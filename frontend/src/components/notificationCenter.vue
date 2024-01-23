@@ -68,11 +68,13 @@ import axios from "axios";
 // Constants
 const isDark = useDark();
 const notificationsInfo = ref([]);
+const apiUrl = import.meta.env.VITE_API_URL;
+
 // Functions
 onMounted(async () => {
   try {
     const token = localStorage.getItem("access_token");
-    const response = await axios.get(`http://localhost:8000/myNotifications`, {
+    const response = await axios.get(`${apiUrl}/myNotifications`, {
       headers: {
         Authorization: token,
       },

@@ -382,6 +382,8 @@ const phoneRules = [
 
 const otherFieldsRules = [(value) => !!value || "This field is required."];
 
+const apiUrl = import.meta.env.VITE_API_URL;
+
 // Functions
 
 // Function to add or remove an entry to the respective array
@@ -406,7 +408,7 @@ const subbmitNomination = async () => {
     const token = localStorage.getItem("access_token");
 
     const response = await axios.post(
-      `http://localhost:8000/lecturer/newnomination`,
+      `${apiUrl}/lecturer/newnomination`,
       {
         coSupervisors: coSupervisors.value.map((supervisor) => ({
           ...supervisor,

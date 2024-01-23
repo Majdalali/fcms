@@ -100,15 +100,59 @@
           /
           {{ item.finalMark.totalOutOf }}
         </template>
+        <template v-slot:item.download="{ item }">
+          <v-btn @click="downloadPdf(item)" size="small" color="indigo">
+            Download
+          </v-btn></template
+        >
       </v-data-table>
+      <div class="mt-4">
+        <h1 class="title mb-2">Download All Evaluations</h1>
+        <v-btn @click="downloadAllPdf(evaluationData)" color="indigo">
+          Download
+        </v-btn>
+        <div class="text-center mt-4">
+          <v-progress-linear
+            :height="10"
+            striped
+            stream
+            :buffer-value="progressCircular + progressCircular / 2"
+            :model-value="progressCircular"
+            v-if="progressCircular !== 0"
+            color="amber"
+          >
+          </v-progress-linear>
+        </div>
+      </div>
     </div>
-    <AdminCriteria :criteriaData="criteriasData" />
+    <AdminCriteria
+      :criteriaData="criteriasData"
+      :programsData="currnetPrograms"
+    />
+    <v-snackbar
+      :timeout="2000"
+      color="indigo"
+      variant="elevated"
+      v-model="snackbar"
+    >
+      {{ responseMessage }}
+
+      <template v-slot:actions>
+        <v-btn color="white" variant="transparent" @click="snackbar = false">
+          X
+        </v-btn>
+      </template>
+    </v-snackbar>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from "vue";
 import axios from "axios";
+import html2pdf from "html2pdf.js";
+import JSZip from "jszip";
+import { saveAs } from "file-saver";
+import utmLogo from "@/assets/images/utmLogo.png";
 import AdminCriteria from "./adminCriteria.vue";
 
 const search = ref("");
@@ -120,15 +164,176 @@ const headers = ref([
   { key: "createdAt", sortable: true, title: "Date" },
   { key: "finalMark", sortable: false, title: "Final Mark" },
   { key: "evaluationObjects", sortable: true, title: "Action" },
+  { key: "download", sortable: false, title: "Download" },
 ]);
 
 const evaluationData = ref([]);
 const criteriasData = ref([]);
+const progressCircular = ref(0);
+const snackbar = ref(false);
+const responseMessage = ref("");
+const currnetPrograms = ref({});
+const apiUrl = import.meta.env.VITE_API_URL;
 
+// Download PDF Method
+const downloadAllPdf = async (evaluationData) => {
+  const batchSize = 10;
+  const zip = new JSZip();
+  const pdfOptions = {
+    margin: 10,
+    filename: "evaluation.pdf",
+    image: { type: "jpeg", quality: 0.98 },
+    html2canvas: { scale: 2 },
+    jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+  };
+
+  const totalPDFs = evaluationData.length;
+  let downloadedPDFs = 0;
+
+  for (let i = 0; i < evaluationData.length; i += batchSize) {
+    const batch = evaluationData.slice(i, i + batchSize);
+
+    await Promise.all(
+      batch.map(async (item) => {
+        const pdfContent = generatePdfContent(item);
+        const blob = await html2pdf()
+          .from(pdfContent)
+          .set(pdfOptions)
+          .outputPdf("blob");
+        zip.file(`evaluation_${item.evaluationId}.pdf`, blob);
+
+        downloadedPDFs++;
+        progressCircular.value = (downloadedPDFs / totalPDFs) * 100;
+      })
+    );
+  }
+
+  zip.generateAsync({ type: "blob" }).then(function (content) {
+    saveAs(content, "all_evaluations.zip");
+    snackbar.value = true;
+    responseMessage.value = "Download completed";
+    progressCircular.value = 0; // Reset progress
+  });
+};
+
+// PDF
+
+const generatePdfContent = (item) => {
+  const logoUrl = utmLogo;
+  const lecturerDetails = {
+    name: item.lecturerName,
+    position: item.typeOfEvaluator,
+  };
+  const studentDetails = {
+    name: item.studentName,
+    program: item.criteriaProgram,
+  };
+  const remarksForCord = item.remarksForCord;
+  const finalMarkTotal = item.finalMark.totalMarks;
+  const finalMarkOutOf = item.finalMark.totalOutOf;
+  const evaluationDataForPdf = Object.entries(item.evaluationObjects).map(
+    ([key, evaluationObject]) => ({
+      criteria: key,
+      mark: evaluationObject.mark,
+      outOf: evaluationObject.outOf,
+    })
+  );
+  const matchingCriteria = criteriasData.value.find(
+    (criteria) => criteria.criteriaProgram === item.criteriaProgram
+  );
+
+  const criteriaNameDiv = matchingCriteria
+    ? `<div style="width:100%; text-align: center; margin-top:20px; font-size:16px;"><h1><strong>${matchingCriteria.criteriaName} (${matchingCriteria.criteriaProgram})</strong> </h1></div>`
+    : "";
+
+  return `
+    <div style="padding: 20px;">
+      <div style="width:100%; display:flex; flex-direction:row;  justify-content: space-between;">
+        <img src="${logoUrl}" alt="Logo" style="width: 300px; ">
+        <div style="text-align: center;">
+          <h1>FACULTY OF COMPUTING</h1>
+          <h1>UNIVERSITY TEKNOLOGI MALAYSIA</h1>
+        </div>
+      </div>
+      ${criteriaNameDiv}
+      <div style="margin-top:40px; width:80%; display:flex; flex-direction:row;  justify-content: space-between;">
+        <div>
+          <h1><strong>Lecturer Details</strong></h1>
+          <p>Name: ${lecturerDetails.name}</p>
+          <p>Position: ${lecturerDetails.position}</p>
+        </div>
+        <div>
+          <h1><strong>Student Details</strong></h1>
+          <p>Name: ${studentDetails.name}</p>
+          <p>Program: ${studentDetails.program}</p>
+        </div>
+      </div>
+      <h1 style="margin-top:40px;"><strong>Evaluation Details</strong></h1>
+      <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+        <thead>
+          <tr>
+            <th style="border: 1px solid #ddd; padding: 8px;">Criteria</th>
+            <th style="border: 1px solid #ddd; padding: 8px;">Mark</th>
+            <th style="border: 1px solid #ddd; padding: 8px;">Out Of</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${evaluationDataForPdf
+            .map(
+              (evaluationObject) => `
+                <tr>
+                  <td style="text-align: center; border: 1px solid #ddd; padding: 8px;">${evaluationObject.criteria}</td>
+                  <td style="text-align: center; border: 1px solid #ddd; padding: 8px;">${evaluationObject.mark}</td>
+                  <td style="text-align: center; border: 1px solid #ddd; padding: 8px;">${evaluationObject.outOf}</td>
+                </tr>
+              `
+            )
+            .join("")}
+        </tbody>
+      </table>
+      <h1 style="margin-top:40px;"><strong>Final Mark:</strong> ${finalMarkTotal} / ${finalMarkOutOf}</h1>
+      <h1 style="margin-top:40px;"><strong>Notes for Coordinator</strong></h1>
+      <p>${remarksForCord}</p>
+    </div>
+  `;
+};
+
+const downloadPdf = async (item) => {
+  const pdfContent = generatePdfContent(item);
+  const options = {
+    margin: 10,
+    filename: `evaluation_${item.evaluationId}.pdf`,
+    image: { type: "jpeg", quality: 0.98 },
+    html2canvas: { scale: 2 },
+    jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+  };
+
+  try {
+    const pdfBlob = await new Promise((resolve, reject) => {
+      html2pdf(pdfContent, options).outputPdf((blob) => resolve(blob), reject);
+    });
+
+    // Create a download link
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(pdfBlob);
+    link.download = `evaluation_${item.evaluationId}.pdf`;
+
+    // Trigger the download
+    link.click();
+
+    // Clean up
+    URL.revokeObjectURL(link.href);
+  } catch (error) {
+    console.error("Error downloading PDF:", error);
+  }
+  // Set snackbar and message when download is successful
+};
+
+// Functions
 onMounted(async () => {
   const token = localStorage.getItem("access_token");
   try {
-    const response = await axios.get("http://localhost:8000/evaluations", {
+    const response = await axios.get(`${apiUrl}/evaluations`, {
       headers: {
         Authorization: token,
       },
@@ -145,7 +350,7 @@ onMounted(async () => {
   }
   // Fetch criteria data
   try {
-    const response = await axios.get("http://localhost:8000/api/criterias");
+    const response = await axios.get(`${apiUrl}/api/criterias`);
     if (response.status === 200) {
       // Handle success
       criteriasData.value = response.data;
@@ -157,6 +362,16 @@ onMounted(async () => {
   } catch (error) {
     console.error("Error fetching evaluation criteria:", error);
     // Handle error, display an error message, or redirect if needed
+  }
+  try {
+    const response = await axios.get(`${apiUrl}/api/programs`);
+    if (response.status === 200) {
+      currnetPrograms.value = response.data.programs;
+    } else {
+      console.log(response.data.message);
+    }
+  } catch (error) {
+    console.error("Error fetching programs:", error);
   }
 });
 

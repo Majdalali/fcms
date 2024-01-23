@@ -246,7 +246,7 @@ const editProfile = async () => {
       requestData.password = password.value;
     }
     const response = await axios.post(
-      "http://localhost:8000/updateLecturerDetails",
+      `${apiUrl}/updateLecturerDetails`,
       requestData,
       {
         headers: {
@@ -280,9 +280,7 @@ onMounted(async () => {
   const userId = storedUser.user_id;
 
   try {
-    const response = await axios.get(
-      `http://localhost:8000/lecturer/${userId}`
-    );
+    const response = await axios.get(`${apiUrl}/lecturer/${userId}`);
     userInfo.value = { ...response.data };
     // Set the values of the form
     username.value = response.data.username;

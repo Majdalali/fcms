@@ -130,8 +130,8 @@ import { useDark } from "@vueuse/core";
 import SignInBg from "@/assets/images/signinBG.svg";
 import UTMLogo from "@/assets/images/utmLogo.png";
 import UTMLogoBlack from "@/assets/images/utmLogoBlack.png";
-
 // Constants
+const apiUrl = import.meta.env.VITE_API_URL;
 const router = useRouter();
 const isDark = useDark();
 const store = useStore();
@@ -178,7 +178,7 @@ const passwordRules = [
 const login = async () => {
   try {
     const response = await axios.post(
-      "http://localhost:8000/login",
+      `${apiUrl}/login`,
       {
         email: email.value,
         password: password.value,

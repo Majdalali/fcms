@@ -336,6 +336,7 @@ const isFormChanged = computed(() => {
   );
 });
 const responseMessage = ref("");
+const apiUrl = import.meta.env.VITE_API_URL;
 
 // Functions
 
@@ -352,15 +353,11 @@ const editProfile = async () => {
     if (password.value !== "" || passwordConfirmation.value !== "") {
       requestData.password = password.value;
     }
-    const response = await axios.post(
-      "http://localhost:8000/updateUser",
-      requestData,
-      {
-        headers: {
-          Authorization: token,
-        },
-      }
-    );
+    const response = await axios.post(`${apiUrl}/updateUser`, requestData, {
+      headers: {
+        Authorization: token,
+      },
+    });
     if (response.status === 200) {
       console.log("The student details has been updated!");
       responseMessage.value = "The student details has been updated!";
@@ -388,7 +385,7 @@ onMounted(async () => {
   const userExaminers = storedUser.examiners;
 
   try {
-    const response = await axios.get(`http://localhost:8000/user/${userId}`);
+    const response = await axios.get(`${apiUrl}/user/${userId}`);
     const userData = { ...response.data };
     userInfo.value = { ...response.data };
     await localStorage.setItem("user", JSON.stringify(userData));
@@ -406,7 +403,7 @@ onMounted(async () => {
     for (let i = 0; i < userExaminers.length; i++) {
       // Get examiner details from userExaminers array
       const response = await axios.get(
-        `http://localhost:8000/getExaminersDetails/${userExaminers[i]}`
+        `${apiUrl}/getExaminersDetails/${userExaminers[i]}`
       );
       // Push examiner details to examinersInfo array
       examinersInfo.value.push(response.data);

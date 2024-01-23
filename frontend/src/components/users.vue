@@ -28,9 +28,11 @@ import axios from "axios";
 import { useDark } from "@vueuse/core";
 const isDark = useDark();
 const userInfo = ref(null);
+const apiUrl = import.meta.env.VITE_API_URL;
+
 onMounted(async () => {
   try {
-    const response = await axios.get(`http://localhost:8000/users`); // Replace with your API endpoint
+    const response = await axios.get(`${apiUrl}:8000/users`); // Replace with your API endpoint
     userInfo.value = response.data;
   } catch (error) {
     console.error("Error fetching user info:", error);

@@ -64,6 +64,7 @@ class Notifications {
     try {
       const querySnapshot = await notificationsCollection
         .where("toUsers", "array-contains", userId)
+        .orderBy("createdAt", "desc")
         .get();
 
       const notifications = [];

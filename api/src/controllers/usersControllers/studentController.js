@@ -2,6 +2,10 @@ const bcrypt = require("bcryptjs");
 const Student = require("../../models/usersModels/studentModel");
 const Lecturer = require("../../models/usersModels/lecturerModel");
 const userHandler = require("../../Handlers/studentHandler");
+const {
+  createNotification,
+} = require("../generalControllers/notificationsController");
+
 const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
 dotenv.config();
@@ -71,6 +75,9 @@ async function loginUser(req, res) {
         user_id: user.user_id,
         user_type: user.user_type,
         user_program: user.user_program,
+        supervisor: user.supervisor,
+        examiners: user.examiners,
+        coSupervisors: user.coSupervisors,
       },
       secretKey,
       { expiresIn: "1 week" }
@@ -203,7 +210,7 @@ async function getUserByEmail(req, res) {
   }
 }
 
-async function assignSupervisor(req, res) {
+async function assignSupervisor(io, connectedUsers, req, res) {
   const { email } = req.body;
   const token = req.headers.authorization;
   const decoded = jwt.verify(token, process.env.SECRET_TOKEN);
@@ -212,14 +219,14 @@ async function assignSupervisor(req, res) {
   try {
     // Find the supervisor by email
     const supervisor = await Lecturer.getUserByEmail(email);
-
+    const supervisorId = supervisor.user_id;
     if (!supervisor || supervisor.user_type !== "lecturer") {
       return res.status(404).json({ error: "Supervisor not found" });
     }
 
     // Assign the supervisor to the student
     const student = await Student.getUserById(studentId);
-
+    const studentName = student.username;
     if (student.supervisor) {
       return res
         .status(400)
@@ -227,7 +234,7 @@ async function assignSupervisor(req, res) {
     }
 
     // Update student's supervisor field with the supervisor's ID
-    student.supervisor = supervisor.user_id;
+    student.supervisor = supervisorId;
 
     // Add the student to the supervisor's supervisedStudents array
     const lecturer = new Lecturer(supervisor);
@@ -242,6 +249,22 @@ async function assignSupervisor(req, res) {
       email: supervisorresponse.email,
     };
     // Return success response
+    await createNotification({
+      fromUser: studentId,
+      message: `${studentName} assigned you as a supervisor`,
+      toUsers: [supervisorId],
+      creator: "Student",
+      type: "New Role",
+    });
+
+    const supervisorSocket = connectedUsers[supervisorId];
+    if (supervisorSocket) {
+      io.to(supervisorSocket).emit("notification", {
+        message: `${studentName} assigned you as a supervisor`,
+        // Additional data if needed
+      });
+    }
+
     return res
       .status(200)
       .json({ message: "Supervisor assigned successfully", supervisorDetails });

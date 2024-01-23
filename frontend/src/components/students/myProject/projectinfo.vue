@@ -71,6 +71,7 @@
           variant="outlined"
           :rules="rules"
           label="Project Title"
+          hint="Enter your project title"
         ></v-text-field>
         <v-text-field
           required
@@ -78,7 +79,8 @@
           variant="outlined"
           :rules="rules"
           label="Project Area"
-          class="mt-2"
+          hint="e.g. web development, mobile development, etc."
+          class="mt-4"
         ></v-text-field>
         <v-text-field
           required
@@ -86,7 +88,8 @@
           variant="outlined"
           :rules="rules"
           label="Project Type"
-          class="mt-2"
+          hint="e.g. research, development, etc."
+          class="mt-4"
         ></v-text-field>
 
         <v-btn
@@ -138,6 +141,7 @@ const rules = [
 ];
 const alertText = ref("");
 const alertType = ref("warning");
+const apiUrl = import.meta.env.VITE_API_URL;
 
 // functions
 const getTitle = (key) => {
@@ -173,7 +177,7 @@ onMounted(async () => {
   try {
     const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
     const userId = storedUser.user_id;
-    const response = await axios.get(`http://localhost:8000/user/${userId}`); // Replace with your API endpoint
+    const response = await axios.get(`${apiUrl}/user/${userId}`); // Replace with your API endpoint
     userInfo.value = response.data;
     // Set default values for input fields
     projectTitle.value = userInfo.value?.projectInfo?.projectTitle || "";
@@ -201,7 +205,7 @@ const updateProjectInfo = async () => {
     };
 
     const response = await axios.post(
-      `http://localhost:8000/updateProjectInfo`,
+      `${apiUrl}/updateProjectInfo`,
       { projectInfo: updatedProjectInfo },
       {
         headers: {

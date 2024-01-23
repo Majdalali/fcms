@@ -1,6 +1,7 @@
 const FileSubmission = require("../../models/generalModels/fileSubmissionModel");
 const Lecturer = require("../../models/usersModels/lecturerModel");
 const Student = require("../../models/usersModels/studentModel");
+const { createNotification } = require("./notificationsController");
 
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
@@ -24,13 +25,23 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-async function uploadFile(req, res) {
+async function uploadFile(io, connectedUsers, req, res) {
   const token = req.headers.authorization;
   const { submissionType } = req.body; // Extract submissionType from req.body
 
   try {
     const decoded = jwt.verify(token, process.env.SECRET_TOKEN);
     const studentId = decoded.user_id;
+    const supervisorId = decoded.supervisor;
+    const coSupervisorsIds = decoded.coSupervisors;
+    const examinersIds = decoded.examiners;
+
+    // Concatenate all IDs into a single array
+    const studentLecturerIds = [
+      supervisorId,
+      ...coSupervisorsIds,
+      ...examinersIds,
+    ];
     const allowedSubmissionTypes = [
       "proposals",
       "progressOne",
@@ -82,6 +93,26 @@ async function uploadFile(req, res) {
 
     // Call the saveDataSubmission function from your model with submissionType and fileSubmissionData
     await FileSubmission.saveDataSubmission(submissionType, fileSubmissionData);
+
+    await createNotification({
+      fromUser: studentId,
+      message: "Student submitted a new file",
+      toUsers: studentLecturerIds,
+      creator: "Student",
+      type: "Submission",
+    });
+
+    const usersSockets = studentLecturerIds
+      .map((userId) => connectedUsers[userId])
+      .filter(Boolean);
+
+    if (usersSockets.length > 0) {
+      io.to(usersSockets).emit("notification", {
+        message: "Student submitted a new file",
+        // Additional data if needed
+        data: submissionType,
+      });
+    }
 
     return res
       .status(200)
@@ -319,6 +350,7 @@ async function getAllLecturerStudentFiles(req, res) {
                 studentName: student.username,
                 MatricNumber: student.matricCard,
                 studentType: studentType,
+                program: student.user_program,
               }));
               allFiles.push(...filesWithMetadata);
             }

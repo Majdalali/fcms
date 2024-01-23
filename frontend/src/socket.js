@@ -1,4 +1,5 @@
 import { io } from "socket.io-client";
+import store from "./store";
 
 const state = {
   socket: null,
@@ -16,18 +17,26 @@ const actions = {
       : null;
 
     if (userId) {
-      const socket = io("http://localhost:8000", { query: { userId } });
+      const apiUrlWS = import.meta.env.VITE_WSS;
+      const socketUrl = apiUrlWS.replace(/^https/, "wss");
+      const socket = io(socketUrl, {
+        query: { userId },
+      });
 
       socket.on("connect", () => {
         console.log("Socket connected");
         // Emit the userId to the server after connecting
         socket.emit("userId", userId);
       });
-      socket.on("comment", (data) => {
-        // Handle the received comment data here
+
+      socket.on("notification", (data) => {
         // For example, dispatch an action to store the comment in Vuex or perform other operations
-        console.log("Received comment:", data);
-        // dispatch("handleComment", data); // Example dispatch
+        console.log("Received notification:", data);
+        console.log("Message:", data.message);
+        store.dispatch("showSnackbar", {
+          message: data.message,
+          color: "info",
+        });
       });
       commit("SET_SOCKET", socket);
     } else {

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="pt-10">
+    <div class="pt-4">
       <v-divider class="w-4/5 mb-5"></v-divider>
 
       <h1 class="title text-lg font-medium">Criterias</h1>
@@ -18,13 +18,22 @@
             ></v-text-field>
           </v-col>
           <v-col cols="12" md="5">
-            <v-text-field
-              v-model="criteriaProgram"
+            <!-- <v-text-field
               :rules="nameRules"
               label="Criteria Program"
               hint="e.g. MECC, MCSD, etc."
-            ></v-text-field>
+            ></v-text-field> -->
+            <v-select
+              v-model="criteriaProgram"
+              label="Criteria Program"
+              required
+              :items="props.programsData.programTypes"
+              item-title="abbreviation"
+              item-value="abbreviation"
+              :item-props="itemProps"
+            ></v-select>
           </v-col>
+          <v-col cols="12"> </v-col>
         </v-row>
         <div
           class="pt-2"
@@ -149,6 +158,7 @@ import axios from "axios";
 // Constants
 const props = defineProps({
   criteriaData: Array,
+  programsData: Object,
 });
 const valid = ref(false);
 const criteriaForm = ref(null);
@@ -197,6 +207,7 @@ const resetForm = () => {
   criteriaForm.value.reset();
 };
 
+const apiUrl = import.meta.env.VITE_API_URL;
 const submitCriteria = async () => {
   const token = localStorage.getItem("access_token");
   try {
@@ -207,10 +218,10 @@ const submitCriteria = async () => {
     });
 
     const response = await axios.post(
-      "http://localhost:8000/api/newCriteria",
+      `${apiUrl}/api/newCriteria`,
       {
         criteriaName: criteriaName.value,
-        criteriaProgram: criteriaProgram.value.toUpperCase(),
+        criteriaProgram: criteriaProgram.value,
         criteriasObjects: criteriasObjectsPayload,
       },
       {
@@ -221,9 +232,9 @@ const submitCriteria = async () => {
     );
     if (response.status === 200) {
       // Handle success
+      props.criteriaData.push(response.data.criteria);
       responseMessage.value = response.data.message;
       snackbar.value = true;
-      console.log("Criteria created successfully");
       resetForm();
     }
   } catch (error) {
@@ -239,6 +250,11 @@ const openDialog = (item) => {
 const closeDialog = (item) => {
   item.dialog = false;
 };
+
+const itemProps = (item) => ({
+  title: item.abbreviation,
+  subtitle: item.name,
+});
 </script>
 
 <style lang="scss" scoped>

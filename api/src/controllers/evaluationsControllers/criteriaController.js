@@ -26,7 +26,7 @@ async function createCriteria(req, res) {
 
     return res.status(200).json({
       message: `Criteria created successfully`,
-      criteriaId: criteria.criteriaId,
+      criteria,
     });
   } catch (error) {
     if (error.message === "Criteria for this program already exists") {

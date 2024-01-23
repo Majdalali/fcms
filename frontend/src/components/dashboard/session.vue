@@ -107,11 +107,12 @@ import SessionCard from "./sessioncard.vue";
 // Constants
 const isDark = useDark();
 const sessionInfo = ref(null);
+const apiUrl = import.meta.env.VITE_API_URL;
 
 // Functions
 onMounted(async () => {
   try {
-    const response = await axios.get(`http://localhost:8000/currentSession`);
+    const response = await axios.get(`${apiUrl}/currentSession`);
     sessionInfo.value = response.data;
   } catch (error) {
     console.error("Error fetching user info:", error);

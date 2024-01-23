@@ -31,6 +31,14 @@
           <v-dialog v-model="item.dialog" width="1200">
             <v-card title="Nomination Details">
               <v-card-text class="mt-4">
+                <v-alert
+                  v-show="item.alertText !== ''"
+                  closable
+                  class="mb-2 py-2"
+                  variant="flat"
+                  :text="item.alertText"
+                  :type="item.alertType"
+                ></v-alert>
                 <v-expansion-panels color="grey-lighten-1">
                   <!--! STUDENT DETAILS -->
                   <v-expansion-panel title="Student Details">
@@ -190,12 +198,32 @@
                   </v-expansion-panel>
                 </v-expansion-panels>
 
-                <h1 class="mt-10">Examiners: {{ item.examinersIds }}</h1>
-                <h1>{{ item.student.userId }}</h1>
-                <small v-if="item.status === 'done'" class="text-green-500"
+                <small v-if="item.status === 'done'" class="mt-4 text-green-500"
                   >Examiners has beeen assigned to student
                   {{ item.student.name }}</small
                 >
+
+                <v-banner
+                  v-show="item.status === 'pending'"
+                  color="warning"
+                  icon="$warning"
+                  text="One or more examiners are unassigned to the student."
+                >
+                </v-banner>
+                <v-banner
+                  v-show="item.status === 'pending'"
+                  color="info"
+                  icon="$info"
+                  class="mb-4"
+                  text="You can still assign examiners to student even if one or more examiners has not been registered yet. However, unregistered examiners need to register first."
+                >
+                </v-banner>
+                <small class="text-red-500" v-show="!item.student.studentExists"
+                  ><strong
+                    >*Assigning examiners to student is not possible until
+                    student is registered.</strong
+                  >
+                </small>
               </v-card-text>
 
               <v-card-actions class="my-2">
@@ -212,10 +240,10 @@
                   color="deep-purple-darken-4"
                   text="Assign Examiners"
                   class="px-4"
-                  @click="
-                    AssignExaminers(item.student.userId, item.examinersIds)
+                  @click="AssignExaminers(item)"
+                  :disabled="
+                    item.status === 'done' || !item.student.studentExists
                   "
-                  :disabled="item.status === 'done'"
                 ></v-btn>
               </v-card-actions>
             </v-card>
@@ -284,13 +312,15 @@ const headersStudent = ref([
 
 const search = ref("");
 const nominations = ref([]);
-
+// const alertText = ref("");
+// const alertType = ref("");
+const apiUrl = import.meta.env.VITE_API_URL;
 // Methods
 onMounted(async () => {
   const token = localStorage.getItem("access_token");
 
   try {
-    const response = await axios.get("http://localhost:8000/api/nominations", {
+    const response = await axios.get(`${apiUrl}/api/nominations`, {
       headers: {
         Authorization: token,
       },
@@ -327,13 +357,13 @@ onMounted(async () => {
   }
 });
 
-const AssignExaminers = async (studentId, examinersIds) => {
+const AssignExaminers = async (item) => {
   try {
     const token = localStorage.getItem("access_token");
     const response = await axios.post(
-      `http://localhost:8000/api/assignExaminers/${studentId}`,
+      `${apiUrl}/api/assignExaminers/${item.student.userId}`,
       {
-        examinerId: examinersIds,
+        examinerId: item.examinersIds,
       },
       {
         headers: {
@@ -342,10 +372,20 @@ const AssignExaminers = async (studentId, examinersIds) => {
       }
     );
     if (response.status === 200) {
-      console.log(response.data.message);
+      item.alertType = "success";
+      item.alertText = response.data.message;
     }
   } catch (error) {
-    console.error("Error: ", error);
+    if (error.response && error.response.status === 400) {
+      // Handle specific error case (e.g., validation error)
+      item.alertText = error.response.data.error;
+      item.alertType = "error";
+    } else {
+      // Handle other errors
+      console.error("Error: ", error);
+      item.alertText = "An error occurred. Please try again later.";
+      item.alertType = "error";
+    }
   }
 };
 
@@ -364,6 +404,8 @@ const formatDate = (timestamp) => {
 // Function to open the dialog and set selectedItem
 const openDialog = (item) => {
   item.dialog = true;
+  item.alertText = ""; // Reset alertText when opening the dialog
+  item.alertType = ""; // Reset alertType when opening the dialog
 };
 
 // Function to close the dialog and reset selectedItem

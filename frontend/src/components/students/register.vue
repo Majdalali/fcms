@@ -144,10 +144,11 @@ const matricCardRules = [
 ];
 
 const currnetPrograms = ref({});
+const apiUrl = import.meta.env.VITE_API_URL;
 
 onMounted(async () => {
   try {
-    const response = await axios.get("http://localhost:8000/api/programs");
+    const response = await axios.get(`${apiUrl}/api/programs`);
     if (response.status === 200) {
       currnetPrograms.value = response.data.programs;
     } else {
@@ -160,7 +161,7 @@ onMounted(async () => {
 
 const register = async () => {
   try {
-    const response = await axios.post("http://localhost:8000/register", {
+    const response = await axios.post(`${apiUrl}/register`, {
       username: username.value,
       email: email.value,
       password: password.value,

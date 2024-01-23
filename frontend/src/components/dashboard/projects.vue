@@ -19,7 +19,7 @@
       <v-data-table
         class="border"
         :headers="headers"
-        :items="projectInfo"
+        :items="filteredProjectInfo"
         :search="search"
       >
         <template v-slot:item.projectInfo.projectTitle="{ item }">
@@ -39,7 +39,7 @@ import axios from "axios";
 
 // Constants
 const search = ref("");
-const projectInfo = ref([]);
+const filteredProjectInfo = ref([]);
 const headers = ref([
   { align: "start", key: "num", sortable: true, title: "Num.", width: "4%" },
   {
@@ -63,16 +63,22 @@ const headers = ref([
   { key: "user_program", sortable: true, title: "Program", width: "12%" },
   // Add other headers as needed
 ]);
+const apiUrl = import.meta.env.VITE_API_URL;
 
 // Functions
 
 onMounted(async () => {
   try {
-    const response = await axios.get(`http://localhost:8000/projects`);
-    projectInfo.value = response.data.map((user, num) => ({
+    const response = await axios.get(`${apiUrl}/projects`);
+    const projectsWithNum = response.data.map((user, num) => ({
       ...user,
       num: num + 1,
     }));
+
+    // Filter out rows with empty projectInfo
+    filteredProjectInfo.value = projectsWithNum.filter(
+      (item) => item.projectInfo && Object.keys(item.projectInfo).length > 0
+    );
   } catch (error) {
     console.error("Error fetching user info:", error);
   }

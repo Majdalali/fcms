@@ -8,7 +8,11 @@
         <v-col cols="2" class="nav">
           <Navigation />
         </v-col>
-        <v-col class="main">
+        <v-col
+          cols="1"
+          style="min-width: 70%; max-width: 90%"
+          class="flex-grow-1 flex-shrink-0 main"
+        >
           <div class="pt-4 upperDiv">
             <h1 class="text-3xl font-medium title">Admin Dashboard!</h1>
             <p class="text-lg titleDes font-light">
@@ -26,10 +30,11 @@
               <v-tab class="v-tab" value="three">Evaluations</v-tab>
               <v-tab class="v-tab" value="four">Nominations</v-tab>
               <v-tab
-                v-for="program in programs"
+                v-for="(curreentProgram, key) in currnetPrograms.programTypes"
+                :key="key"
                 class="v-tab"
-                :value="program.program"
-                >{{ program.program }} Students</v-tab
+                :value="curreentProgram.abbreviation"
+                >{{ curreentProgram.abbreviation }} Students</v-tab
               >
             </v-tabs>
             <v-divider class="w-[90%]"></v-divider>
@@ -45,11 +50,11 @@
                   ><AdminNominations />
                 </v-window-item>
                 <v-window-item
-                  v-for="program in programs"
-                  :value="program.program"
+                  v-for="(curreentProgram, key) in currnetPrograms.programTypes"
+                  :value="curreentProgram.abbreviation"
                   ><ProgramStudents
-                    :program="program.program"
-                    :name="program.name"
+                    :program="curreentProgram.abbreviation"
+                    :name="curreentProgram.name"
                   />
                 </v-window-item>
               </v-window>
@@ -63,10 +68,11 @@
 
 <script setup>
 import { useDark } from "@vueuse/core";
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
+import axios from "axios";
 
 import Navigation from "../navigation.vue";
-import AdminMain from "./adminPages/AdminMain.vue";
+import AdminMain from "./adminPages/adminMain.vue";
 import AdminProposals from "./adminPages/adminProposals.vue";
 import AdminEvaluations from "./adminPages/adminEvaluations.vue";
 import AdminNominations from "./adminPages/adminNominations.vue";
@@ -75,11 +81,21 @@ import ProgramStudents from "./adminPages/programStudents.vue";
 // Constants
 const isDark = useDark();
 const tab = ref("");
-const programs = ref([
-  { program: "MCSD", name: "MASTER OF CYBER SECURITY" },
-  { program: "MECC", name: "MASTER OF SCIENCE (DATA SCIENCE)" },
-  { program: "MCDD", name: "MASTER IN INNOVATIVE COMPUTING" },
-]);
+const currnetPrograms = ref({});
+const apiUrl = import.meta.env.VITE_API_URL;
+
+onMounted(async () => {
+  try {
+    const response = await axios.get(`${apiUrl}/api/programs`);
+    if (response.status === 200) {
+      currnetPrograms.value = response.data.programs;
+    } else {
+      console.log(response.data.message);
+    }
+  } catch (error) {
+    console.error("Error fetching programs:", error);
+  }
+});
 </script>
 
 <style lang="scss" scoped>

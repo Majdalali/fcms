@@ -52,7 +52,7 @@
           <!-- Content of your dialog goes here -->
           <v-card-title> <span class="text-h6">Students</span></v-card-title>
           <v-card-text v-show="!spinner && studentsInfo">
-            <v-table>
+            <v-table class="border">
               <thead>
                 <tr>
                   <th class="text-center text-base">No.</th>
@@ -95,7 +95,7 @@
       <v-card>
         <v-card-title>Examinees</v-card-title>
         <v-card-text v-show="!spinner && examineesInfo">
-          <v-table>
+          <v-table class="border">
             <thead>
               <tr>
                 <th class="text-center text-base">No.</th>
@@ -156,9 +156,9 @@ const headers = ref([
   { key: "numExaminees", sortable: false, title: "Examinees" },
   // Add other headers as needed
 ]);
+const apiUrl = import.meta.env.VITE_API_URL;
 
 // Functions
-
 const openDialog = async (user) => {
   dialog.value = true;
   spinner.value = true;
@@ -166,9 +166,7 @@ const openDialog = async (user) => {
     const userStudents = user.supervisedStudents;
     for (let i = 0; i < userStudents.length; i++) {
       // Get examiner details from userStudents array
-      const response = await axios.get(
-        `http://localhost:8000/student/${userStudents[i]}`
-      );
+      const response = await axios.get(`${apiUrl}/student/${userStudents[i]}`);
       // Push examiner details to examinersInfo array
       studentsInfo.value.push(response.data);
     }
@@ -187,9 +185,7 @@ const opendialogExaminees = async (user) => {
     // Loop through userExaminees array
     for (let i = 0; i < userExaminees.length; i++) {
       // Get examiner details from userExaminees array
-      const response = await axios.get(
-        `http://localhost:8000/student/${userExaminees[i]}`
-      );
+      const response = await axios.get(`${apiUrl}/student/${userExaminees[i]}`);
       // Push examiner details to examineesInfo array
       examineesInfo.value.push(response.data);
     }
@@ -208,7 +204,7 @@ const closeDialog = () => {
 
 onMounted(async () => {
   try {
-    const response = await axios.get(`http://localhost:8000/lecturers`);
+    const response = await axios.get(`${apiUrl}/lecturers`);
     userInfo.value = response.data.map((lecturer, num) => ({
       ...lecturer,
       num: num + 1,

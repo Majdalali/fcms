@@ -6,17 +6,30 @@ interface User {
   user_type: string; 
 }
 
+interface Snackbar {
+  show: boolean;
+  message: string;
+  color: string;
+}
+
 interface RootState {
   user: User | null; 
   access_token: string | null;
   tokenExpiration: number | null;
+  snackbar: Snackbar;
 }
+
 
 const store = createStore<RootState>({
   state: {
     user: null,
     access_token: null,
     tokenExpiration: null as number | null,
+    snackbar: {
+      show: false,
+      message: '',
+      color: '',
+    },
   },
   mutations: {
     SET_USER(state, user) {
@@ -40,6 +53,11 @@ const store = createStore<RootState>({
       localStorage.removeItem("access_token");
       localStorage.removeItem("tokenExpiration");
     },
+    SHOW_SNACKBAR(state, { message, color }) {
+      state.snackbar.show = true;
+      state.snackbar.message = message;
+      state.snackbar.color = color;
+    },
   },
   actions: {
     loginUser({ commit }, { user, access_token, expiresIn }) {
@@ -58,7 +76,10 @@ const store = createStore<RootState>({
     },
     checkLoginStatus({ state }) {
       return state.user !== null && state.access_token !== null;
-    }
+    },
+    showSnackbar({ commit }, { message, color }) {
+      commit('SHOW_SNACKBAR', { message, color });
+    },
   },
   modules: {
     socket: socketModule, // Register the socket module

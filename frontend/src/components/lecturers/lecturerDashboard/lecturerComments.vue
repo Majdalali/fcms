@@ -100,6 +100,7 @@ const comments = ref([]);
 const snackbar = ref(false);
 const responseMessage = ref("");
 const dialog = ref(false);
+const apiUrl = import.meta.env.VITE_API_URL;
 
 // Functions
 
@@ -109,7 +110,7 @@ onMounted(async () => {
   try {
     // Fetching data from the first endpoint
     const response1 = await axios.get(
-      `http://localhost:8000/lecturer/mystudents/${userId}`
+      `${apiUrl}/lecturer/mystudents/${userId}`
     );
 
     // Mapping username and user_id from the first response into students array
@@ -121,7 +122,7 @@ onMounted(async () => {
 
     // Fetching data from the second endpoint
     const response2 = await axios.get(
-      `http://localhost:8000/lecturer/myCoSupervisedStudents/${userId}`
+      `${apiUrl}/lecturer/myCoSupervisedStudents/${userId}`
     );
 
     // Mapping username and user_id from the second response into students array
@@ -133,7 +134,7 @@ onMounted(async () => {
 
     // Fetching data from the third endpoint
     const response3 = await axios.get(
-      `http://localhost:8000/lecturer/myExaminees/${userId}`
+      `${apiUrl}/lecturer/myExaminees/${userId}`
     );
 
     // Mapping username and user_id from the third response into students array
@@ -158,7 +159,7 @@ onMounted(async () => {
   }
   try {
     const responseComments = await axios.get(
-      `http://localhost:8000/lecturer/mycomments/${userId}`
+      `${apiUrl}/lecturer/mycomments/${userId}`
     );
 
     const fetchedComments = responseComments.data;
@@ -203,7 +204,7 @@ const addComment = async () => {
     const token = localStorage.getItem("access_token");
 
     const response = await axios.post(
-      `http://localhost:8000/lecturer/newcomment`,
+      `${apiUrl}/lecturer/newcomment`,
       { commentContent: comment.value, studentId: selectedStudent.value },
       {
         headers: {

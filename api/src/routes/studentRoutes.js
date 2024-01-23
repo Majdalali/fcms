@@ -8,16 +8,15 @@ const commentsController = require("../controllers/generalControllers/commentsCo
 // END POINTS FOR USER ROUTES
 router.post("/register", studentController.registerUser);
 router.post("/login", studentController.loginUser);
+
 router.get("/users", studentController.getAllUsers);
+
 router.get("/projects", studentController.getAllProjects);
+
 router.get("/userByEmail", studentController.getUserByEmail);
 router.get("/user/:userId", studentController.getUserById);
 router.get("/student/:userId", studentController.getStudent);
-router.post(
-  "/assignSupervisor",
-  verifyToken,
-  studentController.assignSupervisor
-);
+
 router.get(
   "/getSupervisorDetails/:studentId",
   studentController.getSupervisorDetails
@@ -29,13 +28,6 @@ router.get(
 router.post(
   "/checkExistingSubmission",
   fileUploadController.checkExistingSubmission
-);
-
-router.post(
-  "/uploadFile",
-  verifyToken,
-  fileUploadController.upload.array("file", 5), // Change the "5" to the maximum number of files allowed
-  fileUploadController.uploadFile
 );
 
 router.get("/files/:fileName", fileUploadController.displayFile);
@@ -64,4 +56,18 @@ router.get(
   verifyToken,
   studentController.getStudentCoSupervisors
 );
-module.exports = router;
+
+module.exports = function (io, connectedUsers) {
+  router.post(
+    "/uploadFile",
+    verifyToken,
+    fileUploadController.upload.array("file", 5), // Change the "5" to the maximum number of files allowed
+    fileUploadController.uploadFile.bind(null, io, connectedUsers)
+  );
+  router.post(
+    "/assignSupervisor",
+    verifyToken,
+    studentController.assignSupervisor.bind(null, io, connectedUsers)
+  );
+  return router;
+};

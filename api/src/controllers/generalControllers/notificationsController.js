@@ -1,13 +1,39 @@
 const Notifications = require("../../models/generalModels/notificationsModel");
 const jwt = require("jsonwebtoken");
 
-async function createNotification(req, res) {
-  const token = req.headers.authorization;
-  try {
-    const decoded = jwt.verify(token, process.env.SECRET_TOKEN);
-    const fromUser = decoded.user_id;
-    const { message, toUsers, creator, type } = req.body;
+// async function createNotification(req, res) {
+//   const token = req.headers.authorization;
+//   try {
+//     const decoded = jwt.verify(token, process.env.SECRET_TOKEN);
+//     const fromUser = decoded.user_id;
+//     const { message, toUsers, creator, type } = req.body;
 
+//     const newNotification = new Notifications({
+//       fromUser,
+//       toUsers,
+//       message,
+//       creator,
+//       type,
+//       createdAt: new Date(),
+//     });
+
+//     await newNotification.save();
+
+//     res.status(201).json({
+//       message: "Notification created successfully",
+//     });
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// }
+async function createNotification({
+  fromUser,
+  message,
+  toUsers,
+  creator,
+  type,
+}) {
+  try {
     const newNotification = new Notifications({
       fromUser,
       toUsers,
@@ -18,12 +44,9 @@ async function createNotification(req, res) {
     });
 
     await newNotification.save();
-
-    res.status(201).json({
-      message: "Notification created successfully",
-    });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    // Throw the error to be caught and handled by the calling function
+    throw error;
   }
 }
 
@@ -91,6 +114,7 @@ async function getMyNotifications(req, res) {
       res.status(200).json(userNotifications);
     }
   } catch (error) {
+    console.error("Error retrieving notifications:", error); // Log the actual error
     res.status(500).json({ error: "Failed to retrieve notifications" });
   }
 }

@@ -117,11 +117,12 @@ const tab = ref("");
 const sessionDate = ref(null);
 const typeNameP2 = ref("Progress 2");
 const typeNameP1 = ref("Progress 1");
+const apiUrl = import.meta.env.VITE_API_URL;
 
 // Methods
 onMounted(async () => {
   try {
-    const response = await axios.get(`http://localhost:8000/currentSession`);
+    const response = await axios.get(`${apiUrl}/currentSession`);
     sessionDate.value = response.data;
   } catch (error) {
     console.error("Error fetching proposal deadline:", error);

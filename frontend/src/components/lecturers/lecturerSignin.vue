@@ -174,11 +174,12 @@ const passwordRules = [
     }
   },
 ];
+const apiUrl = import.meta.env.VITE_API_URL;
 
 const login = async () => {
   try {
     const response = await axios.post(
-      "http://localhost:8000/lecturer/login",
+      `${apiUrl}/lecturer/login`,
       {
         email: email.value,
         password: password.value,

@@ -156,6 +156,7 @@ const headers = ref([
   { key: "indexTwo", sortable: false, title: "Examiners" },
   // Add other headers as needed
 ]);
+const apiUrl = import.meta.env.VITE_API_URL;
 
 // Functions
 
@@ -164,7 +165,7 @@ const openDialog = async (user) => {
   spinner.value = true;
   try {
     const response = await axios.get(
-      `http://localhost:8000/getSupervisorDetails/${user.user_id}`
+      `${apiUrl}/getSupervisorDetails/${user.user_id}`
     );
     supervisorInfo.value = response.data;
     spinner.value = false;
@@ -183,7 +184,7 @@ const openDialogExaminers = async (user) => {
     for (let i = 0; i < userExaminers.length; i++) {
       // Get examiner details from userExaminers array
       const response = await axios.get(
-        `http://localhost:8000/getExaminersDetails/${userExaminers[i]}`
+        `${apiUrl}/getExaminersDetails/${userExaminers[i]}`
       );
       // Push examiner details to examinersInfo array
       examinersInfo.value.push(response.data);
@@ -201,7 +202,7 @@ const closeDialogExaminers = () => {
 
 onMounted(async () => {
   try {
-    const response = await axios.get(`http://localhost:8000/users`);
+    const response = await axios.get(`${apiUrl}/users`);
     userInfo.value = response.data.map((user, num) => ({
       ...user,
       num: num + 1,

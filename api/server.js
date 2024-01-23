@@ -5,7 +5,6 @@ const http = require("http");
 const socketIO = require("socket.io");
 
 // Routes
-const userRoutes = require("./src/routes/studentRoutes");
 // const lecturerRoutes = require("./src/routes/lecturerRoutes");
 const generalRoutes = require("./src/routes/generalRoutes");
 const evaluationRoutes = require("./src/routes/evaluationsRoutes");
@@ -53,7 +52,10 @@ const lecturerRoutes = require("./src/routes/lecturerRoutes")(
   io,
   connectedUsers
 );
-app.use("/", userRoutes);
+
+const studentRoutes = require("./src/routes/studentRoutes")(io, connectedUsers);
+
+app.use("/", studentRoutes);
 app.use("/", lecturerRoutes);
 app.use("/", generalRoutes);
 app.use("/", evaluationRoutes);

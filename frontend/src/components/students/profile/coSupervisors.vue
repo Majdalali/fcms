@@ -142,12 +142,14 @@ const headers = ref([
   { key: "name", sortable: false, title: "Name" },
   { key: "email", sortable: false, title: "Email" },
 ]);
+const apiUrl = import.meta.env.VITE_API_URL;
+
 // Functions
 onMounted(async () => {
   try {
     const token = localStorage.getItem("access_token");
 
-    const response = await axios.get("http://localhost:8000/myCoSupervisors", {
+    const response = await axios.get(`${apiUrl}/myCoSupervisors`, {
       headers: { Authorization: token },
     });
 
@@ -162,7 +164,7 @@ const addCoSupervisor = async () => {
   try {
     const token = localStorage.getItem("access_token");
     const response = await axios.post(
-      "http://localhost:8000/udateCoSupervisors",
+      `${apiUrl}/udateCoSupervisors`,
       {
         email: email.value,
       },
