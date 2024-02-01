@@ -3,12 +3,12 @@
     :theme="isDark ? 'dark' : 'light'"
     :class="isDark ? 'tempDiv-dark' : 'tempDiv'"
   >
-    <div class="parent flex flex-row w-screen max-h-screen">
-      <div class="left w-1/2">
-        <v-form class="w-full ml-24 mt-24" v-model="valid">
+    <div class="parent flex flex-row w-screen h-screen">
+      <div class="left w-full 2xl:w-1/2 flex flex-row items-center">
+        <v-form class="w-full" v-model="valid">
           <v-container>
-            <v-col>
-              <v-col cols="12" lg="12">
+            <v-row class="justify-center items-center">
+              <v-col cols="12" lg="8" md="12" sm="11">
                 <v-img
                   :width="300"
                   aspect-ratio="16/9"
@@ -27,7 +27,7 @@
                   >
                 </p>
               </v-col>
-              <v-col cols="12" lg="8">
+              <v-col cols="12" lg="8" md="12" sm="11">
                 <span class="inputText">Email</span>
                 <v-text-field
                   v-model="email"
@@ -44,7 +44,7 @@
                   Invalid email format
                 </v-alert>
               </v-col>
-              <v-col cols="12" lg="8">
+              <v-col cols="12" lg="8" md="12" sm="11">
                 <span class="inputText">Password</span>
                 <v-text-field
                   v-model="password"
@@ -65,7 +65,7 @@
                   Invalid password format
                 </v-alert>
               </v-col>
-              <v-col cols="12" lg="8">
+              <v-col cols="12" lg="8" md="12" sm="11">
                 <v-btn
                   width="100%"
                   height="50px"
@@ -96,11 +96,11 @@
                   >Sign Up with Google</v-btn
                 >
               </v-col>
-            </v-col>
+            </v-row>
           </v-container>
         </v-form>
       </div>
-      <div class="right w-1/2 h-screen bg-[#880000]">
+      <div class="right 2xl:block w-1/2 hidden h-screen bg-[#880000]">
         <v-img cover :src="SignInBg"></v-img>
       </div>
     </div>
@@ -130,6 +130,7 @@ import { useDark } from "@vueuse/core";
 import SignInBg from "@/assets/images/signinBG.svg";
 import UTMLogo from "@/assets/images/utmLogo.png";
 import UTMLogoBlack from "@/assets/images/utmLogoBlack.png";
+
 // Constants
 const apiUrl = import.meta.env.VITE_API_URL;
 const router = useRouter();

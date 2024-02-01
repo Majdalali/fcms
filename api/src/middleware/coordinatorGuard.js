@@ -13,11 +13,11 @@ function adminGuard(req, res, next) {
     // Verify and decode the token
     const decoded = jwt.verify(token, process.env.SECRET_TOKEN);
 
-    // Check if the user is admin
-    if (decoded.isAdmin !== true) {
+    // Check if the user is a coordinator and
+    if (decoded.isCoordinator !== true) {
       return res
         .status(403)
-        .json({ error: "Forbidden: Insufficient privileges" });
+        .json({ error: "Forbidden: Insufficient privileges." });
     }
 
     // If the user has the correct role, continue to the next middleware or route handler

@@ -6,13 +6,14 @@ class Session {
     session_id,
     session_title,
     session_semester,
-    progress_one,
-    progress_two,
-    finalSubmission,
-    proposal,
-    presentationAndDemo,
-    correction,
+    progress_one = {},
+    progress_two = {},
+    finalSubmission = {},
+    proposal = {},
+    presentationAndDemo = {},
+    correction = {},
     createdAt,
+    bypass_deadline = false,
   }) {
     this.session_id = session_id || this.generateRandomId();
     this.session_title = session_title;
@@ -24,6 +25,7 @@ class Session {
     this.proposal = proposal;
     this.correction = correction;
     this.createdAt = createdAt;
+    this.bypass_deadline = bypass_deadline;
   }
   generateRandomId() {
     const randomPortion = Math.floor(Math.random() * 100000).toString(); // Random 5-digit number
@@ -43,6 +45,7 @@ class Session {
         correction: this.correction,
         presentationAndDemo: this.presentationAndDemo,
         createdAt: this.createdAt,
+        bypass_deadline: this.bypass_deadline,
       });
     } catch (error) {
       throw error;
@@ -69,6 +72,7 @@ class Session {
         finalSubmission: sessionData.finalSubmission,
         presentationAndDemo: sessionData.presentationAndDemo,
         correction: sessionData.correction,
+        bypass_deadline: sessionData.bypass_deadline,
       });
 
       return session;
@@ -99,6 +103,7 @@ class Session {
           finalSubmission: sessionData.finalSubmission,
           presentationAndDemo: sessionData.presentationAndDemo,
           correction: sessionData.correction,
+          bypass_deadline: sessionData.bypass_deadline,
         });
       });
 
@@ -114,6 +119,25 @@ class Session {
       throw error;
     }
   }
+
+  // static async getSessionByProgram(program) {
+  //   try {
+  //     const querySnapshot = await sessionCollection
+  //       .where("session_program", "==", program)
+  //       .get();
+
+  //     if (querySnapshot.empty) {
+  //       return null;
+  //     }
+
+  //     const doc = querySnapshot.docs[0];
+  //     const sessionData = doc.data();
+
+  //     return sessionData;
+  //   } catch (error) {
+  //     throw error;
+  //   }
+  // }
 }
 
 module.exports = Session;

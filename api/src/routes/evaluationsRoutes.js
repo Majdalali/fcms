@@ -3,6 +3,7 @@ const router = express.Router();
 const { verifyToken } = require("../middleware/verifyToken");
 const authGuard = require("../middleware/roleAuth");
 const adminGuard = require("../middleware/adminGuard");
+const coordinatorGuard = require("../middleware/coordinatorGuard");
 
 const evaluationsController = require("../controllers/evaluationsController");
 const criteriaController = require("../controllers/evaluationsControllers/criteriaController");
@@ -14,7 +15,18 @@ router.post(
   evaluationsController.createANomination
 );
 
-router.get("/evaluations", adminGuard, evaluationsController.getAllEvaluations);
+router.get(
+  "/evaluations",
+  coordinatorGuard,
+  evaluationsController.getAllEvaluations
+);
+
+router.get(
+  "/evaluations/:criteriaProgram",
+  coordinatorGuard,
+  evaluationsController.getEvaluationsByProgram
+);
+
 router.get("/evaluations/:id", evaluationsController.getEvaluationsById);
 router.get(
   "/myEvaluations",

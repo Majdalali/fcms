@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { verifyToken, clientToken } = require("../middleware/verifyToken");
 const adminGuard = require("../middleware/adminGuard");
+const coordinatorGuard = require("../middleware/coordinatorGuard");
 
 const sessionController = require("../controllers/generalControllers/sessionController");
 const nominationsController = require("../controllers/generalControllers/nominationsController");
@@ -12,48 +13,16 @@ const fileUploadController = require("../controllers/generalControllers/fileUplo
 const criteriaController = require("../controllers/evaluationsControllers/criteriaController");
 const ProgramController = require("../controllers/usersControllers/programController");
 
-// Admin Routes
-router.get(
-  "/getProposals",
-  adminGuard,
-  fileUploadController.getProposalsForAdmin
-);
-router.post(
-  "/updateProposal",
-  adminGuard,
-  fileUploadController.updateProposalStatusAndRemarks
-);
+//! Super Admin Routes
 
 router.post("/createSession", adminGuard, sessionController.createSession);
 
 router.post("/api/admin", adminGuard, lecturerController.makeUserAdmin);
 
-router.get(
-  "/api/students/:program",
-  adminGuard,
-  studentController.getStudentsByProgram
-);
-
-router.get(
-  "/api/nominations",
-  adminGuard,
-  nominationsController.getAllNominations
-);
-
 router.post(
-  "/api/assignExaminers/:userId",
+  "/api/privilege",
   adminGuard,
-  studentController.updateStudentExaminers
-);
-
-router.post("/api/newCriteria", adminGuard, criteriaController.createCriteria);
-
-router.get("/api/criterias", criteriaController.getAllCriteria);
-
-router.delete(
-  "/api/criterias/:program",
-  adminGuard,
-  criteriaController.deleteCriteriaByProgram
+  lecturerController.changeUserPrivileges
 );
 
 router.post("/api/newProgram", adminGuard, ProgramController.createProgram);
@@ -65,5 +34,57 @@ router.put(
 );
 
 router.get("/api/programs", ProgramController.getPrograms);
+
+//TODO IS CRITERIA CREATED BY COORDINATOR OR SUPER ADMIN?
+router.get("/api/criterias", criteriaController.getAllCriteria);
+
+router.delete(
+  "/api/criterias/:program",
+  coordinatorGuard,
+  criteriaController.deleteCriteriaByProgram
+);
+router.post(
+  "/api/newCriteria",
+  coordinatorGuard,
+  criteriaController.createCriteria
+);
+
+//? Coordinator Routes
+
+router.get(
+  "/getProposals",
+  coordinatorGuard,
+  fileUploadController.getProposalsForAdmin
+);
+
+router.post(
+  "/updateProposal",
+  coordinatorGuard,
+  fileUploadController.updateProposalStatusAndRemarks
+);
+
+router.get(
+  "/api/students/:program",
+  coordinatorGuard,
+  studentController.getStudentsByProgram
+);
+
+router.get(
+  "/api/nominations",
+  coordinatorGuard,
+  nominationsController.getAllNominations
+);
+
+router.get(
+  "/api/nominations/:program",
+  coordinatorGuard,
+  nominationsController.getNominationsByProgram
+);
+
+router.post(
+  "/api/assignExaminers/:userId",
+  coordinatorGuard,
+  studentController.updateStudentExaminers
+);
 
 module.exports = router;

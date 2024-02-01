@@ -62,6 +62,22 @@ class Comment {
       throw error;
     }
   }
+
+  // Delete commnet by commentId
+  static async deleteCommentById(commentId) {
+    try {
+      // get comment by commentId
+      const comment = await commentsCollection.doc(commentId).get();
+      if (!comment.exists) {
+        throw new Error("Comment not found");
+      }
+      // delete comment
+      await commentsCollection.doc(commentId).delete();
+    } catch (error) {
+      console.error("Error deleting comment by ID:", error);
+      throw error; // Rethrow the error to handle it in the calling function
+    }
+  }
 }
 
 module.exports = Comment;

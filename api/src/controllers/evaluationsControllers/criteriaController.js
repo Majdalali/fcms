@@ -64,6 +64,14 @@ async function deleteCriteriaByProgram(req, res) {
   try {
     const { program } = req.params;
 
+    const criteria = await Criteria.getCriteriaByProgram(program);
+
+    if (!criteria) {
+      return res
+        .status(404)
+        .json({ message: `No criteria found for program ${program}` });
+    }
+
     await Criteria.deleteCriteriaByProgram(program);
 
     return res.status(200).json({ message: `Criteria deleted successfully` });

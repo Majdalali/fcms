@@ -56,7 +56,7 @@ async function getLecturerComments(req, res) {
         .status(404)
         .json({ message: "No comments found for this lecturer" });
     }
-
+    // add 10 seconds delay to simulate slow network
     res.status(200).json(lecturerComments);
   } catch (error) {
     console.error(error);
@@ -114,9 +114,24 @@ async function getStudentComments(req, res) {
   }
 }
 
+async function deleteCommentById(req, res) {
+  const { commentId } = req.params;
+  try {
+    await Comment.deleteCommentById(commentId);
+    res.status(200).json({ message: "Comment deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting comment:", error.message);
+    if (error.message === "Comment not found") {
+      res.status(404).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: "Internal server error" });
+    }
+  }
+}
 module.exports = {
   createComment,
   getLecturerComments,
   getStudentComments,
+  deleteCommentById,
   //   getMyLecturerComments,
 };

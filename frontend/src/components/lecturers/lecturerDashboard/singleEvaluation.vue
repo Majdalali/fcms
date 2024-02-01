@@ -109,7 +109,6 @@
           >Submit Evaluation</v-btn
         >
       </v-form>
-      <h1 class="mt-2">{{ selectedStudent }}</h1>
     </div>
     <div v-else class="flex w-full h-full justify-center items-center">
       <v-progress-circular
@@ -143,6 +142,7 @@ import { useDark } from "@vueuse/core";
 // Constants
 const props = defineProps({
   studentInfo: Object,
+  criteriasData: Array,
 });
 const snackbar = ref(false);
 const responseMessage = ref("");
@@ -153,7 +153,7 @@ const evaluationForm = ref(null);
 const evaluationCriterias = ref([{ name: "", grade: "", from: "" }]); // criteria and it's grade
 const remarksForCord = ref("");
 const typeOfEvaluator = ref("");
-const criteriasData = ref([]);
+// const criteriasData = ref([]);
 const criteriaErrorMessages = ref("");
 const selectedStudentProgram = ref("");
 const selectedCriteriaName = ref("");
@@ -251,55 +251,53 @@ const submitEvaluation = async () => {
 };
 
 onMounted(async () => {
-  // Fetch criteria data
   isInfoLoading.value = true;
-  try {
-    const response = await axios.get(`${apiUrl}/api/criterias`);
-    if (response.status === 200) {
-      // Handle success
-      criteriasData.value = response.data;
-    } else {
-      // Handle other status codes or errors
-      console.error("Error fetching evaluation criteria:", response.data);
-      // Optionally, display an error message
-    }
-  } catch (error) {
-    console.error("Error fetching evaluation criteria:", error);
-    // Handle error, display an error message, or redirect if needed
-  }
+  // try {
+  //   const response = await axios.get(`${apiUrl}/api/criterias`);
+  //   if (response.status === 200) {
+  //     criteriasData.value = response.data;
+  //   } else {
+  //     console.error("Error fetching evaluation criteria:", response.data);
+  //     criteriaErrorMessages.value = "Failed to fetch evaluation criteria.";
+  //   }
+  // } catch (error) {
+  //   console.error("Error fetching evaluation criteria:", error);
+  //   criteriaErrorMessages.value = "Failed to fetch evaluation criteria.";
+  // } finally {
+  //   isInfoLoading.value = false;
+  // }
+
   try {
     const studentProgram = props.studentInfo.program;
-
     if (!studentProgram) {
       return;
     }
 
-    // Find the criteria with matching program
-    const criteriaForProgram = criteriasData.value.find(
+    const criteriaForProgram = props.criteriasData.find(
       (criteria) => criteria.criteriaProgram === studentProgram
     );
 
-    // Map criteriasObjects to evaluationCriterias
     if (criteriaForProgram) {
       evaluationCriterias.value = Object.keys(
         criteriaForProgram.criteriasObjects
       ).map((key) => ({
         name: key,
-        grade: "", // Set initial grade to empty
-        outOf: criteriaForProgram.criteriasObjects[key], // Use the value from criteriasObjects as "from"
+        grade: "",
+        outOf: criteriaForProgram.criteriasObjects[key],
       }));
       selectedStudentProgram.value = studentProgram;
       selectedCriteriaName.value = criteriaForProgram?.criteriaName || "";
       selectedCriteriaTotalMark.value =
         criteriaForProgram?.criteriaTotalMark || 0;
       criteriaErrorMessages.value = "";
-      isInfoLoading.value = false;
     } else {
-      // Handle the case where no matching criteria is found
       criteriaErrorMessages.value = `No criteria found for program: ${studentProgram}. Please contact the coordinator for assistance.`;
     }
   } catch (error) {
-    console.log(error);
+    console.error("Error processing criteria:", error);
+    criteriaErrorMessages.value = "Error processing evaluation criteria.";
+  } finally {
+    isInfoLoading.value = false;
   }
 });
 </script>

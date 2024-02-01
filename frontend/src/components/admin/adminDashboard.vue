@@ -26,9 +26,7 @@
               v-model="tab"
             >
               <v-tab class="v-tab" value="one">General</v-tab>
-              <v-tab class="v-tab" value="two">Proposals</v-tab>
-              <v-tab class="v-tab" value="three">Evaluations</v-tab>
-              <v-tab class="v-tab" value="four">Nominations</v-tab>
+              <v-tab class="v-tab" value="two">Overview</v-tab>
               <v-tab
                 v-for="(curreentProgram, key) in currnetPrograms.programTypes"
                 :key="key"
@@ -41,18 +39,41 @@
 
             <v-card-text class="pl-0">
               <v-window v-model="tab">
+                <!--? General Tab -->
                 <v-window-item value="one"><AdminMain /> </v-window-item>
-                <v-window-item value="two"> <AdminProposals /></v-window-item>
-                <v-window-item value="three"
-                  ><AdminEvaluations />
+
+                <!--? Overview Tab -->
+                <v-window-item value="two">
+                  <div class="w-4/5 mt-10 flex justify-center">
+                    <v-tabs
+                      class="rounded-3xl w-1/2"
+                      align-tabs="center"
+                      :bg-color="isDark ? '#fdfefb' : '#BDBDBD'"
+                      v-model="tabSecondry"
+                    >
+                      <v-tab class="v-tab" value="one">Evaluations</v-tab>
+                      <v-tab class="v-tab" value="two">Nominations</v-tab>
+                    </v-tabs>
+                  </div>
+
+                  <div class="pl-0 w-full">
+                    <v-window v-model="tabSecondry">
+                      <v-window-item value="one"
+                        ><AdminEvaluations
+                      /></v-window-item>
+                      <v-window-item value="two"
+                        ><AdminNominations
+                      /></v-window-item>
+                    </v-window>
+                  </div>
                 </v-window-item>
-                <v-window-item value="four"
-                  ><AdminNominations />
-                </v-window-item>
+
+                <!--? Program Students Tab -->
                 <v-window-item
                   v-for="(curreentProgram, key) in currnetPrograms.programTypes"
                   :value="curreentProgram.abbreviation"
-                  ><ProgramStudents
+                >
+                  <ProgramStudents
                     :program="curreentProgram.abbreviation"
                     :name="curreentProgram.name"
                   />
@@ -73,14 +94,14 @@ import axios from "axios";
 
 import Navigation from "../navigation.vue";
 import AdminMain from "./adminPages/adminMain.vue";
-import AdminProposals from "./adminPages/adminProposals.vue";
+import ProgramStudents from "./adminPages/programStudents.vue";
 import AdminEvaluations from "./adminPages/adminEvaluations.vue";
 import AdminNominations from "./adminPages/adminNominations.vue";
-import ProgramStudents from "./adminPages/programStudents.vue";
 
 // Constants
 const isDark = useDark();
 const tab = ref("");
+const tabSecondry = ref("");
 const currnetPrograms = ref({});
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -104,22 +125,27 @@ onMounted(async () => {
     display: none;
   }
 }
+
 .title,
 .titleDes {
   font-family: "DM Sans", sans-serif;
 }
+
 .tempDiv {
   background-color: #fdfefb !important;
 }
+
 .tempDiv-dark {
   background-color: #0d0d0d !important;
 }
+
 .v-tab {
   text-transform: capitalize;
   font-family: "DM Sans", sans-serif;
   font-weight: 500;
   font-size: 18px;
 }
+
 .v-tab:first-child {
   text-align: start !important;
   padding-left: 0%;

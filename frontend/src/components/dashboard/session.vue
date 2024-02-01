@@ -35,7 +35,8 @@
                 :elevation="4"
                 :backgroundColor="isDark ? '#FDFEFB' : '#0D0D0D'"
                 title="Proposal"
-                :data="sessionInfo.proposal"
+                :data="''"
+                :deadline="sessionInfo.proposal"
               />
             </v-col>
 
@@ -44,7 +45,8 @@
                 :elevation="4"
                 backgroundColor="#FFC505"
                 title="Progress 1"
-                :data="sessionInfo.progress_one"
+                :data="''"
+                :deadline="sessionInfo.progress_one"
               />
             </v-col>
           </v-row>
@@ -54,8 +56,9 @@
               <SessionCard
                 :elevation="4"
                 :backgroundColor="isDark ? 'grey-darken-4' : '#E7E5DF'"
+                :data="''"
                 title="Progress 2"
-                :data="sessionInfo.progress_two"
+                :deadline="sessionInfo.progress_two"
               />
             </v-col>
 
@@ -63,8 +66,9 @@
               <SessionCard
                 :elevation="4"
                 backgroundColor="#800000"
+                :data="''"
                 title="Final Report"
-                :data="sessionInfo.finalSubmission"
+                :deadline="sessionInfo.finalSubmission"
               />
             </v-col>
           </v-row>
@@ -73,8 +77,9 @@
               <SessionCard
                 :elevation="4"
                 backgroundColor="#FFC505"
+                :data="''"
                 title="Presentation & Demo"
-                :data="sessionInfo.presentationAndDemo"
+                :deadline="sessionInfo.presentationAndDemo"
               />
             </v-col>
 
@@ -82,8 +87,9 @@
               <SessionCard
                 :elevation="4"
                 :backgroundColor="isDark ? '#FDFEFB' : '#0D0D0D'"
+                :data="''"
                 title="Correction"
-                :data="sessionInfo.correction"
+                :deadline="sessionInfo.correction"
               />
             </v-col>
           </v-row>

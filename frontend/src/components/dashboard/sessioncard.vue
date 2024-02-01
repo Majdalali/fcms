@@ -1,18 +1,32 @@
 <template>
   <v-sheet :elevation="elevation" :color="backgroundColor" class="pa-2 ma-2">
     <h1 class="title text-xl">{{ title }}</h1>
-    <h1 class="titleData font-bold text-2xl">{{ data }}</h1>
+    <h1 v-if="data !== ''" class="titleData font-bold text-2xl">
+      {{ data }}
+    </h1>
+    <h1 v-else class="titleData font-bold text-2xl">
+      {{ formatDate(deadline.startDate) }} <span class="px-2">|</span>
+      {{ formatDate(deadline.endDate) }}
+    </h1>
   </v-sheet>
 </template>
 
-<script>
-export default {
-  props: {
-    elevation: Number,
-    backgroundColor: String,
-    title: String,
-    data: String,
-  },
+<script setup>
+const props = defineProps({
+  elevation: Number,
+  backgroundColor: String,
+  title: String,
+  data: String,
+  deadline: String,
+});
+
+const formatDate = (timestamp) => {
+  const date = new Date(timestamp); // Assuming timestamp is already in milliseconds
+  return date.toLocaleString("en-UK", {
+    year: "numeric",
+    day: "numeric",
+    month: "numeric",
+  }); // Format the date as per the locale
 };
 </script>
 

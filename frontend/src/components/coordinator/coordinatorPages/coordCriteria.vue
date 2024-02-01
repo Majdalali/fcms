@@ -7,7 +7,21 @@
       <p class="titleDes text-sm font-light">Create and edit criterias</p>
     </div>
     <div class="w-4/5 pt-5 h-full">
+      <v-alert
+        v-show="errorMessage !== ''"
+        closable
+        class="mb-2 py-2"
+        variant="flat"
+        :text="errorMessage"
+        type="error"
+      ></v-alert>
       <v-form ref="criteriaForm" v-model="valid">
+        <small class="text-orange-500 font-semibold"
+          >*The default program selected matches your current program. You can
+          change it. However, changing the program will affect the criteria
+          associated with it.</small
+        >
+
         <v-row class="mt-1">
           <v-col cols="12" md="7">
             <v-text-field
@@ -132,6 +146,32 @@
                 ></v-btn>
               </v-card-actions> </v-card></v-dialog
         ></template>
+        <template v-slot:item.delete="{ item }">
+          <v-dialog width="500">
+            <template v-slot:activator="{ props }">
+              <v-btn v-bind:="props" size="small" color="error"> Delete </v-btn>
+            </template>
+
+            <template v-slot:default="{ isActive }">
+              <v-card title="Warning!">
+                <v-card-text class="title">
+                  Are you sure you want to delete this criteria?
+                </v-card-text>
+
+                <v-card-actions>
+                  <v-spacer></v-spacer>
+                  <v-btn text="Cancel" @click="isActive.value = false"></v-btn>
+                  <v-btn
+                    @click="deleteCriteria(item.criteriaProgram)"
+                    color="error"
+                  >
+                    Delete
+                  </v-btn>
+                </v-card-actions>
+              </v-card>
+            </template>
+          </v-dialog>
+        </template>
       </v-data-table>
     </div>
     <v-snackbar
@@ -167,11 +207,14 @@ const headers = ref([
   { key: "criteriaProgram", sortable: false, title: "Program" },
   { key: "criteriaTotalMark", sortable: false, title: "Total Marks" },
   { key: "criteriasObjects", sortable: true, title: "Action" },
+  { key: "delete", sortable: false, title: "Delete" },
 ]);
 
 // Request Body
+const storedUser = JSON.parse(localStorage.getItem("user"));
+const userProgram = storedUser.coordinator_program;
 const criteriaName = ref("");
-const criteriaProgram = ref("");
+const criteriaProgram = ref(userProgram);
 const criteriasObjects = ref([{ name: "", outOf: "" }]);
 
 // Feedback
@@ -195,6 +238,11 @@ const gradeRules = [
 ];
 
 // Functions
+
+onMounted(() => {
+  criteriaProgram.value = userProgram; // Set the default value to userProgram
+});
+
 const addEntry = (list) => {
   list.push({ name: "", outOf: "" });
 };
@@ -232,14 +280,55 @@ const submitCriteria = async () => {
     );
     if (response.status === 200) {
       // Handle success
+      errorMessage.value = "";
       props.criteriaData.push(response.data.criteria);
       responseMessage.value = response.data.message;
       snackbar.value = true;
       resetForm();
     }
   } catch (error) {
-    console.error("Error creating new criteria: ", error);
-    // errorMessage.value = error.data;
+    if (error.response && error.response.status === 404) {
+      errorMessage.value = error.response.data.error;
+    } else if (error.response && error.response.status === 500) {
+      errorMessage.value = error.response.data.error;
+    } else {
+      errorMessage.value = "An unexpected error occurred. Please try again.";
+    }
+  }
+};
+
+const deleteCriteria = async (program) => {
+  const token = localStorage.getItem("access_token");
+  try {
+    const response = await axios.delete(`${apiUrl}/api/criterias/${program}`, {
+      headers: {
+        Authorization: token,
+      },
+    });
+    if (response.status === 200) {
+      // Handle success
+      errorMessage.value = "";
+      // Find the index of the item in criteriaData
+      const indexToDelete = props.criteriaData.findIndex(
+        (item) => item.criteriaProgram === program
+      );
+
+      // Remove the item from the criteriaData array
+      if (indexToDelete !== -1) {
+        props.criteriaData.splice(indexToDelete, 1);
+      }
+
+      responseMessage.value = response.data.message;
+      snackbar.value = true;
+    }
+  } catch (error) {
+    if (error.response && error.response.status === 404) {
+      errorMessage.value = error.response.data.message;
+    } else if (error.response && error.response.status === 500) {
+      errorMessage.value = error.response.data.error;
+    } else {
+      errorMessage.value = "An unexpected error occurred. Please try again.";
+    }
   }
 };
 
@@ -253,7 +342,8 @@ const closeDialog = (item) => {
 
 const itemProps = (item) => ({
   title: item.abbreviation,
-  subtitle: item.name,
+  subtitle:
+    item.name + (item.abbreviation === userProgram ? " (Your Program)" : ""),
 });
 </script>
 

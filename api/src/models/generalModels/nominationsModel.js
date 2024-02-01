@@ -54,6 +54,7 @@ class Student {
     utmEmail,
     phoneNumber,
     matricNumber,
+    studentProgram,
     dissertationTitle,
     dissertationAbstract,
   }) {
@@ -61,6 +62,7 @@ class Student {
     this.email = email;
     this.phoneNumber = phoneNumber;
     this.utmEmail = utmEmail;
+    this.studentProgram = studentProgram;
     this.matricNumber = matricNumber;
     this.dissertationTitle = dissertationTitle;
     this.dissertationAbstract = dissertationAbstract;
@@ -71,6 +73,7 @@ class Student {
       email: this.email,
       phoneNumber: this.phoneNumber,
       utmEmail: this.utmEmail,
+      studentProgram: this.studentProgram,
       matricNumber: this.matricNumber,
       dissertationTitle: this.dissertationTitle,
       dissertationAbstract: this.dissertationAbstract,
@@ -182,6 +185,25 @@ class Nominations {
     try {
       const nominationsRef = firestore().collection("nominations");
       const nominationsSnapshot = await nominationsRef.get();
+      const nominations = [];
+      nominationsSnapshot.forEach((doc) => {
+        nominations.push(doc.data());
+      });
+      if (nominations.length === 0) {
+        return null; // Return null if no nominations found
+      }
+      return nominations;
+    } catch (error) {
+      console.error("Error getting all nominations: ", error);
+      throw error;
+    }
+  }
+  static async getNominationsByProgram(program) {
+    try {
+      const nominationsRef = firestore().collection("nominations");
+      const nominationsSnapshot = await nominationsRef
+        .where("student.studentProgram", "==", program)
+        .get();
       const nominations = [];
       nominationsSnapshot.forEach((doc) => {
         nominations.push(doc.data());

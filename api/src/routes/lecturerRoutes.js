@@ -40,6 +40,10 @@ router.get(
   "/lecturer/mycomments/:lecturerId",
   commentsController.getLecturerComments
 );
+router.delete(
+  "/lecturer/deletecomment/:commentId",
+  commentsController.deleteCommentById
+);
 
 module.exports = function (io, connectedUsers) {
   router.post(

@@ -73,6 +73,21 @@ class evaluationsModel {
     }
   }
 
+  // Get evaluations by criteriaProgram
+  static async getEvaluationsByProgram(criteriaProgram) {
+    const querySnapshot = await evaluationsCollection
+      .where("criteriaProgram", "==", criteriaProgram)
+      .get();
+
+    if (querySnapshot.empty) {
+      return [];
+    }
+
+    const evaluations = querySnapshot.docs.map((doc) => doc.data());
+
+    return evaluations;
+  }
+
   static async getEvaluationsById(id) {
     const querySnapshot = await evaluationsCollection
       .where("studentId", "==", id)

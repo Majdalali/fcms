@@ -228,8 +228,105 @@ function checkNominationStatus(nomination) {
     : "pending";
 }
 
+async function getNominationsByProgram(req, res) {
+  const { program } = req.params;
+  try {
+    const nominations = await Nominations.getNominationsByProgram(program);
+
+    if (!nominations || nominations.length === 0) {
+      return res.status(404).json({ error: "No nominations found" });
+    }
+
+    // Fetch additional details needed for formatting
+    const lecturerIds = nominations.map(
+      (nomination) => nomination.supervisorId
+    );
+    const lecturerDetails = await Promise.all(
+      lecturerIds.map((id) => lecturer.getUserById(id))
+    );
+
+    // Similar to the formatting logic in getAllNominations
+    const formattedNominations = await Promise.all(
+      nominations.map(async (nomination) => {
+        nomination.supervisorName = lecturerDetails.find(
+          (lecturer) => lecturer.user_id === nomination.supervisorId
+        ).username;
+
+        // Check if co-supervisors exist by email
+        await Promise.all(
+          nomination.coSupervisors.map(async (coSupervisor) => {
+            const coSupervisorUser = await lecturer.getUserByEmail(
+              coSupervisor.email
+            );
+            if (coSupervisorUser) {
+              coSupervisor.userId = coSupervisorUser.user_id;
+            }
+            coSupervisor.coSupervisorsExist = !!coSupervisorUser;
+          })
+        );
+
+        // Check if external examiners exist by email
+        await Promise.all(
+          nomination.externalExaminers.map(async (examiner) => {
+            const examinerUser = await lecturer.getUserByEmail(examiner.email);
+            if (examinerUser) {
+              examiner.userId = examinerUser.user_id;
+              examiner.examinees = examinerUser.examinees;
+            }
+            examiner.externalExaminersExist = !!examinerUser;
+          })
+        );
+
+        // Check if student exists by email
+        const utmUser = await student.getUserByEmail(
+          nomination.student.utmEmail
+        );
+        if (utmUser) {
+          nomination.student.userId = utmUser.user_id;
+          nomination.student.examiners = utmUser.examiners;
+          nomination.student.studentExists = true;
+        } else {
+          const emailUser = await student.getUserByEmail(
+            nomination.student.email
+          );
+          if (emailUser) {
+            nomination.student.userId = emailUser.user_id;
+            nomination.student.examiners = emailUser.examiners;
+            nomination.student.studentExists = true;
+          }
+          nomination.student.studentExists = !!emailUser;
+        }
+
+        // Check if internal examiners exist by email
+        await Promise.all(
+          nomination.internalExaminers.map(async (examiner) => {
+            const examinerUser = await lecturer.getUserByEmail(examiner.email);
+
+            if (examinerUser) {
+              examiner.userId = examinerUser.user_id;
+              examiner.examinees = examinerUser.examinees;
+            }
+            examiner.internalExaminersExist = !!examinerUser;
+          })
+        );
+
+        const status = checkNominationStatus(nomination);
+        nomination.status = status;
+
+        return Nominations.formatNominationData(nomination);
+      })
+    );
+
+    return res.status(200).json(formattedNominations);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
 module.exports = {
   createNomination,
   getNominationById,
   getAllNominations,
+  getNominationsByProgram,
 };

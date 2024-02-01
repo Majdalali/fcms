@@ -59,4 +59,6 @@ router.post(
 // Client Token Validation Route
 router.post("/validateToken", clientToken);
 
+router.post("/deadline", sessionController.checkDeadline);
+// router.get("/session/:program", sessionController.getSessionByProgram);
 module.exports = router;

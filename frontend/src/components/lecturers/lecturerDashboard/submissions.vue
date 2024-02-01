@@ -78,7 +78,10 @@
           <v-dialog v-model="item.evaluationDialog" width="1200">
             <v-card>
               <v-card-text>
-                <SingleEvaluation :studentInfo="studentInfo" />
+                <SingleEvaluation
+                  :studentInfo="studentInfo"
+                  :criteriasData="criteriasData"
+                />
               </v-card-text>
               <v-card-actions>
                 <v-spacer></v-spacer>
@@ -110,6 +113,7 @@ const isDark = useDark();
 const filesSubmission = ref([]);
 const students = ref([]);
 const studentInfo = ref({});
+const criteriasData = ref([]);
 const search = ref("");
 const headers = ref([
   { key: "studentName", sortable: false, title: "Student Name" },
@@ -144,6 +148,20 @@ onMounted(async () => {
   } catch (error) {
     console.error("Error fetching files:", error);
   }
+
+  try {
+    const responseCriteria = await axios.get(`${apiUrl}/api/criterias`);
+    if (responseCriteria.status === 200) {
+      criteriasData.value = responseCriteria.data;
+    } else {
+      console.error(
+        "Error fetching evaluation criteria:",
+        responseCriteria.data
+      );
+    }
+  } catch (error) {
+    console.error("Error fetching evaluation criteria:", error);
+  }
 });
 
 const aggregateStudents = () => {
@@ -167,7 +185,7 @@ const aggregateStudents = () => {
 
 const formatDate = (timestamp) => {
   const date = new Date(timestamp._seconds * 1000); // Convert seconds to milliseconds
-  return date.toLocaleString("en-US", {
+  return date.toLocaleString("en-UK", {
     year: "numeric",
     day: "numeric",
     month: "numeric",

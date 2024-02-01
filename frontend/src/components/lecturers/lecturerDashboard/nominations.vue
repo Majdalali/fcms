@@ -107,7 +107,7 @@
                     label="UTM Email"
                     :rules="emailRules"
                   ></v-text-field></v-col
-                ><v-col cols="12" md="6">
+                ><v-col cols="12" md="4">
                   <v-text-field
                     variant="outlined"
                     v-model="student.phoneNumber"
@@ -115,13 +115,25 @@
                     :rules="phoneRules"
                   ></v-text-field
                 ></v-col>
-                <v-col cols="12" md="6">
+                <v-col cols="12" md="4">
                   <v-text-field
                     variant="outlined"
                     v-model="student.matricNumber"
                     label="Matric Number"
                     :rules="matricCardRules"
                   ></v-text-field
+                ></v-col>
+                <v-col cols="12" md="4">
+                  <v-select
+                    variant="outlined"
+                    v-model="student.studentProgram"
+                    label="Program"
+                    required
+                    :items="currnetPrograms.programTypes"
+                    :hint="student.studentProgram"
+                    item-title="name"
+                    item-value="abbreviation"
+                  ></v-select
                 ></v-col>
                 <v-col cols="12" md="12">
                   <v-text-field
@@ -328,7 +340,7 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import axios from "axios";
 
 // Constants
@@ -344,6 +356,7 @@ const student = ref({
   email: "",
   phoneNumber: "",
   utmEmail: "",
+  studentProgram: "",
   matricNumber: "",
   dissertationTitle: "",
   dissertationAbstract: "",
@@ -355,6 +368,7 @@ const externalExaminers = ref([
 const passedDisserationTwo = ref(false);
 const passedElectivesAndCores = ref(false);
 const examinersNotified = ref(false);
+const currnetPrograms = ref({});
 
 // Rules for input validation
 const valid = ref(false);
@@ -385,6 +399,18 @@ const otherFieldsRules = [(value) => !!value || "This field is required."];
 const apiUrl = import.meta.env.VITE_API_URL;
 
 // Functions
+onMounted(async () => {
+  try {
+    const response = await axios.get(`${apiUrl}/api/programs`);
+    if (response.status === 200) {
+      currnetPrograms.value = response.data.programs;
+    } else {
+      console.log(response.data.message);
+    }
+  } catch (error) {
+    console.error("Error fetching programs:", error);
+  }
+});
 
 // Function to add or remove an entry to the respective array
 const addEntry = (list, item) => {

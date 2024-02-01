@@ -113,6 +113,30 @@ async function createANomination(req, res) {
   }
 }
 
+// Get evaluations by criteriaProgram
+async function getEvaluationsByProgram(req, res) {
+  const { criteriaProgram } = req.params;
+
+  try {
+    const evaluations = await evaluationsModel.getEvaluationsByProgram(
+      criteriaProgram
+    );
+
+    if (!evaluations.length) {
+      return res
+        .status(404)
+        .json({
+          message: `No evaluations found for program ${criteriaProgram}`,
+        });
+    }
+
+    return res.status(200).json(evaluations);
+  } catch (error) {
+    console.error("Error getting evaluations by program:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
 async function getLecturerEvaluations(req, res) {
   const token = req.headers.authorization;
   try {
@@ -141,4 +165,5 @@ module.exports = {
   getEvaluationsById,
   createANomination,
   getLecturerEvaluations,
+  getEvaluationsByProgram,
 };

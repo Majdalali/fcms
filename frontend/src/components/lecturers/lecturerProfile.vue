@@ -231,6 +231,7 @@ const isFormChanged = computed(() => {
   );
 });
 const responseMessage = ref("");
+const apiUrl = import.meta.env.VITE_API_URL;
 
 // Functions
 

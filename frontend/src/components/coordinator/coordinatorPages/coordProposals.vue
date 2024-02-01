@@ -128,20 +128,26 @@ const valid = ref(false);
 const snackbar = ref(false);
 const responseMessage = ref("");
 const apiUrl = import.meta.env.VITE_API_URL;
+
 onMounted(async () => {
   const token = localStorage.getItem("access_token");
+  const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+  const userProgram = storedUser.coordinator_program;
+
   try {
     const response = await axios.get(`${apiUrl}/getProposals`, {
       headers: {
         Authorization: token,
       },
     });
-    proposalFiles.value = response.data.map((proposal) => {
-      return {
-        ...proposal,
-        createdAt: formatDate(proposal.createdAt),
-      };
-    });
+    proposalFiles.value = response.data
+      .filter((proposal) => proposal.studentProgram === userProgram)
+      .map((proposal) => {
+        return {
+          ...proposal,
+          createdAt: formatDate(proposal.createdAt),
+        };
+      });
   } catch (error) {
     console.error("Error fetching proposal files:", error);
     // Handle error

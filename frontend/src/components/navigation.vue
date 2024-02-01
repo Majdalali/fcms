@@ -144,6 +144,12 @@ const navigationMenu = ref({
     link: "/admin",
     condidtion: userType === "lecturer" && user.isAdmin === true,
   },
+  coordinator: {
+    icon: markRaw(admin),
+    title: "Coordinator",
+    link: "/coordinator",
+    condidtion: userType === "lecturer" && user.isCoordinator === true,
+  },
   notification: {
     icon: markRaw(bellVue),
     title: "Notification",

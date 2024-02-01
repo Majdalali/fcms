@@ -9,7 +9,8 @@ const jwt = require("jsonwebtoken");
 const admin = require("../../services/firebase");
 
 async function registerLecturer(req, res) {
-  const { username, email, password, user_type } = req.body;
+  const { username, email, password, user_type, coordinator_program } =
+    req.body;
 
   try {
     // Hash the password
@@ -33,6 +34,7 @@ async function registerLecturer(req, res) {
       password: hashedPassword,
       user_type,
       user_id: userRecord.uid,
+      coordinator_program,
     });
     await newUser.save();
     await admin.auth().generateEmailVerificationLink(userRecord.email);
@@ -70,6 +72,8 @@ async function loginLecturer(req, res) {
         user_id: user.user_id,
         user_type: user.user_type,
         isAdmin: user.isAdmin,
+        isCoordinator: user.isCoordinator,
+        coordinator_program: user.coordinator_program,
       },
       secretKey,
       { expiresIn: "1 week" }
@@ -100,13 +104,15 @@ async function getAllLecturers(req, res) {
         email,
         supervisedStudents,
         examinees,
-        department,
+        coSupervisedStudents,
+        isCoordinator,
       }) => ({
         user_id,
         username,
-        department,
         email,
+        isCoordinator,
         supervisedStudents,
+        coSupervisedStudents,
         examinees,
       })
     );
@@ -170,6 +176,7 @@ async function getMyStudents(req, res) {
         email: student.email,
         matricCard: student.matricCard,
         program: student.user_program,
+        projectInfo: student.projectInfo,
       };
 
       return responseStudent; // Return the student object
@@ -203,6 +210,7 @@ async function myCoSupervisedStudents(req, res) {
         email: student.email,
         matricCard: student.matricCard,
         program: student.user_program,
+        projectInfo: student.projectInfo,
       };
 
       return responseStudent; // Return the student object
@@ -236,6 +244,7 @@ async function myExaminees(req, res) {
         email: student.email,
         matricCard: student.matricCard,
         program: student.user_program,
+        projectInfo: student.projectInfo,
       };
 
       return responseStudent; // Return the student object
@@ -344,7 +353,6 @@ async function updateLecturerDetails(req, res) {
 
 async function makeUserAdmin(req, res) {
   const { email } = req.body;
-  const token = req.headers.authorization;
   try {
     const user = await Lecturer.getUserByEmail(email);
 
@@ -366,6 +374,55 @@ async function makeUserAdmin(req, res) {
   }
 }
 
+async function changeUserPrivileges(req, res) {
+  // change user privileges based on the privilege type provided e.g. admin, coordinator, super admin
+  const { email, privilege } = req.body;
+
+  try {
+    const user = await Lecturer.getUserByEmail(email);
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const username = user.username;
+
+    switch (privilege) {
+      case "admin":
+        if (user.isAdmin) {
+          return res
+            .status(400)
+            .json({ error: `${username} is already an admin` });
+        } else {
+          user.isAdmin = true;
+          break;
+        }
+      case "coordinator":
+        if (user.isCoordinator) {
+          return res
+            .status(400)
+            .json({ error: `${username} is already a coordinator` });
+        } else {
+          user.isCoordinator = true;
+          break;
+        }
+
+      default:
+        return res
+          .status(400)
+          .json({ error: `Invalid privilege type: ${privilege}` });
+    }
+
+    await user.update();
+    return res
+      .status(200)
+      .json({ message: `${username} is now a ${privilege}` });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
 module.exports = {
   registerLecturer,
   loginLecturer,
@@ -378,4 +435,5 @@ module.exports = {
   updateLecturerExaminees,
   updateLecturerDetails,
   makeUserAdmin,
+  changeUserPrivileges,
 };

@@ -232,8 +232,18 @@
                   color="warning"
                   variant="outlined"
                   class="w-32"
-                  text="Close"
+                  text="Cancel"
                   @click="closeDialog(item)"
+                ></v-btn>
+                <v-btn
+                  variant="elevated"
+                  color="deep-purple-darken-4"
+                  text="Assign Examiners"
+                  class="px-4"
+                  @click="AssignExaminers(item)"
+                  :disabled="
+                    item.status === 'done' || !item.student.studentExists
+                  "
                 ></v-btn>
               </v-card-actions>
             </v-card>
@@ -271,12 +281,6 @@ const headers = ref([
   },
   { key: "student.name", sortable: false, title: "Student", width: "25%" },
   {
-    key: "student.studentProgram",
-    sortable: true,
-    title: "Program",
-    width: "10%",
-  },
-  {
     key: "createdAt",
     sortable: false,
     title: "Submitted On",
@@ -308,17 +312,24 @@ const headersStudent = ref([
 
 const search = ref("");
 const nominations = ref([]);
+// const alertText = ref("");
+// const alertType = ref("");
 const apiUrl = import.meta.env.VITE_API_URL;
 // Methods
 onMounted(async () => {
   const token = localStorage.getItem("access_token");
+  const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+  const userProgram = storedUser.coordinator_program;
 
   try {
-    const response = await axios.get(`${apiUrl}/api/nominations`, {
-      headers: {
-        Authorization: token,
-      },
-    });
+    const response = await axios.get(
+      `${apiUrl}/api/nominations/${userProgram}`,
+      {
+        headers: {
+          Authorization: token,
+        },
+      }
+    );
     nominations.value = response.data.map((nomination) => {
       const internalExaminersIds = nomination.internalExaminers
         .filter(
@@ -351,13 +362,47 @@ onMounted(async () => {
   }
 });
 
+const AssignExaminers = async (item) => {
+  try {
+    const token = localStorage.getItem("access_token");
+    const response = await axios.post(
+      `${apiUrl}/api/assignExaminers/${item.student.userId}`,
+      {
+        examinerId: item.examinersIds,
+      },
+      {
+        headers: {
+          Authorization: token,
+        },
+      }
+    );
+    if (response.status === 200) {
+      item.alertType = "success";
+      item.alertText = response.data.message;
+    }
+  } catch (error) {
+    if (error.response && error.response.status === 400) {
+      // Handle specific error case (e.g., validation error)
+      item.alertText = error.response.data.error;
+      item.alertType = "error";
+    } else {
+      // Handle other errors
+      console.error("Error: ", error);
+      item.alertText = "An error occurred. Please try again later.";
+      item.alertType = "error";
+    }
+  }
+};
+
 // format date
 const formatDate = (timestamp) => {
   const date = new Date(timestamp._seconds * 1000); // Convert seconds to milliseconds
   return date.toLocaleString("en-US", {
     year: "numeric",
-    month: "short",
+    month: "long",
     day: "numeric",
+    hour: "numeric",
+    minute: "numeric",
   });
 };
 

@@ -30,9 +30,7 @@
                 <v-table class="border">
                   <thead>
                     <tr>
-                      <th class="text-center text-base">
-                        Criteria ({{ item.criteriaProgram }})
-                      </th>
+                      <th class="text-center text-base">Criteria</th>
                       <th class="text-center text-base">Grade</th>
                       <th class="text-center text-base">Out Of</th>
                     </tr>
@@ -74,6 +72,14 @@
                     {{ item.finalMark.totalOutOf }}
                   </v-chip>
                 </h1>
+
+                <div v-if="item.selectedCriteriaData">
+                  <small class="title mt-5">
+                    {{ item.selectedCriteriaData.criteriaName }} ({{
+                      item.selectedCriteriaData.criteriaProgram
+                    }}) - {{ item.selectedCriteriaData.criteriaTotalMark }}
+                  </small>
+                </div>
               </v-card-text>
 
               <v-card-actions>
@@ -119,7 +125,10 @@
         </div>
       </div>
     </div>
-
+    <CoordCriteria
+      :criteriaData="criteriasData"
+      :programsData="currnetPrograms"
+    />
     <v-snackbar
       :timeout="2000"
       color="indigo"
@@ -144,6 +153,7 @@ import html2pdf from "html2pdf.js";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
 import utmLogo from "@/assets/images/utmLogo.png";
+import CoordCriteria from "./coordCriteria.vue";
 
 const search = ref("");
 const headers = ref([
@@ -162,6 +172,7 @@ const criteriasData = ref([]);
 const progressCircular = ref(0);
 const snackbar = ref(false);
 const responseMessage = ref("");
+const currnetPrograms = ref({});
 const apiUrl = import.meta.env.VITE_API_URL;
 
 // Download PDF Method
@@ -321,8 +332,10 @@ const downloadPdf = async (item) => {
 // Functions
 onMounted(async () => {
   const token = localStorage.getItem("access_token");
+  const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+  const userProgram = storedUser.coordinator_program;
   try {
-    const response = await axios.get(`${apiUrl}/evaluations`, {
+    const response = await axios.get(`${apiUrl}/evaluations/${userProgram}`, {
       headers: {
         Authorization: token,
       },
@@ -336,6 +349,31 @@ onMounted(async () => {
   } catch (error) {
     console.error("Error fetching proposal files:", error);
     // Handle error
+  }
+  // Fetch criteria data
+  try {
+    const response = await axios.get(`${apiUrl}/api/criterias`);
+    if (response.status === 200) {
+      // Handle success
+      criteriasData.value = response.data;
+    } else {
+      // Handle other status codes or errors
+      console.error("Error fetching evaluation criteria:", response.data);
+      // Optionally, display an error message
+    }
+  } catch (error) {
+    console.error("Error fetching evaluation criteria:", error);
+    // Handle error, display an error message, or redirect if needed
+  }
+  try {
+    const response = await axios.get(`${apiUrl}/api/programs`);
+    if (response.status === 200) {
+      currnetPrograms.value = response.data.programs;
+    } else {
+      console.log(response.data.message);
+    }
+  } catch (error) {
+    console.error("Error fetching programs:", error);
   }
 });
 

@@ -227,6 +227,7 @@ async function getProposalsForAdmin(req, res) {
         return {
           ...proposal,
           studentName: student.username,
+          studentProgram: student.user_program,
         };
       })
     );

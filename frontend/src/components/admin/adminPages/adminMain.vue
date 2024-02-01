@@ -9,7 +9,7 @@
           v-model="tab"
         >
           <v-tab class="v-tab" value="one">Session</v-tab>
-          <v-tab class="v-tab" value="two">Make Admin</v-tab>
+          <v-tab class="v-tab" value="two">Privileges</v-tab>
           <v-tab class="v-tab" value="three">Programs</v-tab>
         </v-tabs>
       </div>
@@ -25,15 +25,6 @@
                 </p>
               </div>
               <div class="w-4/5 mt-5">
-                <v-alert
-                  class="mb-3 py-2"
-                  color="info"
-                  icon="$info"
-                  border="start"
-                  border-color="deep-purple-accent-4"
-                  closable
-                  text="Please enter the dates in DD-MM-YYYY format. e.g. 01-12-2023"
-                ></v-alert>
                 <v-form ref="sessionForm" v-model="valid">
                   <v-row>
                     <v-col class="pb-0" cols="12" md="10">
@@ -54,53 +45,42 @@
                     </v-col>
                   </v-row>
                   <v-row>
-                    <v-col class="pb-0" cols="12" md="6">
-                      <v-text-field
-                        label="Proposal"
-                        v-model="proposal"
-                      ></v-text-field>
+                    <v-col
+                      cols="12"
+                      md="6"
+                      class="py-0"
+                      v-for="(section, index) in dateSections"
+                      :key="index"
+                    >
+                      <h1 class="title mt-5 mb-2">{{ section.title }}</h1>
+                      <!-- Reusable Date Picker Menu for Range -->
+                      <v-menu location="end">
+                        <template v-slot:activator="{ props }">
+                          <v-text-field
+                            label="Date Range"
+                            v-model="section.dateRange"
+                            :value="formattedDateRange(section.dateRange)"
+                            append-inner-icon="mdi-calendar-month"
+                            readonly
+                            v-bind="props"
+                          ></v-text-field>
+                        </template>
+                        <VueDatePicker
+                          v-model="section.dateRange"
+                          :is-24="false"
+                          range
+                          inline
+                          auto-apply
+                          class="vdp-datepicker-inline"
+                        ></VueDatePicker>
+                      </v-menu>
                     </v-col>
-                    <v-col class="pb-0" cols="12" md="6">
-                      <v-text-field
-                        label="Progress One"
-                        v-model="progressOne"
-                        :rules="formRules"
-                      ></v-text-field>
-                    </v-col>
-                    <v-col class="pb-0" cols="12" md="6">
-                      <v-text-field
-                        label="Progress Two"
-                        v-model="progressTwo"
-                        :rules="formRules"
-                      ></v-text-field>
-                    </v-col>
-                    <v-col class="pb-0" cols="12" md="6">
-                      <v-text-field
-                        label="Final Submission"
-                        v-model="finalSubmission"
-                        :rules="formRules"
-                      ></v-text-field
-                    ></v-col>
-                    <v-col cols="12" md="6">
-                      <v-text-field
-                        label="Presentation and Demo"
-                        v-model="presentationAndDemo"
-                        :rules="formRules"
-                      ></v-text-field
-                    ></v-col>
-                    <v-col cols="12" md="6">
-                      <v-text-field
-                        :rules="formRules"
-                        label="Correction"
-                        v-model="correction"
-                      ></v-text-field
-                    ></v-col>
                   </v-row>
                   <v-btn
                     size="large"
                     variant="elevated"
                     color="deep-purple-darken-4"
-                    class="mb-5"
+                    class="my-5"
                     @click="createSession()"
                     :disabled="!valid"
                   >
@@ -114,7 +94,9 @@
             <div class="adminMaker w-1/2">
               <div class="w-1/2 mt-5">
                 <h1 class="title text-lg font-medium">Admin privileges</h1>
-                <p class="titleDes text-sm font-light">Make a user an admin</p>
+                <p class="titleDes text-sm font-light">
+                  Make a user an admin or a coordinator
+                </p>
               </div>
               <div class="mt-4">
                 <v-form v-model="adminValid" ref="adminForm">
@@ -122,6 +104,7 @@
                     <v-col cols="12" md="10">
                       <v-alert
                         v-show="adminError !== ''"
+                        v-model="adminError"
                         class="py-1 mb-2"
                         closable
                         :text="adminError"
@@ -132,15 +115,28 @@
                         hint="User should be a lecturer"
                         v-model="adminEmail"
                         :rules="emailRules"
-                      ></v-text-field></v-col
-                  ></v-row>
+                      ></v-text-field>
+                      <v-radio-group
+                        v-model="radioGroup"
+                        class="pl-0"
+                        :rules="radioGroupRules"
+                      >
+                        <h1 class="title text-gray-200">Choose Privilege</h1>
+                        <v-radio label="Admin" value="admin"></v-radio>
+                        <v-radio
+                          label="Coordinator"
+                          value="coordinator"
+                        ></v-radio>
+                      </v-radio-group>
+                    </v-col>
+                  </v-row>
                   <v-btn
                     size="large"
                     variant="elevated"
                     color="deep-purple-darken-4"
                     class="mb-5 mt-4"
-                    @click="makeAdmin()"
-                    text="Make Admin"
+                    @click="changePrivilege()"
+                    text="Submit"
                     :disabled="!adminValid"
                   ></v-btn>
                 </v-form>
@@ -252,7 +248,7 @@
                   <v-form v-model="editProgramsValid" ref="editProgramsForm">
                     <div
                       class="mb-2"
-                      v-for="(program, index) in editProgramsCopy"
+                      v-for="(program, index) in editPrograms"
                       :key="index"
                     >
                       <small class="titleDes">Program {{ index + 1 }}</small>
@@ -275,7 +271,7 @@
                           <v-btn
                             size="large"
                             color="error"
-                            @click="removeEntry(editProgramsCopy, index)"
+                            @click="removeEntry(editPrograms, index)"
                           >
                             <v-icon icon="mdi-delete"></v-icon>
                           </v-btn>
@@ -287,7 +283,7 @@
                         size="large"
                         color="success"
                         @click="
-                          addEntry(editProgramsCopy, {
+                          addEntry(editPrograms, {
                             name: '',
                             abbreviation: '',
                           })
@@ -357,26 +353,38 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import axios from "axios";
-
+import { useDark } from "@vueuse/core";
+import VueDatePicker from "@vuepic/vue-datepicker";
+import "@vuepic/vue-datepicker/dist/main.css";
+import { format } from "date-fns";
 // Constants
+const isDark = useDark();
 const snackbar = ref(false);
 const responseMessage = ref("");
 const adminError = ref("");
 const tab = ref("one");
 
-const valid = ref(false);
+// Admin
 const adminValid = ref(false);
-const sessionForm = ref(null);
 const adminForm = ref(null);
+const adminEmail = ref("");
+const radioGroup = ref("");
+
+// Sessions
+const valid = ref(false);
+const sessionForm = ref(null);
 const sessionTitle = ref("");
 const sessionSemester = ref("");
-const progressOne = ref("");
-const progressTwo = ref("");
-const finalSubmission = ref("");
-const presentationAndDemo = ref("");
-const proposal = ref("");
-const correction = ref("");
-const adminEmail = ref("");
+const dateSections = ref([
+  { title: "Proposal", dateRange: [] },
+  { title: "Progress One", dateRange: [] },
+  { title: "Progress Two", dateRange: [] },
+  { title: "Final Submission", dateRange: [] },
+  { title: "Presentation and Demo", dateRange: [] },
+  { title: "Correction", dateRange: [] },
+]);
+
+// Programs
 const programValid = ref(false);
 const programForm = ref(null);
 const programTypes = ref([
@@ -396,18 +404,33 @@ const formRules = [(value) => !!value || "The field is required"];
 const emailRules = [
   (value) => (value && /\S+@\S+\.\S+/.test(value)) || "Invalid email address.",
 ];
+const radioGroupRules = [
+  (value) => !!value || "Please choose a privilege", // Rule: Ensure a value is selected
+];
 
 // functions
 const apiUrl = import.meta.env.VITE_API_URL;
+const formattedDateRange = (dateRange) => {
+  if (dateRange.length === 2) {
+    const [startDate, endDate] = dateRange;
+    // Format the dates according to your desired format
+    return `${format(new Date(startDate), "MM/dd/yyyy h:mm a")} - ${format(
+      new Date(endDate),
+      "MM/dd/yyyy h:mm a"
+    )}`;
+  }
+  return ""; // Return empty string if date range is not complete
+};
+
 onMounted(async () => {
   try {
     const response = await axios.get(`${apiUrl}/api/programs`);
     if (response.status === 200) {
       currnetPrograms.value = response.data.programs;
       editPrograms.value = Array.isArray(currnetPrograms.value.programTypes)
-        ? [...currnetPrograms.value.programTypes]
+        ? JSON.parse(JSON.stringify(currnetPrograms.value.programTypes))
         : [];
-      editProgramsCopy.value = [...editPrograms.value];
+      editProgramsCopy.value = JSON.parse(JSON.stringify(editPrograms.value));
     } else {
       console.log(response.data.message);
     }
@@ -417,7 +440,7 @@ onMounted(async () => {
 });
 
 const cancelEdit = () => {
-  editProgramsCopy.value = [...editPrograms.value];
+  editPrograms.value = JSON.parse(JSON.stringify(editProgramsCopy.value));
   isEditingProgram.value = false;
 };
 
@@ -436,7 +459,7 @@ const updatePrograms = async () => {
     const response = await axios.put(
       `${apiUrl}/api/updateProgram/${currnetPrograms.value.program_id}`,
       {
-        programTypes: editProgramsCopy.value,
+        programTypes: editPrograms.value,
       },
       {
         headers: {
@@ -491,14 +514,15 @@ const createProgram = async () => {
   }
 };
 
-const makeAdmin = async () => {
+const changePrivilege = async () => {
   try {
     const token = localStorage.getItem("access_token");
 
     const response = await axios.post(
-      `${apiUrl}/api/admin`,
+      `${apiUrl}/api/privilege`,
       {
         email: adminEmail.value,
+        privilege: radioGroup.value,
       },
       {
         headers: {
@@ -509,9 +533,9 @@ const makeAdmin = async () => {
     if (response.status === 200) {
       responseMessage.value = response.data.message;
       snackbar.value = true;
-      resetForm();
-    } else {
-      adminError.value = response.data.message;
+      adminError.value = "";
+      radioGroup.value = "";
+      adminForm.value.reset();
     }
   } catch (error) {
     if (
@@ -519,7 +543,8 @@ const makeAdmin = async () => {
       (error.response.status === 400 || error.response.status === 404)
     ) {
       adminError.value = error.response.data.error;
-      resetForm();
+      radioGroup.value = "";
+      adminForm.value.reset();
     } else {
       console.error("Error making user an admin:", error);
     }
@@ -529,18 +554,35 @@ const makeAdmin = async () => {
 const createSession = async () => {
   try {
     const token = localStorage.getItem("access_token");
+    const transformedSessions = {};
+
+    dateSections.value.forEach((section) => {
+      let formattedTitle;
+
+      // Handle special cases for titles
+      switch (section.title) {
+        case "Presentation and Demo":
+          formattedTitle = "presentationAndDemo";
+          break;
+        case "Final Submission":
+          formattedTitle = "finalSubmission";
+          break;
+        default:
+          formattedTitle = section.title.toLowerCase().replace(/\s+/g, "_");
+      }
+
+      transformedSessions[formattedTitle] = {
+        startDate: section.dateRange[0] || "",
+        endDate: section.dateRange[1] || "",
+      };
+    });
 
     const response = await axios.post(
       `${apiUrl}/createSession`,
       {
         session_title: sessionTitle.value,
         session_semester: sessionSemester.value,
-        progress_one: progressOne.value,
-        progress_two: progressTwo.value,
-        finalSubmission: finalSubmission.value,
-        presentationAndDemo: presentationAndDemo.value,
-        proposal: proposal.value,
-        correction: correction.value,
+        ...transformedSessions,
       },
       {
         headers: {
@@ -548,6 +590,7 @@ const createSession = async () => {
         },
       }
     );
+
     if (response.status === 200) {
       responseMessage.value = "session created successfully";
       snackbar.value = true;

@@ -31,6 +31,67 @@
             Co-supervised
           </v-chip>
         </template>
+        <template v-slot:item.projectInfo="{ item }">
+          <v-btn
+            @click="openDialog(item)"
+            size="small"
+            :color="
+              Object.keys(item.projectInfo).length > 0 ? 'info' : 'warning'
+            "
+          >
+            Details
+          </v-btn>
+          <v-dialog v-model="item.dialog" width="1000">
+            <v-card>
+              <v-card-text class="mt-4">
+                <h1 class="title mb-2">Project Details</h1>
+                <v-table
+                  v-if="Object.keys(item.projectInfo).length > 0"
+                  class="border"
+                >
+                  <thead>
+                    <tr>
+                      <th class="text-center text-base">Project</th>
+                      <th class="text-center text-base">Details</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td class="text-center titleDes">Title</td>
+                      <td class="text-center titleDes py-2">
+                        {{ item.projectInfo.projectTitle }}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class="text-center titleDes">Type</td>
+                      <td class="text-center titleDes">
+                        {{ item.projectInfo.projectType }}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class="text-center titleDes">Area</td>
+                      <td class="text-center titleDes">
+                        {{ item.projectInfo.projectArea }}
+                      </td>
+                    </tr>
+                  </tbody>
+                </v-table>
+                <v-alert v-else type="info" variant="outlined" class="my-4"
+                  ><strong>{{ item.username }}</strong> hasn't updated their
+                  project information yet</v-alert
+                >
+              </v-card-text>
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn
+                  color="warning"
+                  variant="outlined"
+                  class="w-32"
+                  text="Cancel"
+                  @click="closeDialog(item)"
+                ></v-btn>
+              </v-card-actions> </v-card></v-dialog
+        ></template>
       </v-data-table>
     </div>
   </div>
@@ -53,6 +114,7 @@ const headers = ref([
   { key: "email", title: "Email" },
   { key: "matricCard", title: "Matric No." },
   { key: "program", title: "Program" },
+  { key: "projectInfo", title: "Project Details" },
 ]);
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -88,6 +150,14 @@ onMounted(async () => {
     ...coSupervisedStudents.value
   );
 });
+
+const openDialog = (item) => {
+  item.dialog = true;
+};
+
+const closeDialog = (item) => {
+  item.dialog = false;
+};
 </script>
 
 <style lang="scss" scoped>

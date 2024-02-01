@@ -13,7 +13,8 @@ class Lecturer {
     examinees = [],
     coSupervisedStudents = [],
     isAdmin = false,
-    department,
+    isCoordinator = false,
+    coordinator_program = null,
   }) {
     this.user_id = user_id; // Generates a new random ID if user_id is not provided
     this.username = username;
@@ -21,10 +22,11 @@ class Lecturer {
     this.password = password;
     this.user_type = user_type;
     this.isAdmin = isAdmin;
+    this.isCoordinator = isCoordinator;
     this.examinees = examinees;
-    this.department = department;
     this.supervisedStudents = supervisedStudents;
     this.coSupervisedStudents = coSupervisedStudents;
+    this.coordinator_program = coordinator_program;
   }
 
   static async getUserByEmail(email) {
@@ -76,9 +78,10 @@ class Lecturer {
         user_type: this.user_type,
         examinees: this.examinees,
         isAdmin: this.isAdmin,
+        isCoordinator: this.isCoordinator,
         supervisedStudents: this.supervisedStudents,
-        department: this.department,
         coSupervisedStudents: this.coSupervisedStudents,
+        coordinator_program: this.coordinator_program,
       });
     } catch (error) {
       throw error;
@@ -94,9 +97,10 @@ class Lecturer {
         user_type: this.user_type,
         examinees: this.examinees,
         supervisedStudents: this.supervisedStudents,
-        department: this.department,
         coSupervisedStudents: this.coSupervisedStudents,
         isAdmin: this.isAdmin,
+        isCoordinator: this.isCoordinator,
+        coordinator_program: this.coordinator_program,
       });
     } catch (error) {
       throw error;
