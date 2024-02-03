@@ -341,12 +341,13 @@ onMounted(async () => {
 
 const formatDate = (timestamp) => {
   const date = new Date(timestamp._seconds * 1000); // Convert seconds to milliseconds
-  return date.toLocaleString("en-US", {
+  return date.toLocaleString("en-UK", {
     day: "numeric",
     month: "numeric",
     year: "numeric",
-    hour: "numeric",
-    minute: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
   });
 };
 

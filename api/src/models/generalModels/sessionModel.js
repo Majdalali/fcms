@@ -52,30 +52,13 @@ class Session {
     }
   }
 
-  static async getSession(sessionTitle) {
+  static async getSessionById(sessionId) {
     try {
-      const querySnapshot = await sessionCollection
-        .where("session_title", "==", sessionTitle)
-        .get();
-
-      if (querySnapshot.empty) {
+      const session = await sessionCollection.doc(sessionId).get();
+      if (!session.exists) {
         return null;
       }
-
-      const sessionData = querySnapshot.docs[0].data();
-      const session = new Session({
-        session_title: sessionData.session_title,
-        session_semester: sessionData.session_semester,
-        proposal: sessionData.proposal,
-        progress_one: sessionData.progress_one,
-        progress_two: sessionData.progress_two,
-        finalSubmission: sessionData.finalSubmission,
-        presentationAndDemo: sessionData.presentationAndDemo,
-        correction: sessionData.correction,
-        bypass_deadline: sessionData.bypass_deadline,
-      });
-
-      return session;
+      return session.data();
     } catch (error) {
       throw error;
     }
@@ -112,32 +95,44 @@ class Session {
       throw error;
     }
   }
-  static async deleteSession(sessionId) {
+
+  static async getAllSessions() {
+    // without creating a new instance of the class
     try {
-      await sessionCollection.doc(sessionId).delete();
+      const querySnapshot = await sessionCollection.get();
+      const sessions = [];
+      querySnapshot.forEach((doc) => {
+        const sessionData = doc.data();
+        sessions.push(sessionData);
+      });
+      return sessions;
     } catch (error) {
       throw error;
     }
   }
 
-  // static async getSessionByProgram(program) {
-  //   try {
-  //     const querySnapshot = await sessionCollection
-  //       .where("session_program", "==", program)
-  //       .get();
+  static async updateSessionBypass(sessionId, bypass_deadline) {
+    try {
+      await sessionCollection.doc(sessionId).update({
+        bypass_deadline,
+      });
+    } catch (error) {
+      throw error;
+    }
+  }
 
-  //     if (querySnapshot.empty) {
-  //       return null;
-  //     }
-
-  //     const doc = querySnapshot.docs[0];
-  //     const sessionData = doc.data();
-
-  //     return sessionData;
-  //   } catch (error) {
-  //     throw error;
-  //   }
-  // }
+  static async deleteSession(sessionId) {
+    // check if session exists
+    try {
+      const session = await sessionCollection.doc(sessionId).get();
+      if (!session.exists) {
+        return null;
+      }
+      await sessionCollection.doc(sessionId).delete();
+    } catch (error) {
+      throw error;
+    }
+  }
 }
 
 module.exports = Session;

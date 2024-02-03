@@ -11,9 +11,8 @@ const lecturerController = require("../controllers/usersControllers/lecturerCont
 const fileUploadController = require("../controllers/generalControllers/fileUploadController");
 // Session Routes
 
-router.get("/currentSession/:sessionTitle", sessionController.getSession);
+// router.get("/currentSession/:sessionTitle", sessionController.getSession);
 router.get("/currentSession", sessionController.getLatestSession);
-router.delete("/session/:sessionId", sessionController.deleteSession);
 
 // Nominations Routes
 
@@ -35,10 +34,7 @@ router.delete(
   "/notification/:notificationId",
   notificationsController.deleteNotification
 );
-// router.get(
-//   "/notifications/:userId",
-//   notificationsController.getNotificationByUserId
-// );
+
 router.get(
   "/myNotifications",
   verifyToken,
@@ -61,4 +57,5 @@ router.post("/validateToken", clientToken);
 
 router.post("/deadline", sessionController.checkDeadline);
 // router.get("/session/:program", sessionController.getSessionByProgram);
+router.get("/api/sessions", sessionController.getAllSessions);
 module.exports = router;

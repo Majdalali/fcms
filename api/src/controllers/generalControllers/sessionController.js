@@ -28,23 +28,8 @@ async function createSession(req, res) {
 
   try {
     await session.save();
-    res.status(200).json({ message: "Session created successfully" });
+    res.status(200).json({ message: "Session created successfully", session });
   } catch (error) {
-    res.status(500).json({ error: "Internal server error" });
-  }
-}
-
-async function getSession(req, res) {
-  const { sessionTitle } = req.params;
-
-  try {
-    const session = await Session.getSession(sessionTitle);
-    if (!session) {
-      return res.status(404).json({ error: "Session not found" });
-    }
-    res.status(200).json(session);
-  } catch (error) {
-    console.error(error);
     res.status(500).json({ error: "Internal server error" });
   }
 }
@@ -66,6 +51,12 @@ async function deleteSession(req, res) {
   const { sessionId } = req.params;
 
   try {
+    const session = await Session.getSessionById(sessionId);
+
+    if (!session) {
+      return res.status(404).json({ error: "Session not found" });
+    }
+
     await Session.deleteSession(sessionId);
     res.status(200).json({ message: "Session deleted successfully" });
   } catch (error) {
@@ -116,25 +107,46 @@ async function checkDeadline(req, res) {
   }
 }
 
-async function getSessionByProgram(req, res) {
-  const { program } = req.params;
-
+async function getAllSessions(req, res) {
   try {
-    const session = await Session.getSessionByProgram(program);
-    if (!session) {
-      return res.status(404).json({ error: "Session not found" });
+    const sessions = await Session.getAllSessions();
+    if (sessions.length === 0) {
+      return res.status(404).json({ error: "No sessions found" });
     }
-    res.status(200).json(session);
+    res.status(200).json(sessions);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal server error" });
   }
 }
+
+async function updateSessionBypass(req, res) {
+  const { sessionId } = req.params;
+  const { bypass_deadline } = req.body;
+
+  try {
+    const session = await Session.getSessionById(sessionId);
+    if (!session) {
+      return res.status(404).json({ error: "Session not found" });
+    }
+    // check if bypass_deadline is a boolean
+    if (typeof bypass_deadline !== "boolean") {
+      return res.status(400).json({ error: "Invalid bypass_deadline value" });
+    }
+    await Session.updateSessionBypass(sessionId, bypass_deadline);
+
+    res.status(200).json({ message: "Session bypass updated successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+}
+
 module.exports = {
   createSession,
-  getSession,
   deleteSession,
   getLatestSession,
   checkDeadline,
-  getSessionByProgram,
+  getAllSessions,
+  updateSessionBypass,
 };

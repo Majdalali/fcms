@@ -17,6 +17,18 @@ const ProgramController = require("../controllers/usersControllers/programContro
 
 router.post("/createSession", adminGuard, sessionController.createSession);
 
+router.put(
+  "/updateSession/:sessionId",
+  adminGuard,
+  sessionController.updateSessionBypass
+);
+
+router.delete(
+  "/deleteSession/:sessionId",
+  adminGuard,
+  sessionController.deleteSession
+);
+
 router.post("/api/admin", adminGuard, lecturerController.makeUserAdmin);
 
 router.post(
