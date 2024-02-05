@@ -28,8 +28,8 @@
               <v-tab class="v-tab" value="three">Progress 1</v-tab>
               <v-tab class="v-tab" value="four">Progress 2</v-tab>
               <v-tab class="v-tab" value="five">Final Submission</v-tab>
-              <v-tab class="v-tab" value="six">Corrections</v-tab>
-              <v-tab class="v-tab" value="seven">Presentation & Demo</v-tab>
+              <v-tab class="v-tab" value="six">Presentation & Demo</v-tab>
+              <v-tab class="v-tab" value="seven">Corrections</v-tab>
               <v-tab class="v-tab" value="eight">Comments</v-tab>
             </v-tabs>
             <v-divider class="w-[90%]"></v-divider>
@@ -45,6 +45,7 @@
                     extrasType="proposalsExtras"
                     name="Proposal"
                     dateType="proposal"
+                    :submissionDate="sessionDate"
                   />
                   <!-- <proposal /> -->
                 </v-window-item>
@@ -54,6 +55,7 @@
                     extrasType="progressOneExtras"
                     :name="typeNameP1"
                     dateType="progress_one"
+                    :submissionDate="sessionDate"
                   />
                   <!-- <progressOne /> -->
                 </v-window-item>
@@ -63,6 +65,7 @@
                     extrasType="progressTwoExtras"
                     :name="typeNameP2"
                     dateType="progress_two"
+                    :submissionDate="sessionDate"
                   />
                 </v-window-item>
                 <v-window-item value="five"
@@ -71,21 +74,24 @@
                     extrasType="finalSubmissionExtras"
                     name="Final Submission"
                     dateType="finalSubmission"
+                    :submissionDate="sessionDate"
                 /></v-window-item>
                 <v-window-item value="six">
-                  <fileUpload
-                    type="corrections"
-                    extrasType="correctionsExtras"
-                    name="Corrections"
-                    dateType="correction"
-                  />
-                </v-window-item>
-                <v-window-item value="seven">
                   <fileUpload
                     type="presentationAndDemos"
                     extrasType="presentationAndDemosExtras"
                     name="Presentation"
                     dateType="presentationAndDemo"
+                    :submissionDate="sessionDate"
+                  />
+                </v-window-item>
+                <v-window-item value="seven">
+                  <fileUpload
+                    type="corrections"
+                    extrasType="correctionsExtras"
+                    name="Corrections"
+                    dateType="correction"
+                    :submissionDate="sessionDate"
                   />
                 </v-window-item>
                 <v-window-item class="w-2/3" value="eight">

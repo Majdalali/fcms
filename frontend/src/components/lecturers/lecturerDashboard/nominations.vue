@@ -10,7 +10,7 @@
       <v-form
         ref="evaluationForm"
         v-model="valid"
-        @submit.prevent="subbmitNomination"
+        @submit.prevent="submitNomination"
       >
         <v-stepper
           :elevation="4"
@@ -163,7 +163,7 @@
             >
               <small class="titleDes">Internal Examiner {{ index + 1 }}</small>
               <v-row class="mt-1">
-                <v-col cols="12">
+                <v-col cols="12" md="6">
                   <v-text-field
                     variant="outlined"
                     v-model="internalExaminer.name"
@@ -171,20 +171,33 @@
                     :rules="nameRules"
                   ></v-text-field>
                 </v-col>
-                <v-col cols="12">
+                <v-col cols="12" md="6">
                   <v-text-field
                     variant="outlined"
                     v-model="internalExaminer.email"
                     label="Email"
                     :rules="emailRules"
                   ></v-text-field></v-col
-                ><v-col cols="12">
+                ><v-col cols="12" md="6">
                   <v-text-field
                     variant="outlined"
                     v-model="internalExaminer.phoneNumber"
                     label="Phone Number"
                     :rules="phoneRules"
-                  ></v-text-field
+                  ></v-text-field></v-col
+                ><v-col cols="12" md="6">
+                  <v-file-input
+                    variant="outlined"
+                    :v-model="[internalExaminer.cvFile]"
+                    :rules="[
+                      (v) => !!v || 'File is required',
+                      (v) => (v && v.length > 0) || 'File is required',
+                    ]"
+                    label="Examiner CV File"
+                    @change="
+                      handleInternalExaminerFileUpload(internalExaminer, $event)
+                    "
+                  ></v-file-input
                 ></v-col>
                 <v-col cols="12">
                   <v-btn
@@ -260,6 +273,20 @@
                     label="Expertise"
                     :rules="otherFieldsRules"
                   ></v-text-field
+                ></v-col>
+                <v-col cols="12">
+                  <v-file-input
+                    variant="outlined"
+                    :v-model="[externalExaminer.cvFile]"
+                    :rules="[
+                      (v) => !!v || 'File is required',
+                      (v) => (v && v.length > 0) || 'File is required',
+                    ]"
+                    label="Examiner CV File"
+                    @change="
+                      handleExternalExaminerFileUpload(externalExaminer, $event)
+                    "
+                  ></v-file-input
                 ></v-col>
                 <v-col cols="12"
                   ><v-btn
@@ -361,9 +388,18 @@ const student = ref({
   dissertationTitle: "",
   dissertationAbstract: "",
 });
-const internalExaminers = ref([{ name: "", email: "", phoneNumber: "" }]);
+const internalExaminers = ref([
+  { name: "", email: "", phoneNumber: "", cvFile: null },
+]);
 const externalExaminers = ref([
-  { name: "", email: "", phoneNumber: "", institution: "", expertise: "" },
+  {
+    name: "",
+    email: "",
+    phoneNumber: "",
+    institution: "",
+    expertise: "",
+    cvFile: null,
+  },
 ]);
 const passedDisserationTwo = ref(false);
 const passedElectivesAndCores = ref(false);
@@ -427,32 +463,119 @@ const removeEntry = (list, index) => {
 
 const resetForm = () => {
   evaluationForm.value.reset();
+  coSupervisors.value = [{ name: "", email: "", phoneNumber: "" }];
+  student.value = {
+    name: "",
+    email: "",
+    phoneNumber: "",
+    utmEmail: "",
+    studentProgram: "",
+    matricNumber: "",
+    dissertationTitle: "",
+    dissertationAbstract: "",
+  };
+  internalExaminers.value = [
+    { name: "", email: "", phoneNumber: "", cvFile: null },
+  ];
+  externalExaminers.value = [
+    {
+      name: "",
+      email: "",
+      phoneNumber: "",
+      institution: "",
+      expertise: "",
+      cvFile: null,
+    },
+  ];
 };
 
-const subbmitNomination = async () => {
+const handleInternalExaminerFileUpload = (examiner, event) => {
+  const file = event.target.files[0];
+  const fileID = Date.now(); // Use current timestamp as a unique identifier
+  examiner.cvFile = file;
+  examiner.cvFileId = fileID;
+};
+
+const handleExternalExaminerFileUpload = (examiner, event) => {
+  const file = event.target.files[0];
+  const fileID = Date.now(); // Use current timestamp as a unique identifier
+  examiner.cvFile = file;
+  examiner.cvFileId = fileID;
+};
+
+const submitNomination = async () => {
   try {
     const token = localStorage.getItem("access_token");
 
+    // Prepare the internalExaminers and externalExaminer data with CV file information
+    const internalExaminersData = internalExaminers.value.map((examiner) => ({
+      name: examiner.name,
+      email: examiner.email,
+      phoneNumber: examiner.phoneNumber,
+      cvFile: examiner.cvFileId, // Include the CV file information
+    }));
+
+    const externalExaminersData = externalExaminers.value.map((examiner) => ({
+      name: examiner.name,
+      email: examiner.email,
+      phoneNumber: examiner.phoneNumber,
+      institution: examiner.institution,
+      expertise: examiner.expertise,
+      cvFile: examiner.cvFileId, // Include the CV file information
+    }));
+
+    // Create a FormData object to handle file uploads
+    const formData = new FormData();
+
+    // Append co-supervisors, student, internalExaminers, and externalExaminers data
+
+    // Append co-supervisors
+    formData.append(
+      "coSupervisors",
+      JSON.stringify(
+        coSupervisors.value.map((supervisor) => ({ ...supervisor }))
+      )
+    );
+
+    // Append student as an object
+    formData.append("student", JSON.stringify({ ...student.value }));
+
+    // Append internalExaminers as an array of objects
+    formData.append("internalExaminers", JSON.stringify(internalExaminersData));
+
+    // Append externalExaminers as an array of objects
+    formData.append("externalExaminers", JSON.stringify(externalExaminersData));
+
+    // Append other fields
+    formData.append("passedDisserationTwo", passedDisserationTwo.value);
+    formData.append("passedElectivesAndCores", passedElectivesAndCores.value);
+    formData.append("examinersNotified", examinersNotified.value);
+
+    // Append internal examiner CV files
+    internalExaminers.value.forEach((examiner) => {
+      const fileExtension = examiner.cvFile.name.split(".").pop(); // Extract file extension
+      formData.append(
+        `cvFiles`,
+        examiner.cvFile,
+        `internal-${examiner.cvFileId}.${fileExtension}`
+      );
+    });
+    externalExaminers.value.forEach((examiner) => {
+      const fileExtension = examiner.cvFile.name.split(".").pop(); // Extract file extension
+      formData.append(
+        `cvFiles`,
+        examiner.cvFile,
+        `external-${examiner.cvFileId}.${fileExtension}`
+      );
+    });
+
     const response = await axios.post(
       `${apiUrl}/lecturer/newnomination`,
-      {
-        coSupervisors: coSupervisors.value.map((supervisor) => ({
-          ...supervisor,
-        })),
-        student: { ...student.value },
-        internalExaminers: internalExaminers.value.map((examiner) => ({
-          ...examiner,
-        })),
-        externalExaminers: externalExaminers.value.map((examiner) => ({
-          ...examiner,
-        })),
-        passedDisserationTwo: passedDisserationTwo.value,
-        passedElectivesAndCores: passedElectivesAndCores.value,
-        examinersNotified: examinersNotified.value,
-      },
+      formData,
       {
         headers: {
           Authorization: token,
+          "Content-Type": "multipart/form-data",
         },
       }
     );

@@ -1,27 +1,30 @@
 const { firestore } = require("../../services/firebase");
 
 class InternalExaminer {
-  constructor({ name, email, phoneNumber }) {
+  constructor({ name, email, phoneNumber, cvFileId }) {
     this.name = name;
     this.email = email;
     this.phoneNumber = phoneNumber;
+    this.cvFileId = cvFileId;
   }
   toPlainObject() {
     return {
       name: this.name,
       email: this.email,
       phoneNumber: this.phoneNumber,
+      cvFileId: this.cvFileId,
     };
   }
 }
 
 class ExternalExaminer {
-  constructor({ name, email, phoneNumber, institution, expertise }) {
+  constructor({ name, email, phoneNumber, institution, expertise, cvFileId }) {
     this.name = name;
     this.email = email;
     this.phoneNumber = phoneNumber;
     this.institution = institution;
     this.expertise = expertise;
+    this.cvFileId = cvFileId;
   }
   toPlainObject() {
     return {
@@ -30,6 +33,7 @@ class ExternalExaminer {
       phoneNumber: this.phoneNumber,
       institution: this.institution,
       expertise: this.expertise,
+      cvFileId: this.cvFileId,
     };
   }
 }

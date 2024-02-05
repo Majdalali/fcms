@@ -65,28 +65,101 @@ async function deleteSession(req, res) {
   }
 }
 
-async function checkDeadline(req, res) {
-  const { submissionType } = req.body;
+// async function checkDeadline(req, res) {
+//   const { submissionType } = req.body;
+//   // Map submission types to corresponding session types
+//   const typeMapping = {
+//     proposals: "proposal",
+//     progressOne: "progress_one",
+//     progressTwo: "progress_two",
+//     corrections: "correction",
+//     presentationAndDemos: "presentationAndDemo",
+//     finalSubmission: "finalSubmission",
+//     proposalsExtras: "proposal",
+//     progressOneExtras: "progress_one",
+//     progressTwoExtras: "progress_two",
+//     finalSubmissionExtras: "finalSubmission",
+//     correctionsExtras: "correction",
+//     presentationAndDemosExtras: "presentationAndDemo",
+//   };
+
+//   try {
+//     // Retrieve the session based on session_program
+//     const session = await Session.getLatestSession();
+
+//     if (!session) {
+//       return res.status(404).json({ error: "Session not found" });
+//     }
+
+//     // Check if sessionType is a valid property in the session
+//     const sessionType = typeMapping[submissionType];
+//     if (!Object.keys(session).includes(sessionType)) {
+//       return res.status(400).json({ error: "Invalid submission type" });
+//     }
+
+//     // Check bypass_deadline
+//     if (session.bypass_deadline === true) {
+//       return res.status(200).json({ isWithinDeadline: true });
+//     }
+
+//     const { startDate, endDate } = session[sessionType];
+
+//     // Parse date strings into Date objects
+//     const jsStartDate = new Date(startDate);
+//     const jsEndDate = new Date(endDate);
+
+//     // Get the current time
+//     const currentTime = Date.now();
+
+//     // Check if the current time is within the deadline range
+//     const isWithinDeadline =
+//       currentTime >= jsStartDate.getTime() &&
+//       currentTime <= jsEndDate.getTime();
+
+//     res.status(200).json({ isWithinDeadline });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ error: "Internal server error" });
+//   }
+// }
+
+async function checkDeadline(submissionType) {
+  // Map submission types to corresponding session types
+  const typeMapping = {
+    proposals: "proposal",
+    progressOne: "progress_one",
+    progressTwo: "progress_two",
+    corrections: "correction",
+    presentationAndDemos: "presentationAndDemo",
+    finalSubmission: "finalSubmission",
+    proposalsExtras: "proposal",
+    progressOneExtras: "progress_one",
+    progressTwoExtras: "progress_two",
+    finalSubmissionExtras: "finalSubmission",
+    correctionsExtras: "correction",
+    presentationAndDemosExtras: "presentationAndDemo",
+  };
 
   try {
     // Retrieve the session based on session_program
     const session = await Session.getLatestSession();
 
     if (!session) {
-      return res.status(404).json({ error: "Session not found" });
+      return { error: "Session not found" };
     }
 
-    // Check if submissionType is a valid property in the session
-    if (!Object.keys(session).includes(submissionType)) {
-      return res.status(400).json({ error: "Invalid submission type" });
+    // Check if sessionType is a valid property in the session
+    const sessionType = typeMapping[submissionType];
+    if (!Object.keys(session).includes(sessionType)) {
+      return { error: "Invalid submission type" };
     }
 
     // Check bypass_deadline
     if (session.bypass_deadline === true) {
-      return res.status(200).json({ isWithinDeadline: true });
+      return { isWithinDeadline: true };
     }
 
-    const { startDate, endDate } = session[submissionType];
+    const { startDate, endDate } = session[sessionType];
 
     // Parse date strings into Date objects
     const jsStartDate = new Date(startDate);
@@ -100,10 +173,10 @@ async function checkDeadline(req, res) {
       currentTime >= jsStartDate.getTime() &&
       currentTime <= jsEndDate.getTime();
 
-    res.status(200).json({ isWithinDeadline });
+    return { isWithinDeadline };
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal server error" });
+    return { error: "Internal server error" };
   }
 }
 

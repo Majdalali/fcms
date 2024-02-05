@@ -4,10 +4,14 @@ const router = express.Router();
 const lecturerController = require("../controllers/usersControllers/lecturerController");
 const fileUploadController = require("../controllers/generalControllers/fileUploadController");
 const nominationController = require("../controllers/generalControllers/nominationsController");
+const cvFileController = require("../controllers/generalControllers/cvFileController");
 const commentsController = require("../controllers/generalControllers/commentsController");
 
 const authGuard = require("../middleware/roleAuth"); // Import the middleware
 const { verifyToken } = require("../middleware/verifyToken");
+
+const multer = require("multer");
+const upload = multer();
 
 // END POINTS FOR USER ROUTES
 router.post("/lecturer/register", lecturerController.registerLecturer);
@@ -31,11 +35,14 @@ router.get(
   lecturerController.myCoSupervisedStudents
 );
 router.get("/lecturer/myExaminees/:userId", lecturerController.myExaminees);
+
 router.post(
   "/lecturer/newnomination",
   verifyToken,
+  cvFileController.cvUpload.array("cvFiles"),
   nominationController.createNomination
 );
+
 router.get(
   "/lecturer/mycomments/:lecturerId",
   commentsController.getLecturerComments

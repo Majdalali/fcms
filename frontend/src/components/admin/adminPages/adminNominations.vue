@@ -132,6 +132,7 @@
                             <th class="text-left">Email</th>
                             <th class="text-left">Phone Number</th>
                             <th class="text-left">Registered?</th>
+                            <th class="text-left">CV File</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -149,6 +150,19 @@
                               <v-chip color="error" text-color="white" v-else
                                 >No</v-chip
                               >
+                            </td>
+                            <td>
+                              <a
+                                :href="`${apiUrl}/files/${inExaminer.cvFileId}`"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                v-if="inExaminer.cvFileId !== undefined"
+                              >
+                                <span class="text-blue-200"> Open</span>
+                              </a>
+                              <h1 v-else class="title">
+                                <span class="text-red-500">No file</span>
+                              </h1>
                             </td>
                           </tr>
                         </tbody></v-table
@@ -171,6 +185,7 @@
                             <th class="text-left">Institution</th>
                             <th class="text-left">Expertise</th>
                             <th class="text-left">Registered?</th>
+                            <th class="text-left">CV File</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -190,6 +205,19 @@
                               <v-chip color="error" text-color="white" v-else
                                 >No</v-chip
                               >
+                            </td>
+                            <td>
+                              <a
+                                :href="`${apiUrl}/files/${exExaminer.cvFileId}`"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                v-if="exExaminer.cvFileId !== undefined"
+                              >
+                                <span class="text-blue-200"> Open</span>
+                              </a>
+                              <h1 v-else class="title">
+                                <span class="text-red-500">No file</span>
+                              </h1>
                             </td>
                           </tr>
                         </tbody></v-table

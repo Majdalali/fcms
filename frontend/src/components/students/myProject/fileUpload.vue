@@ -3,8 +3,27 @@
     <div class="pt-10">
       <h1 class="title text-xl font-medium">{{ name }} Submission</h1>
       <p v-if="submissionDate" class="titleDes text-base font-light">
-        Don't forget to submit by {{ submissionDate[dateType] }}
+        Submission deadline:
+        {{ formatDate(submissionDate[dateType].startDate) }} -
+        {{ formatDate(submissionDate[dateType].endDate) }}
       </p>
+      <p class="titleDes text-base font-light">
+        Submission status:
+        <span class="text-green-400 font-bold" v-if="isWithinDeadline"
+          >Open</span
+        >
+        <span class="text-red-400 font-bold" v-else>Closed</span>
+      </p>
+      <p
+        v-if="!submissionDate.bypass_deadline"
+        class="titleDes text-base font-light"
+      >
+        Time remaining:
+        <span class="font-bold">{{ timeRemaining }}</span>
+      </p>
+      <small v-else class="font-semibold titleDes text-orange-400">
+        *Note that the admin has turned off the deadline for submission
+      </small>
     </div>
     <div class="pt-10 h-full w-[80%]">
       <v-card
@@ -81,6 +100,13 @@
                 }}</span>
               </p>
             </div>
+            <div>
+              <p>
+                <span class="capitalize">{{
+                  submissionTimeDifference(fileInfo.createdAt)
+                }}</span>
+              </p>
+            </div>
           </h1>
           <h1 v-else class="cardValue uppercase text-lg">
             No file was uploaded
@@ -91,11 +117,12 @@
           <v-dialog v-model="dialog[key]" persistent width="1024">
             <template v-slot:activator="{ props }">
               <v-btn
-                class=""
                 variant="elevated"
                 v-bind="props"
                 color="deep-purple-darken-4"
                 size="large"
+                class="w-48"
+                :disabled="!isWithinDeadline"
                 ><v-icon class="mr-2"><upload /></v-icon>Upload File</v-btn
               >
             </template>
@@ -103,74 +130,83 @@
               <v-card-title>
                 <span class="text-h5">Upload Files</span>
               </v-card-title>
-              <v-card-text>
-                <v-container>
-                  <v-row>
-                    <v-col cols="12">
-                      <v-file-input
-                        v-if="key === 'Main'"
-                        v-model="mainFile"
-                        variant="outlined"
-                        clearable
-                        :label="name + ' File'"
-                        show-size
-                        counter
-                      ></v-file-input>
-                      <v-file-input
-                        v-else
-                        v-model="otherFiles"
-                        multiple
-                        variant="outlined"
-                        chips
-                        clearable
-                        label="Other Files"
-                        show-size
-                        counter
-                      ></v-file-input>
-                      <small v-if="key === 'Main'"
-                        >*Only One file is allowed, if you would like to upload
-                        multiple files, you can use .rar or upload in the
-                        "Othres" section</small
-                      >
-                    </v-col>
-                  </v-row>
-                </v-container>
-                <small
-                  class="text-red-500 font-bold text-base"
-                  v-if="key === 'Main' && filesInfo.Main.length > 0"
-                  >*Please Delete the old file first to upload a new one</small
-                >
-                <v-alert
-                  v-if="errorMessage"
-                  type="warning"
-                  variant="outlined"
-                  closable
-                  >{{ errorMessage }}</v-alert
-                >
-              </v-card-text>
-              <v-card-actions>
-                <v-spacer></v-spacer>
-                <v-btn
-                  color="warning"
-                  class="w-32 cardValue"
-                  variant="outlined"
-                  @click="closeDialog(key)"
-                >
-                  Close
-                </v-btn>
-                <v-btn
-                  @click="
-                    key === 'Main' ? submitMainFiles() : submitOtherFiles()
-                  "
-                  class="cardValue w-32"
-                  variant="elevated"
-                  color="indigo"
-                  :disabled="key === 'Main' && filesInfo.Main.length > 0"
-                >
-                  <v-icon class="mr-2"><upload /></v-icon>
-                  Upload
-                </v-btn>
-              </v-card-actions>
+              <v-form v-model="valid">
+                <v-card-text>
+                  <v-container>
+                    <v-row>
+                      <v-col cols="12">
+                        <v-file-input
+                          v-if="key === 'Main'"
+                          v-model="mainFile"
+                          variant="outlined"
+                          clearable
+                          :label="name + ' File'"
+                          show-size
+                          counter
+                          :rules="[
+                            (v) => !!v || 'File is required',
+                            (v) => (v && v.length > 0) || 'File is required',
+                          ]"
+                        ></v-file-input>
+                        <v-file-input
+                          v-else
+                          v-model="otherFiles"
+                          multiple
+                          variant="outlined"
+                          chips
+                          clearable
+                          label="Other Files"
+                          show-size
+                          counter
+                        ></v-file-input>
+                        <small v-if="key === 'Main'"
+                          >*Only One file is allowed, if you would like to
+                          upload multiple files, you can use .rar or upload in
+                          the "Others" section</small
+                        >
+                      </v-col>
+                    </v-row>
+                  </v-container>
+                  <small
+                    class="text-red-500 font-bold"
+                    v-if="key === 'Main' && filesInfo.Main.length > 0"
+                    >*Please Delete the old file first to upload a new
+                    one</small
+                  >
+                  <v-alert
+                    v-if="errorMessage"
+                    type="error"
+                    variant="outlined"
+                    closable
+                    >{{ errorMessage }}</v-alert
+                  >
+                </v-card-text>
+                <v-card-actions>
+                  <v-spacer></v-spacer>
+                  <v-btn
+                    color="warning"
+                    class="w-32 cardValue"
+                    variant="outlined"
+                    @click="closeDialog(key)"
+                  >
+                    Close
+                  </v-btn>
+                  <v-btn
+                    @click="
+                      key === 'Main' ? submitMainFiles() : submitOtherFiles()
+                    "
+                    class="cardValue w-32"
+                    variant="elevated"
+                    color="indigo"
+                    :disabled="
+                      (key === 'Main' && filesInfo.Main.length > 0) || !valid
+                    "
+                  >
+                    <v-icon class="mr-2"><upload /></v-icon>
+                    Upload
+                  </v-btn>
+                </v-card-actions>
+              </v-form>
             </v-card>
           </v-dialog>
         </v-card-actions>
@@ -196,7 +232,7 @@
 
 <script setup>
 import upload from "@/assets/icons/upload.vue";
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import axios from "axios";
 import { useDark } from "@vueuse/core";
 
@@ -206,7 +242,10 @@ const props = defineProps({
   extrasType: String,
   name: String,
   dateType: String,
+  submissionDate: Object,
 });
+// current time and date
+const now = new Date();
 const isDark = useDark();
 const snackbar = ref(false);
 const snackbarMessage = ref("");
@@ -224,8 +263,9 @@ const dialogTypes = {
   Main: "main",
   Others: "others",
 };
-const submissionDate = ref(null);
+const bypass_deadline = ref(false);
 const errorMessage = ref("");
+const valid = ref(false);
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -235,8 +275,10 @@ const closeDialog = (key) => {
   dialog.value[key] = false;
   if (key == "Main") {
     mainFile.value = null;
+    errorMessage.value = "";
   } else {
     otherFiles.value = [];
+    errorMessage.value = "";
   }
 };
 
@@ -244,6 +286,202 @@ const seperateName = (name) => {
   const splitName = name.split(" ");
   const newName = splitName.join(" ");
   return newName;
+};
+
+const isWithinDeadline = computed(() => {
+  if (props.submissionDate.bypass_deadline === true) {
+    return true;
+  } else if (props.submissionDate) {
+    const jsStartDate = new Date(
+      props.submissionDate[props.dateType].startDate
+    );
+    const jsEndDate = new Date(props.submissionDate[props.dateType].endDate);
+    const currentTime = now.getTime();
+
+    return (
+      currentTime >= jsStartDate.getTime() && currentTime <= jsEndDate.getTime()
+    );
+  }
+  return false;
+});
+
+// time remaining for the deadline
+const timeRemaining = computed(() => {
+  if (props.submissionDate) {
+    const jsEndDate = new Date(props.submissionDate[props.dateType].endDate);
+    const currentTime = now.getTime();
+
+    if (currentTime > jsEndDate.getTime()) {
+      // Submission time has passed
+      const timeDiff = currentTime - jsEndDate.getTime();
+      const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor(
+        (timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+      );
+
+      if (days > 0) {
+        return `Closed ${days} days ago`;
+      } else {
+        return `Closed ${hours} ${hours === 1 ? "hour" : "hours"} ago`;
+      }
+    } else {
+      // Submission time is still remaining
+      const timeDiff = jsEndDate.getTime() - currentTime;
+      const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor(
+        (timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+      );
+
+      if (days > 0) {
+        if (hours > 0) {
+          return `${days} days and ${hours} ${
+            hours === 1 ? "hour" : "hours"
+          } remaining`;
+        } else {
+          return `${days} ${days === 1 ? "day" : "days"} remaining`;
+        }
+      } else {
+        return `${hours} ${hours === 1 ? "hour" : "hours"} remaining`;
+      }
+    }
+  }
+
+  return "N/A";
+});
+
+const submissionTimeDifference = (createdAt) => {
+  if (createdAt && props.submissionDate) {
+    if (typeof createdAt === "string") {
+      // Handle the case when createdAt is provided as a string
+      const jsCreatedAt = new Date(createdAt);
+      const jsEndDate = new Date(props.submissionDate[props.dateType].endDate);
+      const timeDiff = jsEndDate.getTime() - jsCreatedAt.getTime();
+
+      if (timeDiff < 0) {
+        // Submitted after the end time
+        const lateDays = Math.floor(Math.abs(timeDiff) / (1000 * 60 * 60 * 24));
+        const lateHours = Math.floor(
+          (Math.abs(timeDiff) % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+        );
+        const lateMinutes = Math.floor(
+          (Math.abs(timeDiff) % (1000 * 60 * 60)) / (1000 * 60)
+        );
+
+        const lateDaysText =
+          lateDays > 0 ? `${lateDays} day${lateDays > 1 ? "s" : ""}` : "";
+        const lateHoursText =
+          lateHours > 0 ? `${lateHours} hour${lateHours > 1 ? "s" : ""}` : "";
+        const lateMinutesText =
+          lateMinutes > 0
+            ? `${lateMinutes} minute${lateMinutes > 1 ? "s" : ""}`
+            : "";
+
+        const lateSubmissionText = `Submitted ${lateDaysText}${
+          lateDays > 0 && (lateHours > 0 || lateMinutes > 0) ? " and " : ""
+        }${lateHoursText}${
+          lateHours > 0 && lateMinutes > 0 ? " and " : ""
+        }${lateMinutesText} late`;
+
+        return lateSubmissionText.trim();
+      } else if (timeDiff === 0) {
+        // Submitted exactly at the end time
+        return "Submitted exactly on time";
+      } else {
+        // Submitted before the end time
+        const earlyDays = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+        const earlyHours = Math.floor(
+          (timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+        );
+        const earlyMinutes = Math.floor(
+          (timeDiff % (1000 * 60 * 60)) / (1000 * 60)
+        );
+
+        const earlyDaysText =
+          earlyDays > 0 ? `${earlyDays} day${earlyDays > 1 ? "s" : ""}` : "";
+        const earlyHoursText =
+          earlyHours > 0
+            ? `${earlyHours} hour${earlyHours > 1 ? "s" : ""}`
+            : "";
+        const earlyMinutesText =
+          earlyMinutes > 0
+            ? `${earlyMinutes} minute${earlyMinutes > 1 ? "s" : ""}`
+            : "";
+
+        const earlySubmissionText = `Submitted ${earlyDaysText}${
+          earlyDays > 0 && (earlyHours > 0 || earlyMinutes > 0) ? " and " : ""
+        }${earlyHoursText}${
+          earlyHours > 0 && earlyMinutes > 0 ? " and " : ""
+        }${earlyMinutesText} early`;
+
+        return earlySubmissionText.trim();
+      }
+    } else if (createdAt && createdAt._seconds && createdAt._nanoseconds) {
+      const jsCreatedAt = new Date(createdAt._seconds * 1000);
+      const jsEndDate = new Date(props.submissionDate[props.dateType].endDate);
+      const timeDiff = jsEndDate.getTime() - jsCreatedAt.getTime();
+
+      if (timeDiff < 0) {
+        // Submitted after the end time
+        const lateDays = Math.floor(Math.abs(timeDiff) / (1000 * 60 * 60 * 24));
+        const lateHours = Math.floor(
+          (Math.abs(timeDiff) % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+        );
+        const lateMinutes = Math.floor(
+          (Math.abs(timeDiff) % (1000 * 60 * 60)) / (1000 * 60)
+        );
+
+        const lateDaysText =
+          lateDays > 0 ? `${lateDays} day${lateDays > 1 ? "s" : ""}` : "";
+        const lateHoursText =
+          lateHours > 0 ? `${lateHours} hour${lateHours > 1 ? "s" : ""}` : "";
+        const lateMinutesText =
+          lateMinutes > 0
+            ? `${lateMinutes} minute${lateMinutes > 1 ? "s" : ""}`
+            : "";
+
+        const lateSubmissionText = `Submitted ${lateDaysText}${
+          lateDays > 0 && (lateHours > 0 || lateMinutes > 0) ? " and " : ""
+        }${lateHoursText}${
+          lateHours > 0 && lateMinutes > 0 ? " and " : ""
+        }${lateMinutesText} late`;
+
+        return lateSubmissionText.trim();
+      } else if (timeDiff === 0) {
+        // Submitted exactly at the end time
+        return "Submitted exactly on time";
+      } else {
+        // Submitted before the end time
+        const earlyDays = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+        const earlyHours = Math.floor(
+          (timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+        );
+        const earlyMinutes = Math.floor(
+          (timeDiff % (1000 * 60 * 60)) / (1000 * 60)
+        );
+
+        const earlyDaysText =
+          earlyDays > 0 ? `${earlyDays} day${earlyDays > 1 ? "s" : ""}` : "";
+        const earlyHoursText =
+          earlyHours > 0
+            ? `${earlyHours} hour${earlyHours > 1 ? "s" : ""}`
+            : "";
+        const earlyMinutesText =
+          earlyMinutes > 0
+            ? `${earlyMinutes} minute${earlyMinutes > 1 ? "s" : ""}`
+            : "";
+
+        const earlySubmissionText = `Submitted ${earlyDaysText}${
+          earlyDays > 0 && (earlyHours > 0 || earlyMinutes > 0) ? " and " : ""
+        }${earlyHoursText}${
+          earlyHours > 0 && earlyMinutes > 0 ? " and " : ""
+        }${earlyMinutesText} early`;
+
+        return earlySubmissionText.trim();
+      }
+    }
+  }
+
+  return "N/A";
 };
 
 onMounted(async () => {
@@ -289,15 +527,6 @@ onMounted(async () => {
     } catch (error) {
       // Handle error for other files request
     }
-
-    // Get Date deadline
-    try {
-      const response = await axios.get(`${apiUrl}/currentSession`);
-      submissionDate.value = response.data;
-    } catch (error) {
-      console.error(`Error fetching ${dateType} deadline:`, error);
-      // Handle error for  deadline request
-    }
   } catch (error) {
     console.error("Error fetching user info:", error);
     // Handle overall error, display an error message, or redirect if needed
@@ -333,7 +562,6 @@ const submitMainFiles = async () => {
       ) {
         console.error("Submission already exists for this student and type.");
         errorMessage.value = existingSubmissionResponse.data.error;
-        // Handle existing submission error here
         return; // Stop file upload process
       } else {
         // Reset the error message on successful upload
@@ -365,8 +593,7 @@ const submitMainFiles = async () => {
       console.log("mainFile:", mainFile.value);
     }
   } catch (error) {
-    console.error("Error uploading Main file:", error);
-    errorMessage.value = error.response.data.message;
+    errorMessage.value = error.response.data.error;
   }
 };
 
@@ -397,7 +624,7 @@ const submitOtherFiles = async () => {
       console.log("otherFiles:", otherFiles.value);
     }
   } catch (error) {
-    console.error("Error uploading other files:", error);
+    errorMessage.value = error.response.data.error;
   }
 };
 
@@ -430,7 +657,6 @@ const deleteFile = async (autogeneratedName, dialogType) => {
     console.log("File deleted:", response.data);
   } catch (error) {
     console.error("Error deleting file:", error);
-    // Handle error if needed
   }
 };
 
