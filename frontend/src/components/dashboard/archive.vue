@@ -1,8 +1,8 @@
 <template>
   <div>
     <div class="pt-10 mb-5">
-      <h1 class="title text-xl font-medium">Projects</h1>
-      <p class="titleDes text-base font-light">List of registered projects</p>
+      <h1 class="title text-xl font-medium">Archive</h1>
+      <p class="titleDes text-base font-light">List of archived projects</p>
     </div>
     <div class="w-[90%]">
       <div v-if="!isLoading">
@@ -78,16 +78,6 @@ const apiUrl = import.meta.env.VITE_API_URL;
 onMounted(async () => {
   isLoading.value = true;
   try {
-    const response = await axios.get(`${apiUrl}/projects`);
-    const projectsWithNum = response.data.map((user, num) => ({
-      ...user,
-      num: num + 1,
-    }));
-
-    // Filter out rows with empty projectInfo
-    filteredProjectInfo.value = projectsWithNum.filter(
-      (item) => item.projectInfo && Object.keys(item.projectInfo).length > 0
-    );
     isLoading.value = false;
   } catch (error) {
     console.error("Error fetching user info:", error);

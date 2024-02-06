@@ -263,7 +263,6 @@ const dialogTypes = {
   Main: "main",
   Others: "others",
 };
-const bypass_deadline = ref(false);
 const errorMessage = ref("");
 const valid = ref(false);
 

@@ -33,14 +33,41 @@
                     <div>
                       <h1 class="text-2xl capitalize font-bold title">
                         {{ userInfo.username }}
+                        <v-chip
+                          text="Admin"
+                          size="small"
+                          label
+                          color="red"
+                          v-show="userInfo.isAdmin"
+                          class="ml-2"
+                        ></v-chip>
+                        <v-chip
+                          text="Coordinator"
+                          size="small"
+                          label
+                          color="primary"
+                          v-show="userInfo.isCoordinator"
+                          class="ml-2"
+                        ></v-chip>
                       </h1>
                     </div>
-                    <div class="flex flex-row">
+                    <div class="flex flex-row mt-2">
                       <v-tooltip location="bottom" text="Email">
                         <template v-slot:activator="{ props }">
                           <p v-bind="props" class="text-lg font-light para">
                             <v-icon class="mr-2"><Email /></v-icon
                             >{{ userInfo.email }}
+                          </p>
+                        </template>
+                      </v-tooltip>
+                      <v-tooltip location="bottom" text="Program">
+                        <template v-slot:activator="{ props }">
+                          <p
+                            v-bind="props"
+                            class="text-lg ml-10 uppercase font-light para"
+                          >
+                            <v-icon class="mr-2"><Flag /></v-icon
+                            >{{ userInfo.coordinator_program }}
                           </p>
                         </template>
                       </v-tooltip>
@@ -60,16 +87,32 @@
                           <span class="text-h5">User Profile</span>
                         </v-card-title>
                         <v-card-text>
+                          <v-alert
+                            v-if="errorMessage"
+                            type="error"
+                            variant="outlined"
+                            closable
+                            >{{ errorMessage }}</v-alert
+                          >
                           <v-container>
                             <v-row>
-                              <v-col cols="12">
+                              <v-col cols="12" md="6">
                                 <small class="titleDes">Name</small>
                                 <v-text-field
                                   v-model="username"
                                   :placeholder="userInfo.username"
                                   :rules="nameRules"
                                   variant="outlined"
-                                  hide-details
+                                  required
+                                ></v-text-field> </v-col
+                              ><v-col cols="12" md="6">
+                                <small class="titleDes">Program</small>
+                                <v-text-field
+                                  v-model="program"
+                                  :placeholder="userInfo.coordinator_program"
+                                  :rules="nameRules"
+                                  variant="outlined"
+                                  hint="Please select the program that you are coordinating"
                                   required
                                 ></v-text-field>
                               </v-col>
@@ -80,7 +123,6 @@
                                   variant="outlined"
                                   :placeholder="userInfo.email"
                                   :rules="emailRules"
-                                  hide-details
                                   required
                                 ></v-text-field>
                               </v-col>
@@ -107,13 +149,6 @@
                                 </v-col> -->
                             </v-row>
                           </v-container>
-                          <small
-                            >*Please only update your details if there was a
-                            mistake at registration!</small
-                          >
-                          <span v-if="responseMessage" class="">{{
-                            responseMessage
-                          }}</span>
                         </v-card-text>
                         <v-card-actions>
                           <v-spacer></v-spacer>
@@ -142,12 +177,30 @@
               </v-sheet>
             </div>
 
-            <v-progress-circular v-else indeterminate></v-progress-circular>
+            <v-skeleton-loader
+              v-else
+              class="w-4/5 border"
+              type="card"
+            ></v-skeleton-loader>
           </div>
           <div class="lowerDiv pt-10"></div>
         </v-col>
       </v-row>
     </v-container>
+    <v-snackbar
+      :timeout="2000"
+      color="indigo"
+      variant="elevated"
+      v-model="snackbar"
+    >
+      {{ snackbarMessage }}
+
+      <template v-slot:actions>
+        <v-btn color="white" variant="transparent" @click="snackbar = false">
+          X
+        </v-btn>
+      </template>
+    </v-snackbar>
   </v-app>
 </template>
 
@@ -158,6 +211,7 @@ import axios from "axios";
 import Navigation from "../navigation.vue";
 
 // Icons
+import Flag from "@/assets/icons/flag.vue";
 import Email from "@/assets/icons/email.vue";
 
 // Constants
@@ -166,6 +220,7 @@ const dialog = ref(false);
 const userInfo = ref(null);
 
 const username = ref("");
+const program = ref("");
 const email = ref("");
 const password = ref("");
 const isPasswordEdited = computed(() => {
@@ -225,12 +280,15 @@ const nameRules = [
 const isFormChanged = computed(() => {
   return (
     username.value !== userInfo.value.username ||
+    program.value !== userInfo.value.coordinator_program ||
     email.value !== userInfo.value.email ||
     password.value !== "" ||
     passwordConfirmation.value !== ""
   );
 });
-const responseMessage = ref("");
+const errorMessage = ref("");
+const snackbar = ref(false);
+const snackbarMessage = ref("");
 const apiUrl = import.meta.env.VITE_API_URL;
 
 // Functions
@@ -241,6 +299,7 @@ const editProfile = async () => {
     const requestData = {
       username: username.value,
       email: email.value,
+      coordinator_program: program.value,
     };
 
     if (password.value !== "" || passwordConfirmation.value !== "") {
@@ -256,16 +315,21 @@ const editProfile = async () => {
       }
     );
     if (response.status === 200) {
-      console.log("The student details has been updated!");
-      responseMessage.value = "The student details has been updated!";
-      location.reload();
-    } else {
-      responseMessage.value =
-        response.data.error || "Process failed. Please try again later.";
+      snackbarMessage.value = "Profile Updated Successfully";
+      snackbar.value = true;
+      userInfo.value.username = username.value;
+      userInfo.value.email = email.value;
+      userInfo.value.coordinator_program = program.value;
+      await localStorage.setItem("user", JSON.stringify(userInfo.value));
+      dialog.value = false;
     }
   } catch (error) {
-    responseMessage.value =
-      error.response?.data?.error || "Process failed. Please try again later.";
+    if (error.response && error.response.status === 404) {
+      errorMessage.value = "User not found";
+    } else {
+      errorMessage.value = error.response.data.message;
+      console.log("Error: ", error);
+    }
   }
 };
 
@@ -276,19 +340,22 @@ const getInitials = (username) => {
     .join("")
     .toUpperCase();
 };
+
 onMounted(async () => {
   const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
   const userId = storedUser.user_id;
 
   try {
+    // delay to show the skeleton loader
     const response = await axios.get(`${apiUrl}/lecturer/${userId}`);
     userInfo.value = { ...response.data };
+
     // Set the values of the form
     username.value = response.data.username;
     email.value = response.data.email;
+    program.value = response.data.coordinator_program;
   } catch (error) {
     console.error("Error fetching user info:", error);
-    // Handle error, display an error message, or redirect if needed
   }
 });
 </script>

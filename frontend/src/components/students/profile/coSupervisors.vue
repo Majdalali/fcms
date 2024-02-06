@@ -1,34 +1,6 @@
 <template>
   <div class="mt-10">
     <div class="w-1/2">
-      <!-- <v-sheet
-        border
-        :height="75"
-        class="w-1/2 mt-4 rounded-lg"
-        :elevation="2"
-        :color="isDark ? '' : '#f5f5f5'"
-      >
-        <div class="h-full flex flex-row items-center">
-          <h1 class="text-lg title font-bold absolute left-10">Name</h1>
-          <h1 class="text-lg font-Light titleDes absolute left-[20%]">
-            {{ user.name }}
-          </h1>
-        </div>
-      </v-sheet>
-      <v-sheet
-        border
-        :height="75"
-        :elevation="2"
-        class="w-1/2 mt-4 rounded-lg"
-        :color="isDark ? '' : '#f5f5f5'"
-      >
-        <div class="h-full flex flex-row items-center">
-          <h1 class="text-lg title absolute left-10 font-bold">Email</h1>
-          <h1 class="text-lg font-Light titleDes absolute left-[20%]">
-            {{ user.email }}
-          </h1>
-        </div>
-      </v-sheet> -->
       <v-data-table-virtual
         class="border w-1/2"
         :headers="headers"
@@ -186,14 +158,15 @@ const addCoSupervisor = async () => {
       dialog.value = false;
     }
   } catch (error) {
-    if (error.response.status === 404) {
-      errorMessage.value = "Supervisor wasn't found, please check the email!";
-    } else if (error.response.status === 400) {
-      errorMessage.value = "Lecturer already assigned as co-supervisor!";
+    if (
+      (error.response && error.response.status === 400) ||
+      error.response.status === 404
+    ) {
+      errorMessage.value = error.response.data.error;
     } else {
-      errorMessage.value = "System error, please try again later.";
+      errorMessage.value = "An error occurred. Please try again";
+      console.log("Error adding co-supervisor:", error);
     }
-    console.error("Error assigning a supervisor:", error);
   }
 };
 const closeDialog = () => {

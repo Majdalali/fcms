@@ -82,6 +82,13 @@
                           <span class="text-h5">User Profile</span>
                         </v-card-title>
                         <v-card-text>
+                          <v-alert
+                            v-if="errorMessage"
+                            type="error"
+                            variant="outlined"
+                            closable
+                            >{{ errorMessage }}</v-alert
+                          >
                           <v-container>
                             <v-row>
                               <v-col cols="12" sm="6" md="4">
@@ -155,9 +162,6 @@
                             >*Please only update your details if there was a
                             mistake at registration!</small
                           >
-                          <span v-if="responseMessage" class="">{{
-                            responseMessage
-                          }}</span>
                         </v-card-text>
                         <v-card-actions>
                           <v-spacer></v-spacer>
@@ -186,7 +190,11 @@
               </v-sheet>
             </div>
 
-            <v-progress-circular v-else indeterminate></v-progress-circular>
+            <v-skeleton-loader
+              v-else
+              class="w-4/5 border"
+              type="card"
+            ></v-skeleton-loader>
           </div>
           <div class="lowerDiv pt-10">
             <v-tabs
@@ -230,6 +238,20 @@
         </v-col>
       </v-row>
     </v-container>
+    <v-snackbar
+      :timeout="2000"
+      color="indigo"
+      variant="elevated"
+      v-model="snackbar"
+    >
+      {{ snackbarMessage }}
+
+      <template v-slot:actions>
+        <v-btn color="white" variant="transparent" @click="snackbar = false">
+          X
+        </v-btn>
+      </template>
+    </v-snackbar>
   </v-app>
 </template>
 
@@ -265,6 +287,9 @@ const passwordConfirmation = ref("");
 const matricCard = ref("");
 const user_program = ref("");
 const valid = ref(false);
+const snackbar = ref(false);
+const snackbarMessage = ref("");
+const errorMessage = ref("");
 const emailRules = [
   (value) => {
     if (value) return true;
@@ -359,16 +384,22 @@ const editProfile = async () => {
       },
     });
     if (response.status === 200) {
-      console.log("The student details has been updated!");
-      responseMessage.value = "The student details has been updated!";
-      location.reload();
-    } else {
-      responseMessage.value =
-        response.data.error || "Process failed. Please try again later.";
+      snackbarMessage.value = "Profile Updated Successfully";
+      snackbar.value = true;
+      userInfo.value.username = username.value;
+      userInfo.value.email = email.value;
+      userInfo.value.matricCard = matricCard.value;
+      userInfo.value.user_program = user_program.value;
+      await localStorage.setItem("user", JSON.stringify(userInfo.value));
+      dialog.value = false;
     }
   } catch (error) {
-    responseMessage.value =
-      error.response?.data?.error || "Process failed. Please try again later.";
+    if (error.response && error.response.status === 404) {
+      errorMessage.value = "User not found";
+    } else {
+      errorMessage.value = "An error occurred while updating the profile";
+      console.log("Error: ", error);
+    }
   }
 };
 
@@ -379,6 +410,7 @@ const getInitials = (username) => {
     .join("")
     .toUpperCase();
 };
+
 onMounted(async () => {
   const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
   const userId = storedUser.user_id;
@@ -386,9 +418,8 @@ onMounted(async () => {
 
   try {
     const response = await axios.get(`${apiUrl}/user/${userId}`);
-    const userData = { ...response.data };
-    userInfo.value = { ...response.data };
-    await localStorage.setItem("user", JSON.stringify(userData));
+    userInfo.value = response.data;
+
     // Set the values of the form
     username.value = response.data.username;
     email.value = response.data.email;

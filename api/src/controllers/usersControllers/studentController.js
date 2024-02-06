@@ -404,6 +404,13 @@ async function updateStudentCoSupervisors(req, res) {
       return res.status(404).json({ error: "Supervisor not found" });
     }
 
+    // Check if the co-supervisor already is the student's supervisor
+    if (student.supervisor === supervisor.user_id) {
+      return res
+        .status(400)
+        .json({ error: "Lecturer already assigned as student's supervisor" });
+    }
+
     // Check if the supervisor already exists in student's coSupervisors
     if (student.coSupervisors.includes(supervisor.user_id)) {
       return res.status(400).json({

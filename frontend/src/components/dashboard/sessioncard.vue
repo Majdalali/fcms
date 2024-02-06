@@ -17,7 +17,7 @@ const props = defineProps({
   backgroundColor: String,
   title: String,
   data: String,
-  deadline: String,
+  deadline: Object,
 });
 
 const formatDate = (timestamp) => {

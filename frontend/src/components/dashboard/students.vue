@@ -7,44 +7,51 @@
     <div class="w-[90%]">
       <v-dialog v-model="dialog" max-width="800px">
         <template v-slot:activator="{ on }">
-          <v-card :rounded="0" :elevation="0">
-            <v-text-field
-              v-model="search"
-              label="Search"
-              prepend-inner-icon="mdi-magnify"
-              single-line
-              :rounded="0"
-              variant="outlined"
-              hide-details
-            ></v-text-field>
-          </v-card>
-          <v-data-table
-            class="border"
-            :headers="headers"
-            :items="userInfo"
-            :search="search"
-          >
-            <template v-slot:item.index="{ item }">
-              <a
-                class="text-blue-500 cursor-pointer"
-                v-if="item.index === 1"
-                @click="openDialog(item)"
-              >
-                1
-              </a>
-              <a v-else-if="item.index === 0"> 0 </a>
-            </template>
-            <template v-slot:item.indexTwo="{ item }">
-              <a
-                class="text-blue-500 cursor-pointer"
-                v-if="item.indexTwo > 0"
-                @click="openDialogExaminers(item)"
-              >
-                {{ item.indexTwo }}
-              </a>
-              <a v-else-if="item.indexTwo === 0"> 0 </a>
-            </template>
-          </v-data-table>
+          <div v-if="!isLoading">
+            <v-card :rounded="0" :elevation="0">
+              <v-text-field
+                v-model="search"
+                label="Search"
+                prepend-inner-icon="mdi-magnify"
+                single-line
+                :rounded="0"
+                variant="outlined"
+                hide-details
+              ></v-text-field>
+            </v-card>
+            <v-data-table
+              class="border"
+              :headers="headers"
+              :items="userInfo"
+              :search="search"
+            >
+              <template v-slot:item.index="{ item }">
+                <a
+                  class="text-blue-500 cursor-pointer"
+                  v-if="item.index === 1"
+                  @click="openDialog(item)"
+                >
+                  1
+                </a>
+                <a v-else-if="item.index === 0"> 0 </a>
+              </template>
+              <template v-slot:item.indexTwo="{ item }">
+                <a
+                  class="text-blue-500 cursor-pointer"
+                  v-if="item.indexTwo > 0"
+                  @click="openDialogExaminers(item)"
+                >
+                  {{ item.indexTwo }}
+                </a>
+                <a v-else-if="item.indexTwo === 0"> 0 </a>
+              </template>
+            </v-data-table>
+          </div>
+          <v-skeleton-loader
+            v-else
+            class="mw-auto border"
+            type="table"
+          ></v-skeleton-loader>
         </template>
 
         <!-- Dialog content -->
@@ -142,6 +149,7 @@ import axios from "axios";
 // Constants
 const search = ref("");
 const userInfo = ref([]);
+const isLoading = ref(false);
 const dialog = ref(false);
 const dialogExaminers = ref(false);
 const supervisorInfo = ref({});
@@ -201,6 +209,7 @@ const closeDialogExaminers = () => {
 };
 
 onMounted(async () => {
+  isLoading.value = true;
   try {
     const response = await axios.get(`${apiUrl}/users`);
     userInfo.value = response.data.map((user, num) => ({
@@ -209,6 +218,7 @@ onMounted(async () => {
       index: user.supervisor ? 1 : 0,
       indexTwo: user.examiners.length,
     }));
+    isLoading.value = false;
   } catch (error) {
     console.error("Error fetching user info:", error);
   }

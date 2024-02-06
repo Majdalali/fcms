@@ -7,44 +7,51 @@
     <div class="w-[90%]">
       <v-dialog v-model="dialog" max-width="800px">
         <template v-slot:activator="{ on }">
-          <v-card :rounded="0" :elevation="0">
-            <v-text-field
-              v-model="search"
-              label="Search"
-              prepend-inner-icon="mdi-magnify"
-              single-line
-              :rounded="0"
-              variant="outlined"
-              hide-details
-            ></v-text-field>
-          </v-card>
-          <v-data-table
-            class="border"
-            :headers="headers"
-            :items="userInfo"
-            :search="search"
-          >
-            <template v-slot:item.numSupervised="{ item }">
-              <a
-                class="text-blue-500 cursor-pointer"
-                v-if="item.numSupervised > 0"
-                @click="openDialog(item)"
-              >
-                {{ item.numSupervised }}
-              </a>
-              <a v-else-if="item.numSupervised === 0"> 0 </a>
-            </template>
-            <template v-slot:item.numExaminees="{ item }">
-              <a
-                class="text-blue-500 cursor-pointer"
-                v-if="item.numExaminees > 0"
-                @click="opendialogExaminees(item)"
-              >
-                {{ item.numExaminees }}
-              </a>
-              <a v-else-if="item.numExaminees === 0"> 0 </a>
-            </template>
-          </v-data-table>
+          <div v-if="!isLoading">
+            <v-card :rounded="0" :elevation="0">
+              <v-text-field
+                v-model="search"
+                label="Search"
+                prepend-inner-icon="mdi-magnify"
+                single-line
+                :rounded="0"
+                variant="outlined"
+                hide-details
+              ></v-text-field>
+            </v-card>
+            <v-data-table
+              class="border"
+              :headers="headers"
+              :items="userInfo"
+              :search="search"
+            >
+              <template v-slot:item.numSupervised="{ item }">
+                <a
+                  class="text-blue-500 cursor-pointer"
+                  v-if="item.numSupervised > 0"
+                  @click="openDialog(item)"
+                >
+                  {{ item.numSupervised }}
+                </a>
+                <a v-else-if="item.numSupervised === 0"> 0 </a>
+              </template>
+              <template v-slot:item.numExaminees="{ item }">
+                <a
+                  class="text-blue-500 cursor-pointer"
+                  v-if="item.numExaminees > 0"
+                  @click="opendialogExaminees(item)"
+                >
+                  {{ item.numExaminees }}
+                </a>
+                <a v-else-if="item.numExaminees === 0"> 0 </a>
+              </template>
+            </v-data-table>
+          </div>
+          <v-skeleton-loader
+            v-else
+            class="mw-auto border"
+            type="table"
+          ></v-skeleton-loader>
         </template>
 
         <!-- Dialog content -->
@@ -142,6 +149,7 @@ import axios from "axios";
 // Constants
 const search = ref("");
 const userInfo = ref([]);
+const isLoading = ref(false);
 const dialog = ref(false);
 const dialogExaminees = ref(false);
 const studentsInfo = ref([]);
@@ -203,6 +211,7 @@ const closeDialog = () => {
 };
 
 onMounted(async () => {
+  isLoading.value = true;
   try {
     const response = await axios.get(`${apiUrl}/lecturers`);
     userInfo.value = response.data.map((lecturer, num) => ({
@@ -211,6 +220,7 @@ onMounted(async () => {
       numSupervised: lecturer.supervisedStudents.length,
       numExaminees: lecturer.examinees.length,
     }));
+    isLoading.value = false;
   } catch (error) {
     console.error("Error fetching user info:", error);
   }

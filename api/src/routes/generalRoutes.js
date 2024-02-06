@@ -30,9 +30,11 @@ router.post(
   notificationsController.createNotification
 );
 router.get("/notifications", notificationsController.getAllNotifications);
-router.delete(
+
+router.post(
   "/notification/:notificationId",
-  notificationsController.deleteNotification
+  verifyToken,
+  notificationsController.deleteOrUpdateNotification
 );
 
 router.get(

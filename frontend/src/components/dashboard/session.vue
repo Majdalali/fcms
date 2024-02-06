@@ -106,24 +106,13 @@
 
 <script setup>
 import { useDark } from "@vueuse/core";
-import { ref, onMounted } from "vue";
-import axios from "axios";
 import SessionCard from "./sessioncard.vue";
 
 // Constants
 const isDark = useDark();
-const sessionInfo = ref(null);
-const apiUrl = import.meta.env.VITE_API_URL;
 
-// Functions
-onMounted(async () => {
-  try {
-    const response = await axios.get(`${apiUrl}/currentSession`);
-    sessionInfo.value = response.data;
-  } catch (error) {
-    console.error("Error fetching user info:", error);
-    // Handle error, display an error message, or redirect if needed
-  }
+const props = defineProps({
+  sessionInfo: Object,
 });
 </script>
 

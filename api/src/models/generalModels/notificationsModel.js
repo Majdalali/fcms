@@ -52,9 +52,35 @@ class Notifications {
     }
   }
 
+  static async updateNotification(notificationId, notificationData) {
+    try {
+      await notificationsCollection
+        .doc(notificationId)
+        .update(notificationData);
+    } catch (error) {
+      throw error;
+    }
+  }
+
   static async deleteNotification(notificationId) {
     try {
       await notificationsCollection.doc(notificationId).delete();
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  static async getNotificationById(notificationId) {
+    try {
+      const notification = await notificationsCollection
+        .doc(notificationId)
+        .get();
+
+      if (!notification.exists) {
+        return null;
+      }
+
+      return notification.data();
     } catch (error) {
       throw error;
     }

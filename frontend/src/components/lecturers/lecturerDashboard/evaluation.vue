@@ -110,7 +110,6 @@
           >Submit Evaluation</v-btn
         >
       </v-form>
-      <h1 class="mt-2">{{ selectedStudent }}</h1>
     </div>
     <LecturerEvaluations :criteriaData="criteriasData" />
     <v-snackbar

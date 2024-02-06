@@ -1,31 +1,6 @@
 const Notifications = require("../../models/generalModels/notificationsModel");
 const jwt = require("jsonwebtoken");
 
-// async function createNotification(req, res) {
-//   const token = req.headers.authorization;
-//   try {
-//     const decoded = jwt.verify(token, process.env.SECRET_TOKEN);
-//     const fromUser = decoded.user_id;
-//     const { message, toUsers, creator, type } = req.body;
-
-//     const newNotification = new Notifications({
-//       fromUser,
-//       toUsers,
-//       message,
-//       creator,
-//       type,
-//       createdAt: new Date(),
-//     });
-
-//     await newNotification.save();
-
-//     res.status(201).json({
-//       message: "Notification created successfully",
-//     });
-//   } catch (error) {
-//     res.status(500).json({ error: error.message });
-//   }
-// }
 async function createNotification({
   fromUser,
   message,
@@ -65,36 +40,49 @@ async function getAllNotifications(req, res) {
   }
 }
 
-async function deleteNotification(req, res) {
+// async function deleteNotification(req, res) {
+//   const { notificationId } = req.params;
+
+//   try {
+//     await Notifications.deleteNotification(notificationId);
+
+//     res.status(200).json({
+//       message: "Notification deleted successfully",
+//     });
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// }
+
+async function deleteOrUpdateNotification(req, res) {
   const { notificationId } = req.params;
+  const { userId } = req.body;
 
   try {
-    await Notifications.deleteNotification(notificationId);
-
-    res.status(200).json({
-      message: "Notification deleted successfully",
-    });
+    const notification = await Notifications.getNotificationById(
+      notificationId
+    );
+    if (!notification) {
+      return res.status(404).json({ error: "Notification not found" });
+    }
+    if (notification.toUsers.includes(userId)) {
+      if (notification.toUsers.length === 1) {
+        await Notifications.deleteNotification(notificationId);
+        return res.status(200).json({
+          message: "Notification deleted successfully",
+        });
+      }
+      const newToUsers = notification.toUsers.filter((user) => user !== userId);
+      notification.toUsers = newToUsers;
+      await Notifications.updateNotification(notificationId, notification);
+      return res.status(200).json({
+        message: "Notification updated successfully",
+      });
+    }
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 }
-
-// async function getNotificationByUserId(req, res) {
-//   const { userId } = req.params;
-
-//   try {
-//     const notifications = await Notifications.getNotificationByUserId(userId);
-
-//     if (!notifications || notifications.length === 0) {
-//       return res.status(404).json({ message: "No notifications found" });
-//     }
-
-//     res.status(200).json(notifications);
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: "Internal server error" });
-//   }
-// }
 
 async function getMyNotifications(req, res) {
   const token = req.headers.authorization;
@@ -122,6 +110,6 @@ async function getMyNotifications(req, res) {
 module.exports = {
   createNotification,
   getAllNotifications,
-  deleteNotification,
   getMyNotifications,
+  deleteOrUpdateNotification,
 };

@@ -317,7 +317,7 @@ async function updateLecturerExaminees(req, res) {
 }
 
 async function updateLecturerDetails(req, res) {
-  const { username, email, password } = req.body;
+  const { username, email, password, coordinator_program } = req.body;
 
   try {
     const token = req.headers.authorization;
@@ -339,6 +339,9 @@ async function updateLecturerDetails(req, res) {
     if (password !== undefined) {
       const hashedPassword = await bcrypt.hash(password, 10);
       lecturer.password = hashedPassword;
+    }
+    if (coordinator_program !== undefined) {
+      lecturer.coordinator_program = coordinator_program;
     }
     await lecturer.update();
 

@@ -12,7 +12,9 @@
           <div class="pt-4 upperDiv">
             <h1 class="text-3xl font-medium title">Welcome Home!</h1>
             <p class="text-lg titleDes font-light">
-              The MDMS System For Semester 2023/2024 - 1
+              The MPDS System For Session
+              {{ sessionInfo ? sessionInfo.session_title : "" }} -
+              {{ sessionInfo ? sessionInfo.session_semester : "" }}
             </p>
           </div>
           <div class="lowerDiv pt-10">
@@ -31,13 +33,15 @@
 
             <v-card-text class="pl-0">
               <v-window v-model="tab">
-                <v-window-item value="one"> <Session /> </v-window-item>
+                <v-window-item value="one">
+                  <Session :sessionInfo="sessionInfo" />
+                </v-window-item>
 
                 <v-window-item value="two"> <Projects /> </v-window-item>
 
                 <v-window-item value="three"> <Students /> </v-window-item>
                 <v-window-item value="four"> <Lecturers /> </v-window-item>
-                <v-window-item value="five">five </v-window-item>
+                <v-window-item value="five"><Archive /> </v-window-item>
               </v-window>
             </v-card-text>
           </div>
@@ -47,17 +51,32 @@
   </v-app>
 </template>
 <script setup>
+import { useDark } from "@vueuse/core";
+import { ref, onMounted } from "vue";
+import axios from "axios";
+
 import Navigation from "./navigation.vue";
 import Session from "./dashboard/session.vue";
 import Students from "./dashboard/students.vue";
 import Lecturers from "./dashboard/lecturers.vue";
 import Projects from "./dashboard/projects.vue";
-import { useDark } from "@vueuse/core";
-import { ref } from "vue";
+import Archive from "./dashboard/archive.vue";
 
 // Constants
 const isDark = useDark();
 const tab = ref("");
+const sessionInfo = ref(null);
+const apiUrl = import.meta.env.VITE_API_URL;
+
+// Functions
+onMounted(async () => {
+  try {
+    const response = await axios.get(`${apiUrl}/currentSession`);
+    sessionInfo.value = response.data;
+  } catch (error) {
+    console.error("Error fetching user info:", error);
+  }
+});
 </script>
 
 <style lang="scss" scoped>
