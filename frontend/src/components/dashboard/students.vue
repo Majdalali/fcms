@@ -1,10 +1,10 @@
 <template>
   <div>
     <div class="pt-10 mb-5">
-      <h1 class="title text-xl font-medium">Students</h1>
+      <h1 class="title text-lg font-medium">Students</h1>
       <p class="titleDes text-base font-light">List of registered students</p>
     </div>
-    <div class="w-[90%]">
+    <div class="lg:w-[90%]">
       <v-dialog v-model="dialog" max-width="800px">
         <template v-slot:activator="{ on }">
           <div v-if="!isLoading">

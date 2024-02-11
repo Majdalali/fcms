@@ -9,8 +9,7 @@ const jwt = require("jsonwebtoken");
 const admin = require("../../services/firebase");
 
 async function registerLecturer(req, res) {
-  const { username, email, password, user_type, coordinator_program } =
-    req.body;
+  const { username, email, password, coordinator_program } = req.body;
 
   try {
     // Hash the password
@@ -32,7 +31,6 @@ async function registerLecturer(req, res) {
       username,
       email,
       password: hashedPassword,
-      user_type,
       user_id: userRecord.uid,
       coordinator_program,
     });
@@ -43,7 +41,7 @@ async function registerLecturer(req, res) {
     delete responseUser.password;
 
     return res
-      .status(201)
+      .status(200)
       .json({ message: "User registered successfully", user: responseUser });
   } catch (error) {
     console.error(error);

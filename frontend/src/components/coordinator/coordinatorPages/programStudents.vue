@@ -1,13 +1,13 @@
 <template>
   <div>
-    <div class="pt-10 mb-5">
-      <h1 class="title text-xl font-medium">Students</h1>
-      <p class="titleDes text-base font-light">
+    <div class="pt-10">
+      <h1 class="title text-lg font-medium">Students</h1>
+      <p class="titleDes text-sm font-light">
         List of registered students for program
         <strong>{{ props.name }}</strong>
       </p>
     </div>
-    <div class="w-[90%]">
+    <div class="md:w-4/5 pt-10">
       <v-card :rounded="0" :elevation="0">
         <v-text-field
           v-model="search"
@@ -73,4 +73,13 @@ onMounted(async () => {
 });
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.title {
+  font-family: "DM Sans", sans-serif;
+}
+.titleDes {
+  font-family: "Work Sans", sans-serif;
+  font-size: 1rem /* 18px */;
+  line-height: 1.75rem /* 28px */;
+}
+</style>

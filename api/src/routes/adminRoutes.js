@@ -47,6 +47,12 @@ router.put(
 
 router.get("/api/programs", ProgramController.getPrograms);
 
+router.post(
+  "/removeExaminer",
+  adminGuard,
+  studentController.DeleteStudentExaminer
+);
+
 //TODO IS CRITERIA CREATED BY COORDINATOR OR SUPER ADMIN?
 router.get("/api/criterias", criteriaController.getAllCriteria);
 

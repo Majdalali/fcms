@@ -1,17 +1,17 @@
 <template>
   <div>
     <div class="pt-10">
-      <h1 class="title text-xl font-medium">Session & Semester Calendar</h1>
+      <h1 class="title text-lg font-medium">Session & Semester Calendar</h1>
       <p class="titleDes text-base font-light">
         Keep track of the important dates
       </p>
     </div>
     <!-- Session -->
-    <div class="pt-10 h-full w-[90%]">
+    <div class="pt-5 h-full lg:w-[90%]">
       <v-container>
         <div v-if="sessionInfo">
           <v-row no-gutters>
-            <v-col cols="8">
+            <v-col cols="12" lg="8">
               <SessionCard
                 :elevation="4"
                 backgroundColor="#800000"
@@ -19,7 +19,7 @@
                 :data="sessionInfo.session_title"
               />
             </v-col>
-            <v-col>
+            <v-col cols="12" lg="4">
               <SessionCard
                 :elevation="4"
                 :backgroundColor="isDark ? 'grey-darken-4' : '#E7E5DF'"
@@ -30,7 +30,7 @@
           </v-row>
 
           <v-row no-gutters>
-            <v-col>
+            <v-col cols="12" lg="6">
               <SessionCard
                 :elevation="4"
                 :backgroundColor="isDark ? '#FDFEFB' : '#0D0D0D'"
@@ -40,7 +40,7 @@
               />
             </v-col>
 
-            <v-col>
+            <v-col cols="12" lg="6">
               <SessionCard
                 :elevation="4"
                 backgroundColor="#FFC505"
@@ -52,7 +52,7 @@
           </v-row>
 
           <v-row no-gutters>
-            <v-col>
+            <v-col cols="12" lg="4">
               <SessionCard
                 :elevation="4"
                 :backgroundColor="isDark ? 'grey-darken-4' : '#E7E5DF'"
@@ -62,7 +62,7 @@
               />
             </v-col>
 
-            <v-col cols="8">
+            <v-col cols="12" lg="8">
               <SessionCard
                 :elevation="4"
                 backgroundColor="#800000"
@@ -73,7 +73,7 @@
             </v-col>
           </v-row>
           <v-row no-gutters>
-            <v-col>
+            <v-col cols="12" lg="6">
               <SessionCard
                 :elevation="4"
                 backgroundColor="#FFC505"
@@ -83,7 +83,7 @@
               />
             </v-col>
 
-            <v-col>
+            <v-col cols="12" lg="6">
               <SessionCard
                 :elevation="4"
                 :backgroundColor="isDark ? '#FDFEFB' : '#0D0D0D'"
@@ -117,11 +117,11 @@ const props = defineProps({
 </script>
 
 <style lang="scss" scoped>
-.title,
-.titleDes {
+.title {
   font-family: "DM Sans", sans-serif;
 }
-.titleData {
+.titleData,
+.titleDes {
   font-family: "Work Sans", sans-serif;
 }
 </style>

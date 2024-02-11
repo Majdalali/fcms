@@ -1,159 +1,13 @@
 <template>
   <v-app :class="isDark ? 'glass-backgroundDark' : 'glass-background'">
     <div v-if="!isDark" class="overlay z-0"></div>
-
-    <v-sheet
-      :color="isDark ? '#0D0D0D' : 'white'"
-      :elevation="8"
-      class="z-10 px-[10%] h-20"
-    >
-      <div class="flex flex-row items-center justify-between w-full h-full">
-        <div>
-          <v-img
-            :width="300"
-            aspect-ratio="16/9"
-            cover
-            :src="isDark ? UTMLogoBlack : UTMLogo"
-          ></v-img>
-        </div>
-        <div class="flex flex-row">
-          <ul class="flex flex-row gap-16">
-            <li>Home</li>
-            <li>About us</li>
-            <li>Contact us</li>
-          </ul>
-        </div>
-        <div>
-          <ul class="flex flex-row gap-10">
-            <li v-if="!user">
-              <v-btn class="btn" variant="text" @click="dialogSignIn = true"
-                >Sign In</v-btn
-              >
-            </li>
-            <li v-if="!user">
-              <v-btn
-                class="btn"
-                variant="flat"
-                color="#800000"
-                rounded="lg"
-                @click="dialogRegister = true"
-                >Register</v-btn
-              >
-            </li>
-            <li v-if="user">
-              <v-btn class="btn" variant="text" @click="logout">Sign Out</v-btn>
-            </li>
-            <li v-if="isAdminUser">Admin</li>
-            <li v-if="user_type === 'student'">
-              <router-link to="/profile"
-                ><v-btn class="btn" variant="text" prepend-icon="mdi-account"
-                  >Profile</v-btn
-                ></router-link
-              >
-            </li>
-            <li v-if="user_type === 'lecturer'">
-              <router-link to="/lecturer-profile"
-                ><v-btn class="btn" variant="text" prepend-icon="mdi-account"
-                  >Profile</v-btn
-                ></router-link
-              >
-            </li>
-            <li>
-              <v-btn
-                variant="text"
-                @click="toggleDark()"
-                :color="isDark ? '#FAC000' : '#0D0D0D'"
-                size="small"
-                :icon="isDark ? 'mdi-white-balance-sunny' : 'mdi-weather-night'"
-              ></v-btn>
-            </li>
-          </ul>
-        </div>
-      </div>
-
-      <v-dialog v-model="dialogSignIn" height="500" width="500">
-        <v-card title="Sign In" :color="isDark ? 'white' : '#0D0D0D'">
-          <v-card-text>
-            <v-row class="justify-around py-10">
-              <div class="student">
-                <h1 class="title font-medium text-center mb-2">Student</h1>
-
-                <router-link to="/signin"
-                  ><v-btn
-                    variant="elevated"
-                    text="Sign In"
-                    color="#800000"
-                  ></v-btn
-                ></router-link>
-              </div>
-              <div class="lecturer">
-                <h1 class="title font-medium text-center mb-2">Lecturer</h1>
-                <router-link to="/lecturer-signin"
-                  ><v-btn
-                    variant="elevated"
-                    text="Sign In"
-                    color="#800000"
-                  ></v-btn
-                ></router-link>
-              </div>
-            </v-row>
-          </v-card-text>
-
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn
-              text="Cancel"
-              variant="text"
-              @click="dialogSignIn = false"
-            ></v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
-      <v-dialog v-model="dialogRegister" height="500" width="500">
-        <v-card title="Register" :color="isDark ? 'white' : '#0D0D0D'">
-          <v-card-text>
-            <v-row class="justify-around py-10">
-              <div class="student">
-                <h1 class="title font-medium text-center mb-2">Student</h1>
-
-                <router-link to="/register"
-                  ><v-btn
-                    variant="elevated"
-                    text="Register"
-                    color="#800000"
-                  ></v-btn
-                ></router-link>
-              </div>
-              <div class="lecturer">
-                <h1 class="title font-medium text-center mb-2">Lecturer</h1>
-                <router-link to="/lecturer-register"
-                  ><v-btn
-                    variant="elevated"
-                    text="Register"
-                    color="#800000"
-                  ></v-btn
-                ></router-link>
-              </div>
-            </v-row>
-          </v-card-text>
-
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn
-              text="Cancel"
-              variant="text"
-              @click="dialogRegister = false"
-            ></v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
-    </v-sheet>
+    <HomeNavigation />
     <div
-      class="w-full h-full z-10 px-[10%] flex flex-row items-center justify-around"
+      class="w-full h-full z-10 flex flex-row items-center justify-center max-xl:text-center xl:px-[10%] xl:justify-around"
     >
-      <div class="heroLeft w-1/2">
+      <div class="heroLeft xl:w-1/2">
         <h1
-          class="title heroTitle uppercase text-[#0D0D0D] dark:text-[#F8F6F6] whitespace-nowrap"
+          class="title heroTitle uppercase text-[#0D0D0D] dark:text-[#F8F6F6] whitespace-nowrap hidden sm:font- xl:block"
         >
           <span class="mastersGradiant">Masters</span> System <br />for
           <span :class="isDark ? 'postGradiant' : 'postGradiantLight'"
@@ -161,11 +15,20 @@
           ><br />
           students.
         </h1>
-        <p
-          class="heroPara pt-2 text-[#0D0D0D] dark:text-[#F8F6F6] whitespace-nowrap"
+        <h1
+          class="title heroTitle uppercase text-[#0D0D0D] dark:text-[#F8F6F6] xl:hidden"
         >
-          Welcome to our new masters management system, if <br />you're new
-          please register a new account
+          <span class="mastersGradiant">Masters</span> System for
+          <span :class="isDark ? 'postGradiant' : 'postGradiantLight'"
+            >Postgraduate</span
+          >
+          students.
+        </h1>
+        <p
+          class="heroPara pt-2 text-[#0D0D0D] dark:text-[#F8F6F6] md:whitespace-nowrap"
+        >
+          Welcome to our Masters Project & Dissertation System, if
+          <br class="max-md:hidden" />you're new please register a new account
         </p>
         <div class="mt-6">
           <v-btn
@@ -179,7 +42,7 @@
             @click="dialogRegister = true"
           ></v-btn>
           <v-btn
-            class="btn ml-6"
+            class="btn sm:ml-6"
             variant="text"
             :color="isDark ? '#F8F6F6' : '#0D0D0D'"
             width="200"
@@ -195,7 +58,7 @@
           ></v-btn>
         </div>
       </div>
-      <div class="heroRight">
+      <div class="heroRight hidden xl:block">
         <v-img
           draggable="false"
           :width="800"
@@ -205,39 +68,56 @@
         ></v-img>
       </div>
     </div>
+    <v-dialog v-model="dialogRegister" height="500" width="500">
+      <v-card title="Register" :color="isDark ? 'white' : '#0D0D0D'">
+        <v-card-text>
+          <v-row class="justify-around py-10">
+            <div class="student">
+              <h1 class="title font-medium text-center mb-2">Student</h1>
+
+              <router-link to="/register"
+                ><v-btn
+                  variant="elevated"
+                  text="Register"
+                  color="#800000"
+                ></v-btn
+              ></router-link>
+            </div>
+            <div class="lecturer">
+              <h1 class="title font-medium text-center mb-2">Lecturer</h1>
+              <router-link to="/lecturer-register"
+                ><v-btn
+                  variant="elevated"
+                  text="Register"
+                  color="#800000"
+                ></v-btn
+              ></router-link>
+            </div>
+          </v-row>
+        </v-card-text>
+
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+            text="Cancel"
+            variant="text"
+            @click="dialogRegister = false"
+          ></v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-app>
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from "vue";
-import { useStore } from "vuex";
-import { useDark, useToggle } from "@vueuse/core";
-import UTMLogo from "@/assets/images/utmLogo.png";
-import UTMLogoBlack from "@/assets/images/utmLogoBlack.png";
+import { ref } from "vue";
+import { useDark } from "@vueuse/core";
 import HeroImage from "@/assets/images/heroImage.svg";
+import HomeNavigation from "./homeNavigation.vue";
 
 // Constants
 const isDark = useDark();
-const toggleDark = useToggle(isDark);
-const store = useStore();
-const dialogSignIn = ref(false);
 const dialogRegister = ref(false);
-
-console.log(isDark.value);
-
-// Computed property to get the user from the store
-const user = computed(() => store.state.user);
-const user_type = computed(() => user.value !== null && user.value.user_type);
-
-// Computed property to check if the user is logged in
-const isAdminUser = computed(
-  () => user.value !== null && user.value.role === "admin"
-);
-
-// Function to handle user logout
-const logout = () => {
-  store.dispatch("logoutUser");
-};
 </script>
 
 <style lang="scss" scoped>
@@ -334,5 +214,27 @@ li {
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
+}
+
+// active li style
+.router-link-active {
+  color: #6589ff; /* Change text color */
+}
+
+@media screen and (max-width: 635px) {
+  .heroTitle {
+    font-size: 32px;
+  }
+
+  .heroPara {
+    font-size: 16px;
+    white-space: normal;
+  }
+  .heroLeft {
+    width: 80%;
+  }
+  .btn:nth-child(2) {
+    margin-top: 10px;
+  }
 }
 </style>

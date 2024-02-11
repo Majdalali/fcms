@@ -10,7 +10,7 @@
         class="py-2 mb-5"
         v-show="criteriaErrorMessages !== ''"
       ></v-alert>
-      <div class="my-5 w-2/5">
+      <div class="my-5">
         <!--! student name and program from props -->
         <v-chip size="large" color="primary" label
           ><v-icon start icon="mdi-account-circle-outline"></v-icon>
@@ -85,15 +85,19 @@
         </div>
         <v-row>
           <v-col cols="12">
+            <small class="titleDes">Remarks</small>
             <v-text-field
+              class="mt-4"
               label="Remarks for coordinator"
               v-model="remarksForCord"
               :rules="remarksForCordRules"
             ></v-text-field
           ></v-col>
-          <v-col cols="4">
+          <v-col cols="12" lg="4" md="4">
+            <small class="titleDes">Type</small>
             <v-select
               label="Type of evaluator"
+              class="mt-4"
               v-model="typeOfEvaluator"
               :rules="typeOfEvaluatorRules"
               :items="['Supervisor', 'Co-Supervisor', 'Examiner']"
@@ -252,20 +256,6 @@ const submitEvaluation = async () => {
 
 onMounted(async () => {
   isInfoLoading.value = true;
-  // try {
-  //   const response = await axios.get(`${apiUrl}/api/criterias`);
-  //   if (response.status === 200) {
-  //     criteriasData.value = response.data;
-  //   } else {
-  //     console.error("Error fetching evaluation criteria:", response.data);
-  //     criteriaErrorMessages.value = "Failed to fetch evaluation criteria.";
-  //   }
-  // } catch (error) {
-  //   console.error("Error fetching evaluation criteria:", error);
-  //   criteriaErrorMessages.value = "Failed to fetch evaluation criteria.";
-  // } finally {
-  //   isInfoLoading.value = false;
-  // }
 
   try {
     const studentProgram = props.studentInfo.program;

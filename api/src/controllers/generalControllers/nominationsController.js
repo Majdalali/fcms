@@ -352,9 +352,70 @@ async function getNominationsByProgram(req, res) {
   }
 }
 
+async function getNominationsForLecturer(req, res) {
+  const token = req.headers.authorization;
+  try {
+    const decoded = jwt.verify(token, process.env.SECRET_TOKEN);
+    const lecturerId = decoded.user_id;
+
+    const nominations = await Nominations.getNominationsForLecturer(lecturerId);
+
+    if (!nominations || nominations.length === 0) {
+      return res.status(404).json({ error: "No nominations found" });
+    }
+
+    const formattedNominations = await Promise.all(
+      nominations.map(async (nomination) => {
+        const studentDetails = await student.getUserByEmail(
+          nomination.student.utmEmail
+        );
+        if (studentDetails) {
+          nomination.student.userId = studentDetails.user_id;
+          nomination.student.studentExists = true;
+        } else {
+          const emailUser = await student.getUserByEmail(
+            nomination.student.email
+          );
+          if (emailUser) {
+            nomination.student.userId = emailUser.user_id;
+            nomination.student.studentExists = true;
+          }
+        }
+        const status = checkNominationStatus(nomination);
+        nomination.status = status;
+
+        return Nominations.formatNominationData(nomination);
+      })
+    );
+
+    return res.status(200).json(formattedNominations);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+async function deleteNominationById(req, res) {
+  const { nominationId } = req.params;
+  try {
+    const nomination = await Nominations.getNominationById(nominationId);
+    if (!nomination) {
+      return res.status(404).json({ error: "Nomination not found" });
+    }
+
+    await Nominations.deleteNominationById(nominationId);
+    return res.status(200).json({ message: "Nomination deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
 module.exports = {
   createNomination,
   getNominationById,
   getAllNominations,
   getNominationsByProgram,
+  getNominationsForLecturer,
+  deleteNominationById,
 };

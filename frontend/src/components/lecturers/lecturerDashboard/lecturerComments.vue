@@ -1,11 +1,11 @@
 <template>
   <div class="mt-10">
-    <div class="w-1/2">
+    <div>
       <h1 class="title text-lg font-medium">
         Add Comments & Feedback to students
       </h1>
     </div>
-    <div class="w-3/5 mt-5">
+    <div class="lg:w-4/5 mt-5">
       <v-form>
         <v-autocomplete
           v-model="selectedStudent"

@@ -1,13 +1,13 @@
 <template>
   <div>
     <div class="pt-10">
-      <h1 class="title text-xl font-medium">Comments</h1>
+      <h1 class="title text-lg font-medium">Comments</h1>
       <p class="titleDes text-base font-light">
         Suggestions and comments from the supervisor and examiners regarding
         your project
       </p>
     </div>
-    <div class="pt-10 h-full">
+    <div class="pt-10 h-full lg:w-4/5">
       <v-alert
         variant="outlined"
         type="warning"

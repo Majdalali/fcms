@@ -6,7 +6,7 @@
         The nominations made by the lecturers
       </p>
     </div>
-    <div class="w-4/5 pt-10 h-full">
+    <div class="md:w-4/5 pt-10 h-full">
       <v-card :rounded="0" :elevation="0">
         <v-text-field
           v-model="search"
@@ -411,8 +411,8 @@ const AssignExaminers = async (item) => {
       }
     );
     if (response.status === 200) {
-      alertType = "success";
-      alertText = response.data.message;
+      alertType.value = "success";
+      alertText.value = response.data.message;
     }
   } catch (error) {
     if (error.response && error.response.status === 400) {
@@ -431,12 +431,13 @@ const AssignExaminers = async (item) => {
 // format date
 const formatDate = (timestamp) => {
   const date = new Date(timestamp._seconds * 1000); // Convert seconds to milliseconds
-  return date.toLocaleString("en-US", {
+  return date.toLocaleString("en-UK", {
     year: "numeric",
-    month: "long",
+    month: "numeric",
     day: "numeric",
     hour: "numeric",
     minute: "numeric",
+    hour12: true,
   });
 };
 

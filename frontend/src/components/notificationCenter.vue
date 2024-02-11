@@ -5,13 +5,19 @@
   >
     <v-container fluid>
       <v-row>
-        <v-col cols="2" class="nav">
+        <v-col cols="12" md="2" sm="0" class="nav sm:mb-5">
           <Navigation />
         </v-col>
-        <v-col cols="10" class="main">
+        <v-col
+          cols="12"
+          md="12"
+          lg="10"
+          style="min-width: 70%; max-width: 100%"
+          class="main"
+        >
           <div class="pt-4 upperDiv">
             <h1 class="text-3xl font-medium title">Notifications Center</h1>
-            <p class="text-lg titleDes font-light">
+            <p class="text-base titleDes font-light">
               Stay Updated with Important Notices and announcements!
             </p>
           </div>
@@ -169,22 +175,32 @@ const getCreatorChipColor = (creator) => {
 
 const formatDate = (timestamp) => {
   const date = new Date(timestamp._seconds * 1000); // Convert seconds to milliseconds
-  return date.toLocaleString("en-US", {
+  return date.toLocaleString("en-UK", {
     year: "numeric",
-    month: "long",
+    month: "numeric",
     day: "numeric",
     hour: "numeric",
     minute: "numeric",
+    hour12: true,
   }); // Format the date as per the locale
 };
 </script>
 
 <style lang="scss" scoped>
-@media screen and (max-width: 1500px) {
+@media screen and (max-width: 1488px) {
   .nav {
-    display: none;
+    max-width: 1%;
+  }
+  .main {
+    min-width: 100% !important;
   }
 }
+@media screen and (max-width: 639px) {
+  .main {
+    margin-top: 20px !important;
+  }
+}
+
 .title,
 .titleDes {
   font-family: "DM Sans", sans-serif;

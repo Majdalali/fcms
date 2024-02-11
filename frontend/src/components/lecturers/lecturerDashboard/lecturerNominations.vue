@@ -1,46 +1,21 @@
 <template>
   <div>
-    <div class="pt-10">
-      <h1 class="title text-lg font-medium">Nominations</h1>
-      <p class="titleDes text-sm font-light">
-        The nominations made by the lecturers
-      </p>
-    </div>
-    <div class="md:w-4/5 pt-10 h-full">
-      <v-card :rounded="0" :elevation="0">
-        <v-text-field
-          v-model="search"
-          label="Search"
-          prepend-inner-icon="mdi-magnify"
-          single-line
-          :rounded="0"
-          variant="outlined"
-          hide-details
-        ></v-text-field>
-      </v-card>
-      <v-data-table
-        class="border"
-        :headers="headers"
-        :items="nominations"
-        :search="search"
-      >
-        <template v-slot:item.index="{ item }">
+    <div class="pt-5 lg:w-4/5">
+      <v-divider class="mb-5"></v-divider>
+
+      <h1 class="title text-lg font-medium">Previous Nominations</h1>
+      <p class="titleDes mb-5 text-sm font-light">View your nominations</p>
+
+      <v-data-table class="border" :headers="headers" :items="nominations">
+        <template v-slot:item.details="{ item }">
           <v-dialog v-model="item.dialog" width="1200">
             <template v-slot:activator="{ props }">
-              <v-btn v-bind="props" size="small" color="primary">
-                Details
-              </v-btn></template
-            ><template v-slot:default=""
+              <v-btn v-bind="props" size="small" color="primary" text="Details">
+              </v-btn>
+            </template>
+            <template v-slot:default=""
               ><v-card title="Nomination Details">
                 <v-card-text class="mt-4">
-                  <v-alert
-                    v-show="alertText !== ''"
-                    closable
-                    class="mb-2 py-2"
-                    variant="flat"
-                    :text="alertText"
-                    :type="alertType"
-                  ></v-alert>
                   <v-expansion-panels color="grey-lighten-1">
                     <!--! STUDENT DETAILS -->
                     <v-expansion-panel title="Student Details">
@@ -99,7 +74,6 @@
                               <th class="text-left">Name</th>
                               <th class="text-left">Email</th>
                               <th class="text-left">Phone Number</th>
-                              <th class="text-left">Registered?</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -107,17 +81,6 @@
                               <td>{{ coSupervisor.name }}</td>
                               <td>{{ coSupervisor.email }}</td>
                               <td>{{ coSupervisor.phoneNumber }}</td>
-                              <td>
-                                <v-chip
-                                  color="green"
-                                  text-color="white"
-                                  v-if="coSupervisor.coSupervisorsExist"
-                                  >Yes</v-chip
-                                >
-                                <v-chip color="error" text-color="white" v-else
-                                  >No</v-chip
-                                >
-                              </td>
                             </tr>
                           </tbody></v-table
                         >
@@ -133,7 +96,6 @@
                               <th class="text-left">Name</th>
                               <th class="text-left">Email</th>
                               <th class="text-left">Phone Number</th>
-                              <th class="text-left">Registered?</th>
                               <th class="text-left">CV File</th>
                             </tr>
                           </thead>
@@ -142,17 +104,7 @@
                               <td>{{ inExaminer.name }}</td>
                               <td>{{ inExaminer.email }}</td>
                               <td>{{ inExaminer.phoneNumber }}</td>
-                              <td>
-                                <v-chip
-                                  color="green"
-                                  text-color="white"
-                                  v-if="inExaminer.internalExaminersExist"
-                                  >Yes</v-chip
-                                >
-                                <v-chip color="error" text-color="white" v-else
-                                  >No</v-chip
-                                >
-                              </td>
+
                               <td>
                                 <a
                                   :href="`${apiUrl}/files/${inExaminer.cvFileId}`"
@@ -186,7 +138,6 @@
                               <th class="text-left">Phone Number</th>
                               <th class="text-left">Institution</th>
                               <th class="text-left">Expertise</th>
-                              <th class="text-left">Registered?</th>
                               <th class="text-left">CV File</th>
                             </tr>
                           </thead>
@@ -197,17 +148,7 @@
                               <td>{{ exExaminer.phoneNumber }}</td>
                               <td>{{ exExaminer.institution }}</td>
                               <td>{{ exExaminer.expertise }}</td>
-                              <td>
-                                <v-chip
-                                  color="green"
-                                  text-color="white"
-                                  v-if="exExaminer.externalExaminersExist"
-                                  >Yes</v-chip
-                                >
-                                <v-chip color="error" text-color="white" v-else
-                                  >No</v-chip
-                                >
-                              </td>
+
                               <td>
                                 <a
                                   :href="`${apiUrl}/files/${exExaminer.cvFileId}`"
@@ -234,30 +175,6 @@
                     >Examiners has beeen assigned to student
                     {{ item.student.name }}</small
                   >
-
-                  <v-banner
-                    v-show="item.status === 'pending'"
-                    color="warning"
-                    icon="$warning"
-                    text="One or more examiners are unassigned to the student."
-                  >
-                  </v-banner>
-                  <v-banner
-                    v-show="item.status === 'pending'"
-                    color="info"
-                    icon="$info"
-                    class="mb-4"
-                    text="You can still assign examiners to student even if one or more examiners has not been registered yet. However, unregistered examiners need to register first."
-                  >
-                  </v-banner>
-                  <small
-                    class="text-red-500"
-                    v-show="!item.student.studentExists"
-                    ><strong
-                      >*Assigning examiners to student is not possible until
-                      student is registered.</strong
-                    >
-                  </small>
                 </v-card-text>
 
                 <v-card-actions class="my-2">
@@ -266,26 +183,55 @@
                     color="warning"
                     variant="outlined"
                     class="w-32"
-                    text="Close"
+                    text="Cancel"
                     @click="closeDialog(item)"
                   ></v-btn>
                 </v-card-actions> </v-card
             ></template>
           </v-dialog>
         </template>
-        <template v-slot:item.status="{ item }">
-          <v-chip
-            class="w-24 justify-center"
-            color="success"
-            v-if="item.status === 'done'"
-            >DONE</v-chip
-          >
-          <v-chip class="w-24 justify-center" color="warning" v-else
-            >PENDING</v-chip
-          >
+        <template v-slot:item.delete="{ item }">
+          <v-dialog width="500">
+            <template v-slot:activator="{ props }">
+              <v-btn v-bind:="props" size="small" color="error"> Delete </v-btn>
+            </template>
+
+            <template v-slot:default="{ isActive }">
+              <v-card title="Warning!">
+                <v-card-text class="title">
+                  Are you sure you want to delete this nomination?
+                </v-card-text>
+
+                <v-card-actions>
+                  <v-spacer></v-spacer>
+                  <v-btn text="Cancel" @click="isActive.value = false"></v-btn>
+                  <v-btn
+                    color="error"
+                    @click="deleteNomination(item.nominationId)"
+                  >
+                    Delete
+                  </v-btn>
+                </v-card-actions>
+              </v-card>
+            </template>
+          </v-dialog>
         </template>
       </v-data-table>
     </div>
+    <v-snackbar
+      :timeout="2000"
+      color="indigo"
+      variant="elevated"
+      v-model="snackbar"
+    >
+      {{ responseMessage }}
+
+      <template v-slot:actions>
+        <v-btn color="white" variant="transparent" @click="snackbar = false">
+          X
+        </v-btn>
+      </template>
+    </v-snackbar>
   </div>
 </template>
 
@@ -294,37 +240,20 @@ import { ref, onMounted } from "vue";
 import axios from "axios";
 
 // Constants
-
+const nominations = ref([]);
+const snackbar = ref(false);
+const responseMessage = ref("");
 const headers = ref([
   { key: "nominationId", sortable: true, title: "ID." },
-  {
-    key: "supervisorName",
-    sortable: true,
-    title: "Submitted By",
-    width: "25%",
-  },
-  { key: "student.name", sortable: false, title: "Student", width: "25%" },
-  {
-    key: "student.studentProgram",
-    sortable: true,
-    title: "Program",
-    width: "10%",
-  },
+  { key: "student.name", sortable: false, title: "Student" },
   {
     key: "createdAt",
     sortable: false,
     title: "Submitted On",
-    width: "25%",
     align: "center",
   },
-  {
-    key: "status",
-    sortable: true,
-    title: "Status",
-    width: "20%",
-    align: "center",
-  },
-  { key: "index", sortable: false, title: "Actions", align: "center" },
+  { key: "details", sortable: false, title: "Actions", align: "center" },
+  { key: "delete", sortable: false, title: "Delete" },
 ]);
 
 const headersStudent = ref([
@@ -340,79 +269,95 @@ const headersStudent = ref([
   },
 ]);
 
-const search = ref("");
-const nominations = ref([]);
-const alertText = ref("");
-const alertType = ref("error");
 const apiUrl = import.meta.env.VITE_API_URL;
-// Methods
+
+// Functions
+
 onMounted(async () => {
   const token = localStorage.getItem("access_token");
-
   try {
-    const response = await axios.get(`${apiUrl}/api/nominations`, {
-      headers: {
-        Authorization: token,
-      },
-    });
+    const response = await axios.get(
+      `${apiUrl}/myNominations`,
+
+      {
+        headers: {
+          Authorization: token,
+        },
+      }
+    );
     nominations.value = response.data.map((nomination) => {
-      const internalExaminersIds = nomination.internalExaminers
-        .filter(
-          (examiner) =>
-            examiner.userId !== undefined && examiner.userId !== null
-        )
-        .map((examiner) => examiner.userId);
-
-      const externalExaminersIds = nomination.externalExaminers
-        .filter(
-          (examiner) =>
-            examiner.userId !== undefined && examiner.userId !== null
-        )
-        .map((examiner) => examiner.userId);
-
-      const allExaminersIds = [
-        ...internalExaminersIds,
-        ...externalExaminersIds,
-      ];
-
       return {
         ...nomination,
         createdAt: formatDate(nomination.createdAt),
-        examinersIds: allExaminersIds,
       };
     });
   } catch (error) {
-    console.error("Error fetching proposal files:", error);
-    // Handle error
+    console.log(error);
   }
 });
 
-// format date
+const deleteNomination = async (nominationId) => {
+  const token = localStorage.getItem("access_token");
+  try {
+    const response = await axios.delete(
+      `${apiUrl}/nominations/${nominationId}`,
+      {
+        headers: {
+          Authorization: token,
+        },
+      }
+    );
+    responseMessage.value = response.data.message;
+    snackbar.value = true;
+    nominations.value = nominations.value.filter(
+      (nomination) => nomination.nominationId !== nominationId
+    );
+  } catch (error) {
+    if (error.response && error.response.status === 404) {
+      snackbar.value = true;
+      responseMessage.value = error.response.data.error;
+    } else {
+      snackbar.value = true;
+      responseMessage.value =
+        "Error deleting evaluatio. Please try again later";
+    }
+  }
+};
+
+const openDialog = (item) => {
+  item.dialog = true;
+};
+
+const closeDialog = (item) => {
+  item.dialog = false;
+};
+
 const formatDate = (timestamp) => {
   const date = new Date(timestamp._seconds * 1000); // Convert seconds to milliseconds
   return date.toLocaleString("en-US", {
     year: "numeric",
-    month: "short",
+    month: "numeric",
     day: "numeric",
+    hour: "numeric",
+    minute: "numeric",
+    hour12: true,
   });
-};
-
-// Function to open the dialog and set selectedItem
-
-// Function to close the dialog and reset selectedItem
-const closeDialog = (item) => {
-  item.dialog = false;
-  alertText.value = "";
 };
 </script>
 
 <style lang="scss" scoped>
 .title {
   font-family: "DM Sans", sans-serif;
+  font-weight: 400;
+  font-size: 1.125rem /* 18px */;
+  line-height: 1.75rem /* 28px */;
 }
 .titleDes {
   font-family: "Work Sans", sans-serif;
   font-size: 1rem /* 18px */;
   line-height: 1.75rem /* 28px */;
+}
+.formText {
+  font-family: "Work Sans", sans-serif;
 }
 </style>

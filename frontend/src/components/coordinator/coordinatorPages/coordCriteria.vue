@@ -1,12 +1,11 @@
 <template>
   <div>
     <div class="pt-4">
-      <v-divider class="w-4/5 mb-5"></v-divider>
-
+      <v-divider class="md:w-4/5 mb-5"></v-divider>
       <h1 class="title text-lg font-medium">Criterias</h1>
       <p class="titleDes text-sm font-light">Create and edit criterias</p>
     </div>
-    <div class="w-4/5 pt-5 h-full">
+    <div class="md:w-4/5 pt-5 h-full">
       <v-alert
         v-show="errorMessage !== ''"
         closable
@@ -94,13 +93,14 @@
           size="large"
           variant="elevated"
           color="deep-purple-darken-4"
+          class="max-lg:mt-5"
           @click="submitCriteria()"
           :disabled="!valid"
           >Submit Criteria</v-btn
         >
       </v-form>
     </div>
-    <div class="w-4/5 pt-5 h-full">
+    <div class="md:w-4/5 pt-5 h-full">
       <v-divider class="mb-5"></v-divider>
       <h1 class="title text-lg mb-5 font-medium">Current Existing Criterias</h1>
 

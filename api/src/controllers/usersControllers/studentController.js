@@ -57,16 +57,12 @@ async function loginUser(req, res) {
   try {
     const user = await Student.getUserByEmailOrMatric(email, matricCard);
     if (!user) {
-      return res
-        .status(401)
-        .json({ error: "Invalid matric card or email or password" });
+      return res.status(401).json({ error: "Invalid email or password" });
     }
 
     const isPasswordMatch = await bcrypt.compare(password, user.password);
     if (!isPasswordMatch) {
-      return res
-        .status(401)
-        .json({ error: "Invalid matric card or email or password" });
+      return res.status(401).json({ error: "Invalid email or password" });
     }
 
     // Generate JWT token
@@ -545,7 +541,9 @@ async function getStudentsByProgram(req, res) {
   try {
     const studentsData = await Student.getAllStudentsByProgram(program);
     if (!studentsData) {
-      return res.status(404).json({ error: "Student not found" });
+      return res
+        .status(404)
+        .json({ error: "No Students are assigned to this Program" });
     }
     // Create a sanitized version of the users array without the password property
     const sanitizedStudents = studentsData.map(
@@ -564,6 +562,86 @@ async function getStudentsByProgram(req, res) {
     res.status(500).json({ error: "Internal server error" });
   }
 }
+
+async function DeleteStudentLecturer(req, res) {
+  const { lecturerType } = req.params;
+  const { lecturerEmail } = req.body;
+  const token = req.headers.authorization;
+  const decoded = jwt.verify(token, process.env.SECRET_TOKEN);
+  const studentId = decoded.user_id;
+  try {
+    // Find the student by ID
+    const student = await Student.getUserById(studentId);
+    if (!student) {
+      return res.status(404).json({ error: "Student not found" });
+    }
+    const lecturer = await Lecturer.getUserByEmail(lecturerEmail);
+    if (!lecturer) {
+      return res.status(404).json({ error: "Lecturer not found" });
+    }
+    const lecturerId = lecturer.user_id;
+    if (lecturerType === "supervisor") {
+      if (student.supervisor === lecturerId) {
+        student.supervisor = null;
+        lecturer.supervisedStudents = lecturer.supervisedStudents.filter(
+          (id) => id !== studentId
+        );
+      } else {
+        return res.status(404).json({ error: "Supervisor not found" });
+      }
+    } else if (lecturerType === "coSupervisor") {
+      if (student.coSupervisors.includes(lecturerId)) {
+        student.coSupervisors = student.coSupervisors.filter(
+          (id) => id !== lecturerId
+        );
+        lecturer.coSupervisedStudents = lecturer.coSupervisedStudents.filter(
+          (id) => id !== studentId
+        );
+      } else {
+        return res.status(404).json({ error: "Co-supervisor not found" });
+      }
+    }
+
+    await student.save();
+    await lecturer.save();
+    return res.status(200).json({ message: "Lecturer deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+async function DeleteStudentExaminer(req, res) {
+  const { examinerEmail, studentEmail } = req.body;
+  try {
+    // Find the student by ID
+    const student = await Student.getUserByEmail(studentEmail);
+    if (!student) {
+      return res.status(404).json({ error: "Student not found" });
+    }
+    const studentId = student.user_id;
+    const examiner = await Lecturer.getUserByEmail(examinerEmail);
+
+    if (!examiner) {
+      return res.status(404).json({ error: "Examiner not found" });
+    }
+    const examinerId = examiner.user_id;
+    if (student.examiners.includes(examinerId)) {
+      student.examiners = student.examiners.filter((id) => id !== examinerId);
+      examiner.examinees = examiner.examinees.filter((id) => id !== studentId);
+    } else {
+      return res.status(404).json({ error: "Examiner not found" });
+    }
+
+    await student.save();
+    await examiner.save();
+    return res.status(200).json({ message: "Examiner deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
 module.exports = {
   registerUser,
   loginUser,
@@ -581,4 +659,6 @@ module.exports = {
   updateStudentCoSupervisors,
   getStudentCoSupervisors,
   getStudentsByProgram,
+  DeleteStudentLecturer,
+  DeleteStudentExaminer,
 };

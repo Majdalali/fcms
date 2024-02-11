@@ -1,9 +1,9 @@
 <template>
   <div class="mt-10">
-    <div class="w-1/2">
+    <div>
       <h1 class="title text-lg font-medium">Evaluation Form</h1>
     </div>
-    <div class="w-4/5 my-5">
+    <div class="lg:w-4/5 my-5">
       <v-alert
         :title="criteriaErrorMessages"
         type="error"
@@ -86,14 +86,18 @@
         </div>
         <v-row>
           <v-col cols="12">
+            <small class="titleDes">Remarks</small>
             <v-text-field
+              class="mt-4"
               label="Remarks for coordinator"
               v-model="remarksForCord"
               :rules="remarksForCordRules"
             ></v-text-field
           ></v-col>
-          <v-col cols="4">
+          <v-col cols="12" lg="4" md="4">
+            <small class="titleDes">Type</small>
             <v-select
+              class="mt-4"
               label="Type of evaluator"
               v-model="typeOfEvaluator"
               :rules="typeOfEvaluatorRules"
@@ -104,6 +108,7 @@
         <v-btn
           size="large"
           variant="elevated"
+          class="mt-2"
           color="deep-purple-darken-4"
           @click="submitEvaluation()"
           :disabled="!valid"

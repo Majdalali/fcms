@@ -138,6 +138,29 @@ class evaluationsModel {
 
     return evaluations;
   }
+
+  // Delete evaluation by id
+  static async deleteEvaluationById(id) {
+    try {
+      await evaluationsCollection.doc(id).delete();
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  static async getEvaluationById(id) {
+    try {
+      const querySnapshot = await evaluationsCollection.doc(id).get();
+
+      if (!querySnapshot.exists) {
+        return null;
+      }
+
+      return querySnapshot.data();
+    } catch (error) {
+      throw error;
+    }
+  }
 }
 
 module.exports = evaluationsModel;

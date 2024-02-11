@@ -5,13 +5,15 @@
   >
     <v-container fluid>
       <v-row>
-        <v-col cols="2" class="nav">
+        <v-col cols="12" md="2" sm="0" class="nav sm:mb-5">
           <Navigation />
         </v-col>
         <v-col
-          cols="1"
-          style="min-width: 70%; max-width: 90%"
-          class="flex-grow-1 flex-shrink-0 main"
+          cols="12"
+          md="12"
+          lg="10"
+          style="min-width: 70%; max-width: 100%"
+          class="main"
         >
           <div class="pt-4 upperDiv">
             <h1 class="text-3xl font-medium title">Admin Dashboard!</h1>
@@ -25,61 +27,59 @@
               bg-color="transparent"
               v-model="tab"
             >
-              <v-tab class="v-tab" value="one">General</v-tab>
-              <v-tab class="v-tab" value="two">Overview</v-tab>
+              <v-tab class="v-tabMain" value="one">General</v-tab>
+              <v-tab class="v-tabMain" value="two">Overview</v-tab>
               <v-tab
                 v-for="(curreentProgram, key) in currnetPrograms.programTypes"
                 :key="key"
-                class="v-tab"
+                class="v-tabMain"
                 :value="curreentProgram.abbreviation"
                 >{{ curreentProgram.abbreviation }} Students</v-tab
               >
             </v-tabs>
             <v-divider class="w-[90%]"></v-divider>
 
-            <v-card-text class="pl-0">
-              <v-window v-model="tab">
-                <!--? General Tab -->
-                <v-window-item value="one"><AdminMain /> </v-window-item>
+            <v-window disabled v-model="tab">
+              <!--? General Tab -->
+              <v-window-item value="one"><AdminMain /> </v-window-item>
 
-                <!--? Overview Tab -->
-                <v-window-item value="two">
-                  <div class="w-4/5 mt-10 flex justify-center">
-                    <v-tabs
-                      class="rounded-3xl w-1/2"
-                      align-tabs="center"
-                      :bg-color="isDark ? '#fdfefb' : '#BDBDBD'"
-                      v-model="tabSecondry"
-                    >
-                      <v-tab class="v-tab" value="one">Evaluations</v-tab>
-                      <v-tab class="v-tab" value="two">Nominations</v-tab>
-                    </v-tabs>
-                  </div>
+              <!--? Overview Tab -->
+              <v-window-item value="two">
+                <div class="w-fit m-auto mt-10">
+                  <v-tabs
+                    class="rounded-3xl md:px-20"
+                    align-tabs="center"
+                    :bg-color="isDark ? '#fdfefb' : '#BDBDBD'"
+                    v-model="tabSecondry"
+                  >
+                    <v-tab value="one">Evaluations</v-tab>
+                    <v-tab value="two">Nominations</v-tab>
+                  </v-tabs>
+                </div>
 
-                  <div class="pl-0 w-full">
-                    <v-window v-model="tabSecondry">
-                      <v-window-item value="one"
-                        ><AdminEvaluations
-                      /></v-window-item>
-                      <v-window-item value="two"
-                        ><AdminNominations
-                      /></v-window-item>
-                    </v-window>
-                  </div>
-                </v-window-item>
+                <div class="pl-0 w-full">
+                  <v-window disabled v-model="tabSecondry">
+                    <v-window-item value="one"
+                      ><AdminEvaluations
+                    /></v-window-item>
+                    <v-window-item value="two"
+                      ><AdminNominations
+                    /></v-window-item>
+                  </v-window>
+                </div>
+              </v-window-item>
 
-                <!--? Program Students Tab -->
-                <v-window-item
-                  v-for="(curreentProgram, key) in currnetPrograms.programTypes"
-                  :value="curreentProgram.abbreviation"
-                >
-                  <ProgramStudents
-                    :program="curreentProgram.abbreviation"
-                    :name="curreentProgram.name"
-                  />
-                </v-window-item>
-              </v-window>
-            </v-card-text>
+              <!--? Program Students Tab -->
+              <v-window-item
+                v-for="(curreentProgram, key) in currnetPrograms.programTypes"
+                :value="curreentProgram.abbreviation"
+              >
+                <ProgramStudents
+                  :program="curreentProgram.abbreviation"
+                  :name="curreentProgram.name"
+                />
+              </v-window-item>
+            </v-window>
           </div>
         </v-col>
       </v-row>
@@ -120,9 +120,17 @@ onMounted(async () => {
 </script>
 
 <style lang="scss" scoped>
-@media screen and (max-width: 1500px) {
+@media screen and (max-width: 1488px) {
   .nav {
-    display: none;
+    max-width: 1%;
+  }
+  .main {
+    min-width: 100% !important;
+  }
+}
+@media screen and (max-width: 639px) {
+  .main {
+    margin-top: 20px !important;
   }
 }
 
@@ -139,14 +147,14 @@ onMounted(async () => {
   background-color: #0d0d0d !important;
 }
 
-.v-tab {
+.v-tabMain {
   text-transform: capitalize;
   font-family: "DM Sans", sans-serif;
   font-weight: 500;
   font-size: 18px;
 }
 
-.v-tab:first-child {
+.v-tabMain:first-child {
   text-align: start !important;
   padding-left: 0%;
 }

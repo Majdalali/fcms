@@ -6,7 +6,7 @@
         The evaluations made by the lecturers
       </p>
     </div>
-    <div class="w-4/5 pt-10 h-full">
+    <div class="md:w-4/5 pt-10 h-full">
       <v-card :rounded="0" :elevation="0">
         <v-text-field
           v-model="search"
@@ -379,12 +379,13 @@ onMounted(async () => {
 
 const formatDate = (timestamp) => {
   const date = new Date(timestamp._seconds * 1000); // Convert seconds to milliseconds
-  return date.toLocaleString("en-US", {
+  return date.toLocaleString("en-UK", {
     day: "numeric",
     month: "numeric",
     year: "numeric",
     hour: "numeric",
     minute: "numeric",
+    hour12: true,
   });
 };
 

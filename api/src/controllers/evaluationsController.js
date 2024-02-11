@@ -123,11 +123,9 @@ async function getEvaluationsByProgram(req, res) {
     );
 
     if (!evaluations.length) {
-      return res
-        .status(404)
-        .json({
-          message: `No evaluations found for program ${criteriaProgram}`,
-        });
+      return res.status(404).json({
+        message: `No evaluations found for program ${criteriaProgram}`,
+      });
     }
 
     return res.status(200).json(evaluations);
@@ -158,6 +156,21 @@ async function getLecturerEvaluations(req, res) {
   }
 }
 
+async function deleteEvaluationById(req, res) {
+  const { id } = req.params;
+  try {
+    const evaluation = await evaluationsModel.getEvaluationById(id);
+    if (!evaluation) {
+      return res.status(404).json({ error: "Evaluation not found" });
+    }
+    await evaluationsModel.deleteEvaluationById(id);
+    return res.status(200).json({ message: "Evaluation deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
 // Exports
 
 module.exports = {
@@ -166,4 +179,5 @@ module.exports = {
   createANomination,
   getLecturerEvaluations,
   getEvaluationsByProgram,
+  deleteEvaluationById,
 };

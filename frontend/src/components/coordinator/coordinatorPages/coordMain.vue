@@ -1,17 +1,17 @@
 <template>
   <div class="mt-10">
-    <div class="lowerDiv mt-5 flex flex-col w-full">
+    <div class="lowerDiv flex flex-col w-full">
       <div class="w-4/5 flex justify-center"></div>
 
       <div class="pl-0 w-full">
         <div class="session">
-          <div class="w-1/2 mt-5">
+          <div>
             <h1 class="title text-lg font-medium">Create a new session</h1>
             <p class="titleDes text-sm font-light">
               The home page will display the leatest session
             </p>
           </div>
-          <div class="w-4/5 mt-5">
+          <div class="md:w-4/5 mt-5">
             <v-form ref="sessionForm" v-model="valid">
               <v-row>
                 <v-col class="pb-0" cols="12" md="10">
@@ -80,7 +80,7 @@
               >
             </v-form>
           </div>
-          <div class="w-4/5 mt-5">
+          <div class="md:w-4/5 mt-5">
             <h1 class="title text-lg font-medium">Current Sessions</h1>
             <small class="text-orange-500 font-semibold"
               >*Please note that only the latest session is displayed in the

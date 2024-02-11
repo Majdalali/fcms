@@ -28,6 +28,7 @@ router.get(
 );
 
 router.get("/evaluations/:id", evaluationsController.getEvaluationsById);
+
 router.get(
   "/myEvaluations",
   verifyToken,
@@ -36,5 +37,12 @@ router.get(
 );
 
 router.get("/criteria/:program", criteriaController.getCriteriaByProgram);
+
+router.delete(
+  "/evaluations/:id",
+  verifyToken,
+  authGuard("lecturer"),
+  evaluationsController.deleteEvaluationById
+);
 
 module.exports = router;

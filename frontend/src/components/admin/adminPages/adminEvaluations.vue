@@ -6,7 +6,7 @@
         The evaluations made by the lecturers
       </p>
     </div>
-    <div class="w-4/5 pt-10 h-full">
+    <div class="md:w-4/5 pt-10 h-full">
       <v-card :rounded="0" :elevation="0">
         <v-text-field
           v-model="search"

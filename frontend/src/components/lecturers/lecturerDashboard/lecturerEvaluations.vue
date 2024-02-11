@@ -1,7 +1,6 @@
-just single pdf
 <template>
   <div>
-    <div class="pt-5 w-4/5">
+    <div class="pt-5 lg:w-4/5">
       <v-divider class="mb-5"></v-divider>
 
       <h1 class="title text-lg font-medium">Previous Evaluations</h1>
@@ -84,6 +83,32 @@ just single pdf
             Download
           </v-btn></template
         >
+        <template v-slot:item.delete="{ item }">
+          <v-dialog width="500">
+            <template v-slot:activator="{ props }">
+              <v-btn v-bind:="props" size="small" color="error"> Delete </v-btn>
+            </template>
+
+            <template v-slot:default="{ isActive }">
+              <v-card title="Warning!">
+                <v-card-text class="title">
+                  Are you sure you want to delete this evaluation?
+                </v-card-text>
+
+                <v-card-actions>
+                  <v-spacer></v-spacer>
+                  <v-btn text="Cancel" @click="isActive.value = false"></v-btn>
+                  <v-btn
+                    @click="deleteEvaluation(item.evaluationId)"
+                    color="error"
+                  >
+                    Delete
+                  </v-btn>
+                </v-card-actions>
+              </v-card>
+            </template>
+          </v-dialog>
+        </template>
       </v-data-table>
       <div class="mt-5">
         <h1 class="title mb-2">Download All Evaluations</h1>
@@ -146,6 +171,7 @@ const headers = ref([
   { key: "finalMark", sortable: false, title: "Final Mark" },
   { key: "evaluationObjects", sortable: false, title: "Action" },
   { key: "download", sortable: false, title: "Download" },
+  { key: "delete", sortable: false, title: "Delete" },
 ]);
 
 // Request Body
@@ -329,6 +355,34 @@ onMounted(async () => {
   }
 });
 
+const deleteEvaluation = async (evaluationId) => {
+  const token = localStorage.getItem("access_token");
+  try {
+    const response = await axios.delete(
+      `${apiUrl}/evaluations/${evaluationId}`,
+      {
+        headers: {
+          Authorization: token,
+        },
+      }
+    );
+    snackbar.value = true;
+    responseMessage.value = response.data.message;
+    evaluationData.value = evaluationData.value.filter(
+      (evaluation) => evaluation.evaluationId !== evaluationId
+    );
+  } catch (error) {
+    if (error.response && error.response.status === 404) {
+      snackbar.value = true;
+      responseMessage.value = error.response.data.error;
+    } else {
+      snackbar.value = true;
+      responseMessage.value =
+        "Error deleting evaluatio. Please try again later";
+    }
+  }
+};
+
 const openDialog = (item) => {
   item.dialog = true;
 };
@@ -339,12 +393,13 @@ const closeDialog = (item) => {
 
 const formatDate = (timestamp) => {
   const date = new Date(timestamp._seconds * 1000); // Convert seconds to milliseconds
-  return date.toLocaleString("en-US", {
+  return date.toLocaleString("en-UK", {
     year: "numeric",
-    month: "long",
+    month: "2-digit",
     day: "numeric",
     hour: "numeric",
     minute: "numeric",
+    hour12: true,
   });
 };
 </script>

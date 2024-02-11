@@ -1,31 +1,40 @@
 <template>
   <div>
     <div class="pt-10 mb-5">
-      <h1 class="title text-xl font-medium">Students</h1>
-      <p class="titleDes text-base font-light">
+      <h1 class="title text-lg font-medium">Students</h1>
+      <p class="titleDes text-sm font-light">
         List of registered students for program
         <strong>{{ props.name }}</strong>
       </p>
     </div>
-    <div class="w-[90%]">
-      <v-card :rounded="0" :elevation="0">
-        <v-text-field
-          v-model="search"
-          label="Search"
-          prepend-inner-icon="mdi-magnify"
-          single-line
-          :rounded="0"
-          variant="outlined"
-          hide-details
-        ></v-text-field>
-      </v-card>
-      <v-data-table
-        class="border"
-        :headers="headers"
-        :items="students"
-        :search="search"
-      >
-      </v-data-table>
+    <div class="md:w-[90%]">
+      <div v-if="!noStudents">
+        <v-card :rounded="0" :elevation="0">
+          <v-text-field
+            v-model="search"
+            label="Search"
+            prepend-inner-icon="mdi-magnify"
+            single-line
+            :rounded="0"
+            variant="outlined"
+            hide-details
+          ></v-text-field>
+        </v-card>
+        <v-data-table
+          class="border"
+          :headers="headers"
+          :items="students"
+          :search="search"
+        >
+        </v-data-table>
+      </div>
+      <v-alert
+        v-else
+        type="info"
+        variant="outlined"
+        class="my-4"
+        text="No students registered for this program"
+      ></v-alert>
     </div>
   </div>
 </template>
@@ -48,6 +57,7 @@ const headers = ref([
 ]);
 const search = ref("");
 const students = ref([]);
+const noStudents = ref(false);
 const apiUrl = import.meta.env.VITE_API_URL;
 // Methods
 onMounted(async () => {
@@ -67,10 +77,20 @@ onMounted(async () => {
       index: index + 1,
     }));
   } catch (error) {
-    console.error("Error fetching proposal files:", error);
-    // Handle error
+    if (error.response && error.response.status === 404) {
+      noStudents.value = true;
+    }
   }
 });
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.title {
+  font-family: "DM Sans", sans-serif;
+}
+.titleDes {
+  font-family: "Work Sans", sans-serif;
+  font-size: 1rem /* 18px */;
+  line-height: 1.75rem /* 28px */;
+}
+</style>

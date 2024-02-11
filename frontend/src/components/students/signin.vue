@@ -34,16 +34,11 @@
                   class="mt-1"
                   :rules="emailRules"
                   variant="outlined"
-                  hide-details
                   placeholder="Enter your email address or matric number"
                   required
                 ></v-text-field>
               </v-col>
-              <v-col cols="12" lg="8" v-if="!validEmail">
-                <v-alert dense outlined type="error">
-                  Invalid email format
-                </v-alert>
-              </v-col>
+
               <v-col cols="12" lg="8" md="12" sm="11">
                 <span class="inputText">Password</span>
                 <v-text-field
@@ -53,18 +48,13 @@
                   :counter="20"
                   placeholder="Enter your password"
                   variant="outlined"
-                  hide-details
                   :type="visiblePass ? 'text' : 'password'"
                   :append-inner-icon="visiblePass ? 'mdi-eye' : 'mdi-eye-off'"
                   @click:append-inner="visiblePass = !visiblePass"
                   required
                 ></v-text-field>
               </v-col>
-              <v-col cols="12" lg="8" v-if="!validPassword">
-                <v-alert dense outlined type="error">
-                  Invalid password format
-                </v-alert>
-              </v-col>
+
               <v-col cols="12" lg="8" md="12" sm="11">
                 <v-btn
                   width="100%"
@@ -77,25 +67,11 @@
                   {{ responseMessage == "" ? "Sign In" : "Welcome back!" }}
                 </v-btn>
               </v-col>
-              <v-col cols="12" lg="8">
-                <span
-                  :class="
-                    isDark
-                      ? 'titleDes  orSpanBlack text-base '
-                      : 'titleDes  orSpan text-base '
-                  "
-                  >OR</span
-                >
-              </v-col>
-              <v-col cols="12" lg="8" class="text-center mt-2">
-                <v-btn
-                  width="100%"
-                  height="50px"
-                  variant="outlined"
-                  class="google"
-                  >Sign Up with Google</v-btn
-                >
-              </v-col>
+              <v-col cols="12" lg="8" md="12" sm="11">
+                <span class="title text-center text-[#800000]">
+                  {{ errorMessage }}
+                </span></v-col
+              >
             </v-row>
           </v-container>
         </v-form>
@@ -139,7 +115,6 @@ const store = useStore();
 const valid = ref(false);
 const snackbar = ref(false);
 const responseMessage = ref("");
-const delay = new Promise((resolve) => setTimeout(resolve, 3000));
 const email = ref("");
 const validEmail = ref(true);
 const visiblePass = ref(false);
@@ -175,13 +150,14 @@ const passwordRules = [
     }
   },
 ];
+const errorMessage = ref("");
 
 const login = async () => {
   try {
     const response = await axios.post(
       `${apiUrl}/login`,
       {
-        email: email.value,
+        email: email.value.toLowerCase(),
         password: password.value,
       },
       {
@@ -197,18 +173,18 @@ const login = async () => {
       const userId = response.data.user.user_id;
       localStorage.setItem("user_id", userId);
       store.dispatch("connectSocket", userId);
+      errorMessage.value = "";
       responseMessage.value = "Sign in successful";
       snackbar.value = true;
-      await delay;
+      await new Promise((resolve) => setTimeout(resolve, 1500));
       router.push("/home");
-    } else {
-      // Handle failed login (display error message, etc.)
-      console.error("Sign in failed:", response.data.error);
-      // Reset form fields or handle error state as needed
     }
   } catch (error) {
-    console.error("Sign in error:", error);
-    // Handle error, e.g., display a generic error message to the user
+    if (error.response && error.response.status === 401) {
+      errorMessage.value = "Invalid email or password";
+    } else {
+      errorMessage.value = "An error occurred. Please try again later.";
+    }
   }
 };
 </script>
@@ -234,32 +210,5 @@ const login = async () => {
 .inputText::after {
   content: " *";
   color: #800000;
-}
-.orSpan {
-  display: flex;
-  align-items: center;
-}
-.orSpanBlack {
-  display: flex;
-  align-items: center;
-}
-.orSpan::before,
-.orSpan::after {
-  content: "";
-  flex: 1;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.3);
-  margin: 0 15px;
-}
-.orSpanBlack::before,
-.orSpanBlack::after {
-  content: "";
-  flex: 1;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-  margin: 0 15px;
-}
-.google {
-  font-size: 18px;
-  font-family: "Work Sans", sans-serif;
-  color: #463c84;
 }
 </style>

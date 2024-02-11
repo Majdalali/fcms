@@ -1,103 +1,121 @@
 <template>
   <div>
-    <v-navigation-drawer
-      :theme="isDark ? 'dark' : 'light'"
-      class="dark:bg-[#151515]"
-    >
-      <v-list>
-        <v-list-item
-          title="Masters Project"
-          subtitle="Faculty of Computing"
-        ></v-list-item
-      ></v-list>
-      <v-divider class="mt-2"></v-divider>
-      <v-list class="h-[90%]">
-        <ul class="h-full flex flex-col justify-between">
-          <div>
-            <router-link
-              v-for="navigation in navigationMenu"
-              :to="navigation.link"
-            >
-              <v-list-item
-                v-if="navigation.condidtion"
-                :prepend-icon="navigation.icon"
-                :title="navigation.title"
-                link
-                class="vli"
-              ></v-list-item>
-            </router-link>
-          </div>
-          <div>
-            <v-menu
-              v-model="menu"
-              :close-on-content-click="false"
-              location="end"
-            >
-              <template v-slot:activator="{ props }">
+    <div class="z-20 absolute top-0 w-full left-0 hidden toolBar">
+      <v-toolbar
+        :collapse="!drawer"
+        :elevation="2"
+        :color="isDark ? '#151515' : 'white'"
+      >
+        <v-app-bar-nav-icon
+          variant="text"
+          @click.stop="drawer = !drawer"
+        ></v-app-bar-nav-icon>
+        <v-toolbar-title>Masters Project</v-toolbar-title>
+      </v-toolbar>
+    </div>
+    <div class="relative z-10">
+      <v-navigation-drawer
+        v-model="drawer"
+        :theme="isDark ? 'dark' : 'light'"
+        :mobile-breakpoint="1488"
+        class="dark:bg-[#151515]"
+      >
+        <v-list>
+          <v-list-item
+            title="Masters Project"
+            subtitle="Faculty of Computing"
+          ></v-list-item
+        ></v-list>
+        <v-divider class="mt-2"></v-divider>
+        <v-list class="h-[90%]">
+          <ul class="h-full flex flex-col justify-between">
+            <div>
+              <router-link
+                v-for="navigation in navigationMenu"
+                :to="navigation.link"
+              >
                 <v-list-item
-                  :prepend-icon="settings"
-                  title="Settings"
-                  v-bind="props"
+                  v-if="navigation.condidtion"
+                  :prepend-icon="navigation.icon"
+                  :title="navigation.title"
                   link
                   class="vli"
-                >
-                </v-list-item>
-              </template>
-              <v-card min-width="300">
-                <div class="p-2">
-                  <v-switch
-                    v-model="currentMode"
-                    @change="toggleDark()"
-                    color="indigo"
-                    inset
-                    label="Night Mode"
-                    hide-details
-                  ></v-switch>
-                </div>
-              </v-card>
-            </v-menu>
-
-            <v-list-item
-              :prepend-icon="question"
-              title="Contact Us"
-              class="vli"
-              link
-            >
-            </v-list-item>
-            <v-dialog width="500">
-              <template v-slot:activator="{ props }">
+                ></v-list-item>
+              </router-link>
+            </div>
+            <div>
+              <v-menu
+                v-model="menu"
+                :close-on-content-click="false"
+                location="end"
+              >
+                <template v-slot:activator="{ props }">
+                  <v-list-item
+                    :prepend-icon="settings"
+                    title="Settings"
+                    v-bind="props"
+                    link
+                    class="vli"
+                  >
+                  </v-list-item>
+                </template>
+                <v-card min-width="300">
+                  <div class="p-2">
+                    <v-switch
+                      v-model="currentMode"
+                      @change="toggleDark()"
+                      color="indigo"
+                      inset
+                      label="Night Mode"
+                      hide-details
+                    ></v-switch>
+                  </div>
+                </v-card>
+              </v-menu>
+              <router-link to="/contact">
                 <v-list-item
-                  :prepend-icon="logout"
-                  title="Sign Out"
-                  v-bind="props"
+                  :prepend-icon="question"
+                  title="Contact Us"
+                  class="vli"
                   link
                 >
-                </v-list-item>
-              </template>
+                </v-list-item
+              ></router-link>
 
-              <template v-slot:default="{ isActive }">
-                <v-card title="Signing Out!">
-                  <v-card-text class="text-red-400">
-                    Are you sure you want to sign out?
-                  </v-card-text>
+              <v-dialog width="500">
+                <template v-slot:activator="{ props }">
+                  <v-list-item
+                    :prepend-icon="logout"
+                    title="Sign Out"
+                    v-bind="props"
+                    link
+                    class="vli"
+                  >
+                  </v-list-item>
+                </template>
 
-                  <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <v-btn
-                      text="Cancel"
-                      @click="isActive.value = false"
-                    ></v-btn>
-                    <v-btn text="Sign Out" @click="signout()"></v-btn>
-                  </v-card-actions>
-                </v-card>
-              </template>
-            </v-dialog>
-          </div>
-        </ul>
-      </v-list>
+                <template v-slot:default="{ isActive }">
+                  <v-card title="Signing Out!">
+                    <v-card-text class="text-red-400">
+                      Are you sure you want to sign out?
+                    </v-card-text>
 
-      <!-- Add more items as needed -->
-    </v-navigation-drawer>
+                    <v-card-actions>
+                      <v-spacer></v-spacer>
+                      <v-btn
+                        text="Cancel"
+                        @click="isActive.value = false"
+                      ></v-btn>
+                      <v-btn text="Sign Out" @click="signout()"></v-btn>
+                    </v-card-actions>
+                  </v-card>
+                </template>
+              </v-dialog>
+            </div>
+          </ul>
+        </v-list>
+      </v-navigation-drawer>
+    </div>
   </div>
 </template>
 
@@ -121,6 +139,7 @@ import admin from "@/assets/icons/admin.vue";
 const store = useStore();
 const isDark = useDark();
 const toggleDark = useToggle(isDark);
+const drawer = ref(true);
 const menu = ref(false);
 const currentMode = ref(isDark.value);
 const user = JSON.parse(localStorage.getItem("user"));
@@ -190,5 +209,11 @@ const signout = () => {
 .switch {
   margin: 0 !important;
   padding: 0 !important;
+}
+
+@media screen and (max-width: 1488px) {
+  .toolBar {
+    display: block;
+  }
 }
 </style>

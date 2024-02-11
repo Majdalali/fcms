@@ -13,10 +13,13 @@ import MyProject from "./components/students/myproject.vue";
 import notificationCenter from "./components/notificationCenter.vue";
 import clientTokenMiddleware from "./middleware/tokenGuard";
 import lecturerSignin from "./components/lecturers/lecturerSignin.vue";
+import lecturerRegister from "./components/lecturers/lecturerRegister.vue";
 import lecturerDashboard from "./components/lecturers/lecturerDashboard.vue";
 import lecturerProfile from "./components/lecturers/lecturerProfile.vue";
 import adminDashboard from "./components/admin/adminDashboard.vue";
 import coordinatorDashboard from "./components/coordinator/coordinatorDashboard.vue";
+import Coontact from "./components/contact.vue";
+import Notfound from "./components/notfound.vue";
 
 const routes = [
   {
@@ -64,7 +67,10 @@ const routes = [
     path: "/about",
     name: "about",
     component: About,
-    meta: { requiresAuth: true, allowedUserType: "lecturer" },
+  },{
+    path: "/contact",
+    name: "contact",
+    component: Coontact,
   },
   {
     path: "/profile",
@@ -78,6 +84,12 @@ const routes = [
     path: "/lecturer-signin",
     name: "lecturer-signin",
     component: lecturerSignin,
+    meta: { requiresGuest: true },
+  },
+  {
+    path: "/lecturer-register",
+    name: "lecturer-register",
+    component: lecturerRegister,
     meta: { requiresGuest: true },
   },
   {
@@ -107,6 +119,11 @@ const routes = [
     name: "coordinator",
     component: coordinatorDashboard,
     meta: { allowedUserType: "lecturer" , requiresCoordinator: true, requiresAuth: true},
+  },
+  {
+    path: "/:pathMatch(.*)*",
+    name: "404",
+    component: Notfound,
   },
 ];
 

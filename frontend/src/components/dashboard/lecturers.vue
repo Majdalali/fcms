@@ -1,10 +1,10 @@
 <template>
   <div>
     <div class="pt-10 mb-5">
-      <h1 class="title text-xl font-medium">Lecturers & Supervisors</h1>
+      <h1 class="title text-lg font-medium">Lecturers & Supervisors</h1>
       <p class="titleDes text-base font-light">List of registered Lecturers</p>
     </div>
-    <div class="w-[90%]">
+    <div class="lg:w-[90%]">
       <v-dialog v-model="dialog" max-width="800px">
         <template v-slot:activator="{ on }">
           <div v-if="!isLoading">
@@ -228,11 +228,11 @@ onMounted(async () => {
 </script>
 
 <style lang="scss" scoped>
-.title,
-.titleDes {
+.title {
   font-family: "DM Sans", sans-serif;
 }
-.titleData {
+.titleData,
+.titleDes {
   font-family: "Work Sans", sans-serif;
 }
 </style>

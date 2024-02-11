@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="pt-10">
-      <h1 class="title text-xl font-medium">Project Information</h1>
+      <h1 class="title text-lg font-medium">Project Information</h1>
       <p class="titleDes text-base font-light">
         Check the home page for deadlines
       </p>
@@ -13,27 +13,29 @@
       type="warning"
       variant="outlined"
       closable
-      class="mt-10 w-2/3 uppercase text-bold"
+      class="mt-10 lg:w-4/5 uppercase text-bold"
     ></v-alert>
     <v-alert
       v-show="alertText !== ''"
       closable
-      class="mt-10 w-2/3 uppercase text-bold"
+      class="mt-10 lg:w-4/5 uppercase text-bold"
       variant="outlined"
       :text="alertText"
       :type="alertType"
     ></v-alert>
-    <div v-show="!editMode" class="pt-10 h-full w-2/3">
+    <div v-show="!editMode" class="pt-10 h-full xl:w-4/5">
       <div v-if="userInfo">
         <v-card
           v-for="(value, key) in projectInfo"
           :key="key"
           :title="getTitle(key)"
-          :subtitle="userInfo.projectInfo[key]"
           :color="isDark ? '' : '#f5f5f5'"
           :elevation="2"
-          class="card title p-10 rounded-lg"
+          class="card title p-10 rounded-lg h-max"
         >
+          <v-card-text class="text-gray-300">
+            {{ userInfo.projectInfo[key] }}
+          </v-card-text>
         </v-card>
 
         <v-btn
@@ -63,7 +65,7 @@
       </template>
     </div>
     <!-- Edit Project -->
-    <div v-show="editMode" class="pt-10 h-full w-2/3">
+    <div v-show="editMode" class="pt-10 h-full">
       <v-form v-model="valid">
         <v-text-field
           required
@@ -92,23 +94,25 @@
           class="mt-4"
         ></v-text-field>
 
-        <v-btn
-          class="w-56 mt-5"
-          variant="flat"
-          color="blue-darken-4"
-          size="large"
-          :disabled="!isFormChanged || !valid"
-          @click="updateProjectInfo"
-          >Submit</v-btn
-        >
-        <v-btn
-          class="w-56 mt-5 ml-5"
-          variant="outlined"
-          color="warning"
-          size="large"
-          @click="cancelEdit"
-          >Cancel</v-btn
-        >
+        <div class="mt-5 flex flex-col sm:flex-row gap-5">
+          <v-btn
+            class="w-56"
+            variant="flat"
+            color="blue-darken-4"
+            size="large"
+            :disabled="!isFormChanged || !valid"
+            @click="updateProjectInfo"
+            >Submit</v-btn
+          >
+          <v-btn
+            class="w-56"
+            variant="outlined"
+            color="warning"
+            size="large"
+            @click="cancelEdit"
+            >Cancel</v-btn
+          >
+        </div>
       </v-form>
     </div>
   </div>
@@ -244,16 +248,17 @@ const updateProjectInfo = async () => {
 </script>
 
 <style lang="scss" scoped>
-.title,
-.titleDes {
+.title {
   font-family: "DM Sans", sans-serif;
+}
+.titleDes {
+  font-family: "Work Sans", sans-serif;
 }
 .cardValue {
   font-family: "Source Sans Pro", sans-serif;
 }
 .card {
   width: 100%;
-  height: 80px;
 }
 .card:nth-child(2),
 .card:nth-child(3) {

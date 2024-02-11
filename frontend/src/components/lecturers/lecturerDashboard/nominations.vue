@@ -1,12 +1,12 @@
 <template>
   <div :key="componentKey" class="mt-10">
-    <div class="w-1/2">
+    <div>
       <h1 class="title text-lg font-medium">Nomination Form</h1>
       <p class="titleDes font-thin">
         Use this form to nomoinate examiners for a student
       </p>
     </div>
-    <div class="w-4/5 my-5 ml-2">
+    <div class="lg:w-4/5 my-5 ml-2">
       <v-form
         ref="evaluationForm"
         v-model="valid"
@@ -349,6 +349,7 @@
         </v-stepper>
       </v-form>
     </div>
+    <LecturerNominations />
     <v-snackbar
       :timeout="2000"
       color="indigo"
@@ -369,6 +370,8 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import axios from "axios";
+
+import LecturerNominations from "./lecturerNominations.vue";
 
 // Constants
 const snackbar = ref(false);

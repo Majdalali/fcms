@@ -1,30 +1,30 @@
 <template>
   <div class="mt-10">
     <div class="lowerDiv mt-5 flex flex-col w-full">
-      <div class="w-4/5 flex justify-center">
+      <div class="w-fit m-auto">
         <v-tabs
-          class="rounded-3xl w-1/2"
+          class="rounded-3xl md:px-20"
           align-tabs="center"
           :bg-color="isDark ? '#fdfefb' : '#BDBDBD'"
           v-model="tab"
         >
           <v-tab class="v-tab" value="one">Session</v-tab>
-          <v-tab class="v-tab" value="two">Privileges</v-tab>
+          <v-tab class="v-tab" value="two">Assign</v-tab>
           <v-tab class="v-tab" value="three">Programs</v-tab>
         </v-tabs>
       </div>
 
       <div class="pl-0 w-full">
-        <v-window v-model="tab">
+        <v-window disabled v-model="tab">
           <v-window-item value="one"
             ><div class="session">
-              <div class="w-1/2 mt-5">
+              <div class="mt-5">
                 <h1 class="title text-lg font-medium">Create a new session</h1>
                 <p class="titleDes text-sm font-light">
                   The home page will display the leatest session
                 </p>
               </div>
-              <div class="w-4/5 mt-5">
+              <div class="lg:w-4/5 mt-5">
                 <v-form ref="sessionForm" v-model="valid">
                   <v-row>
                     <v-col class="pb-0" cols="12" md="10">
@@ -93,7 +93,7 @@
                   >
                 </v-form>
               </div>
-              <div class="w-4/5 mt-5">
+              <div class="md:w-4/5 mt-5">
                 <h1 class="title text-lg font-medium">Current Sessions</h1>
                 <small class="text-orange-500 font-semibold"
                   >*Please note that only the latest session is displayed in the
@@ -275,8 +275,8 @@
             </div></v-window-item
           >
           <v-window-item value="two">
-            <div class="adminMaker w-1/2">
-              <div class="w-1/2 mt-5">
+            <div class="adminMaker">
+              <div class="mt-5">
                 <h1 class="title text-lg font-medium">Admin privileges</h1>
                 <p class="titleDes text-sm font-light">
                   Make a user an admin or a coordinator
@@ -285,7 +285,7 @@
               <div class="mt-4">
                 <v-form v-model="adminValid" ref="adminForm">
                   <v-row>
-                    <v-col cols="12" md="10">
+                    <v-col cols="12" md="7">
                       <v-alert
                         v-show="adminError !== ''"
                         v-model="adminError"
@@ -324,11 +324,59 @@
                     :disabled="!adminValid"
                   ></v-btn>
                 </v-form>
-              </div></div
-          ></v-window-item>
+              </div>
+              <v-divider></v-divider>
+              <div class="mt-5">
+                <h1 class="title text-lg font-medium">
+                  Remove Student From Examiner's List
+                </h1>
+                <small>
+                  *To remove a student from the examiner's list, please enter
+                  the student's email address and the examiner's email address
+                </small>
+              </div>
+              <div class="mt-4">
+                <v-form v-model="examinerValid" ref="examinerForm">
+                  <v-row>
+                    <v-col cols="12" md="7">
+                      <v-alert
+                        v-show="examinerError !== ''"
+                        v-model="examinerError"
+                        class="py-1 mb-2"
+                        closable
+                        :text="examinerError"
+                        type="error"
+                      ></v-alert>
+                      <v-text-field
+                        label="Student email"
+                        hint="Please enter the student's registered email address"
+                        v-model="examinerStudent"
+                        :rules="emailRules"
+                      ></v-text-field>
+                      <v-text-field
+                        label="Examiner email"
+                        hint="Please enter the examiner's registered email address"
+                        v-model="examinerEmail"
+                        :rules="emailRules"
+                      ></v-text-field>
+                    </v-col>
+                  </v-row>
+                  <v-btn
+                    size="large"
+                    variant="elevated"
+                    color="deep-purple-darken-4"
+                    class="mb-5 mt-4"
+                    text="Submit"
+                    :disabled="!examinerValid"
+                    @click="removeExaminer()"
+                  ></v-btn>
+                </v-form>
+              </div>
+            </div>
+          </v-window-item>
           <v-window-item value="three">
-            <div class="programMaker w-4/5">
-              <div class="w-1/2 mt-5">
+            <div class="programMaker md:w-4/5">
+              <div class="mt-5">
                 <h1 class="title text-lg font-medium">Programs</h1>
                 <p class="titleDes text-sm font-light">
                   Create and edit avaliable programs
@@ -554,6 +602,11 @@ const adminValid = ref(false);
 const adminForm = ref(null);
 const adminEmail = ref("");
 const radioGroup = ref("");
+const examinerForm = ref(null);
+const examinerValid = ref(false);
+const examinerEmail = ref("");
+const examinerStudent = ref("");
+const examinerError = ref("");
 
 // Sessions
 const valid = ref(false);
@@ -815,6 +868,41 @@ const changePrivilege = async () => {
       adminForm.value.reset();
     } else {
       console.error("Error making user an admin:", error);
+    }
+  }
+};
+
+const removeExaminer = async () => {
+  try {
+    const token = localStorage.getItem("access_token");
+
+    const response = await axios.post(
+      `${apiUrl}/removeExaminer`,
+      {
+        studentEmail: examinerStudent.value,
+        examinerEmail: examinerEmail.value,
+      },
+      {
+        headers: {
+          Authorization: token,
+        },
+      }
+    );
+    if (response.status === 200) {
+      responseMessage.value = response.data.message;
+      snackbar.value = true;
+      examinerError.value = "";
+      examinerForm.value.reset();
+    }
+  } catch (error) {
+    if (
+      error.response &&
+      (error.response.status === 400 || error.response.status === 404)
+    ) {
+      examinerError.value = error.response.data.error;
+      examinerForm.value.reset();
+    } else {
+      examinerError.value = "An error occurred while removing the student";
     }
   }
 };

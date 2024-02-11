@@ -16,10 +16,10 @@
                   :src="isDark ? UTMLogoBlack : UTMLogo"
                   class="mb-10"
                 ></v-img>
-                <h1 class="text-4xl w-max font-bold title">Create account</h1>
+                <h1 class="text-4xl w-max font-bold title">Staff portal!</h1>
                 <p class="text-lg w-max font-light titleDes">
                   Already have an account ?
-                  <router-link to="/signin"
+                  <router-link to="/lecturer-signin"
                     ><span
                       class="font-normal pb-[1px] border-b-2 border-b-[#FAC000]"
                       >Sign in</span
@@ -38,18 +38,7 @@
                   required
                 ></v-text-field>
               </v-col>
-              <v-col class="py-0" cols="12" lg="8" md="6" sm="11">
-                <span class="inputText">Matric Number</span>
-                <v-text-field
-                  v-model="matricCard"
-                  class="mt-1"
-                  :rules="matricCardRules"
-                  :counter="9"
-                  variant="outlined"
-                  placeholder="Enter your matric number"
-                  required
-                ></v-text-field>
-              </v-col>
+
               <v-col class="py-0" cols="12" lg="8" md="12" sm="11">
                 <span class="inputText">Email</span>
                 <v-text-field
@@ -80,7 +69,7 @@
 
               <v-col cols="12" lg="8" md="12" sm="11">
                 <v-select
-                  v-model="user_program"
+                  v-model="coordinator_program"
                   label="Program"
                   variant="outlined"
                   required
@@ -88,6 +77,10 @@
                   item-title="name"
                   item-value="abbreviation"
                 ></v-select>
+                <small
+                  >*Program is used for coordinator's access. Please select one
+                  even if you're not a coordinator</small
+                >
               </v-col>
               <v-col cols="12" lg="8" md="12" sm="11">
                 <v-btn
@@ -152,8 +145,7 @@ const valid = ref(false);
 const username = ref("");
 const email = ref("");
 const password = ref("");
-const matricCard = ref("");
-const user_program = ref("");
+const coordinator_program = ref("");
 const visiblePass = ref(false);
 const snackbar = ref(false);
 const responseMessage = ref("");
@@ -178,7 +170,7 @@ const passwordRules = [
     return "Password is required.";
   },
   (value) => {
-    if (value.length >= 3) {
+    if (value.length >= 8) {
       return true;
     } else {
       return "Password must be at least 8 characters.";
@@ -190,20 +182,6 @@ const nameRules = [
   (value) =>
     (value && value.length >= 5 && /^[a-zA-Z\s]*$/.test(value)) ||
     "Name must be at least 5 characters with no numbers or symbols.",
-];
-
-const matricCardRules = [
-  (value) => {
-    if (value) return true;
-    return "Matric Number is required.";
-  },
-  (value) => {
-    if (value.length == 9) {
-      return true;
-    } else {
-      return "Matric Number must be 9 characters.";
-    }
-  },
 ];
 
 const currnetPrograms = ref({});
@@ -224,22 +202,19 @@ onMounted(async () => {
 
 const register = async () => {
   try {
-    const response = await axios.post(`${apiUrl}/register`, {
+    const response = await axios.post(`${apiUrl}/lecturer/register`, {
       username: username.value,
       email: email.value.toLowerCase(),
       password: password.value,
-      matricCard: matricCard.value,
-      user_program: user_program.value,
+      coordinator_program: coordinator_program.value,
     });
 
     if (response.status === 200) {
       responseMessage.value = response.data.message;
       snackbar.value = true;
-
-      router.push("/signin");
-    } else {
-      errorMessage.value =
-        response.data.error || "Registration failed. Please try again later.";
+      // delay
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+      router.push("/lecturer-signin");
     }
   } catch (error) {
     if (error.response && error.response.status === 400) {

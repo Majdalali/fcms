@@ -221,6 +221,35 @@ class Nominations {
       throw error;
     }
   }
+  static async getNominationsForLecturer(lecturerId) {
+    try {
+      const nominationsRef = firestore().collection("nominations");
+      const nominationsSnapshot = await nominationsRef
+        .where("supervisorId", "==", lecturerId)
+        .get();
+      const nominations = [];
+      nominationsSnapshot.forEach((doc) => {
+        nominations.push(doc.data());
+      });
+      if (nominations.length === 0) {
+        return null; // Return null if no nominations found
+      }
+      return nominations;
+    } catch (error) {
+      console.error("Error getting all nominations: ", error);
+      throw error;
+    }
+  }
+
+  static async deleteNominationById(nominationId) {
+    try {
+      const nominationsRef = firestore().collection("nominations");
+      await nominationsRef.doc(nominationId).delete();
+    } catch (error) {
+      console.error("Error deleting nomination: ", error);
+      throw error;
+    }
+  }
 }
 module.exports = {
   Nominations,

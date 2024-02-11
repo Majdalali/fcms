@@ -5,10 +5,16 @@
   >
     <v-container fluid>
       <v-row>
-        <v-col cols="2">
+        <v-col cols="12" md="2" sm="0" class="nav sm:mb-5">
           <Navigation />
         </v-col>
-        <v-col cols="10" class="main">
+        <v-col
+          cols="12"
+          md="12"
+          lg="10"
+          style="min-width: 70%; max-width: 100%"
+          class="main"
+        >
           <div class="pt-4 upperDiv">
             <h1 class="text-3xl font-medium title">Personal Profile</h1>
             <p v-if="userInfo" class="text-lg titleDes font-light">
@@ -18,11 +24,10 @@
           <div class="middleDiv pt-10">
             <div v-if="userInfo">
               <v-sheet
-                :height="200"
                 border
-                class="w-[90%] drop-shadow-lg p-10 rounded-lg"
+                class="lg:w-[90%] drop-shadow-lg p-5 rounded-lg h-80 md:h-[200px]"
               >
-                <div class="flex flex-row items-center h-full pl-20">
+                <div class="flex flex-row items-center h-full md:pl-20">
                   <v-avatar
                     :text="getInitials(userInfo.username)"
                     color="#9C3D3D"
@@ -35,7 +40,7 @@
                         {{ userInfo.username }}
                       </h1>
                     </div>
-                    <div class="flex flex-row">
+                    <div class="flex flex-col md:flex-row mt-2">
                       <v-tooltip location="bottom" text="Email">
                         <template v-slot:activator="{ props }">
                           <p v-bind="props" class="text-lg font-light para">
@@ -48,7 +53,7 @@
                         <template v-slot:activator="{ props }">
                           <p
                             v-bind="props"
-                            class="text-lg ml-10 uppercase font-light para"
+                            class="text-lg md:ml-10 uppercase font-light para"
                           >
                             <v-icon class="mr-2"><UserCard /></v-icon
                             >{{ userInfo.matricCard }}
@@ -59,7 +64,7 @@
                         <template v-slot:activator="{ props }">
                           <p
                             v-bind="props"
-                            class="text-lg ml-10 uppercase font-light para"
+                            class="text-lg md:ml-10 uppercase font-light para"
                           >
                             <v-icon class="mr-2"><Flag /></v-icon
                             >{{ userInfo.user_program }}
@@ -203,7 +208,7 @@
               v-model="tab"
             >
               <v-tab class="v-tab" value="one">Supervisor</v-tab>
-              <v-tab class="v-tab" value="five">Co Supervisors</v-tab>
+              <v-tab class="v-tab" value="two">Co Supervisors</v-tab>
               <v-tab
                 v-for="(examiner, index) in examinersInfo"
                 :key="index"
@@ -219,6 +224,9 @@
               <v-window v-model="tab">
                 <v-window-item value="one"> <Supervisor /> </v-window-item>
 
+                <v-window-item value="two">
+                  <CoSupervisors />
+                </v-window-item>
                 <v-window-item
                   v-for="(examiner, index) in examinersInfo"
                   :key="index"
@@ -226,11 +234,8 @@
                 >
                   <Examiner :name="examiner.name" :email="examiner.email" />
                 </v-window-item>
-                <v-window-item class="w-[60%]" value="four">
+                <v-window-item value="four">
                   <Comments />
-                </v-window-item>
-                <v-window-item value="five">
-                  <CoSupervisors />
                 </v-window-item>
               </v-window>
             </v-card-text>
@@ -446,6 +451,20 @@ onMounted(async () => {
 </script>
 
 <style lang="scss" scoped>
+@media screen and (max-width: 1488px) {
+  .nav {
+    max-width: 1%;
+  }
+  .main {
+    min-width: 100% !important;
+  }
+}
+@media screen and (max-width: 639px) {
+  .main {
+    margin-top: 20px !important;
+  }
+}
+
 .title,
 .titleDes {
   font-family: "DM Sans", sans-serif;

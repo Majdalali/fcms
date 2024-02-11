@@ -5,10 +5,16 @@
   >
     <v-container fluid>
       <v-row>
-        <v-col cols="2" class="nav">
+        <v-col cols="12" md="2" sm="0" class="nav sm:mb-5">
           <Navigation />
         </v-col>
-        <v-col class="main">
+        <v-col
+          cols="12"
+          md="12"
+          lg="10"
+          style="min-width: 70%; max-width: 100%"
+          class="main"
+        >
           <div class="pt-4 upperDiv">
             <h1 class="text-3xl font-medium title">My Project</h1>
             <p class="text-lg titleDes font-light" v-if="sessionDate">
@@ -94,7 +100,7 @@
                     :submissionDate="sessionDate"
                   />
                 </v-window-item>
-                <v-window-item class="w-2/3" value="eight">
+                <v-window-item value="eight">
                   <comments />
                 </v-window-item>
               </v-window>
@@ -138,17 +144,25 @@ onMounted(async () => {
 </script>
 
 <style lang="scss" scoped>
-@media screen and (max-width: 1500px) {
+@media screen and (max-width: 1488px) {
   .nav {
-    display: none;
+    max-width: 1%;
+  }
+  .main {
+    min-width: 100% !important;
   }
 }
-.title {
-  font-family: "DM Sans", sans-serif;
+@media screen and (max-width: 639px) {
+  .main {
+    margin-top: 20px !important;
+  }
 }
+
+.title,
 .titleDes {
   font-family: "DM Sans", sans-serif;
 }
+
 .tempDiv {
   background-color: #fdfefb !important;
 }

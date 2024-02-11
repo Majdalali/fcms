@@ -1,10 +1,10 @@
 <template>
   <div>
     <div class="pt-10 mb-5">
-      <h1 class="title text-xl font-medium">Archive</h1>
+      <h1 class="title text-lg font-medium">Archive</h1>
       <p class="titleDes text-base font-light">List of archived projects</p>
     </div>
-    <div class="w-[90%]">
+    <div class="lg:w-[90%]">
       <div v-if="!isLoading">
         <v-card :rounded="0" :elevation="0">
           <v-text-field
@@ -86,11 +86,11 @@ onMounted(async () => {
 </script>
 
 <style lang="scss" scoped>
-.title,
-.titleDes {
+.title {
   font-family: "DM Sans", sans-serif;
 }
-.titleData {
+.titleData,
+.titleDes {
   font-family: "Work Sans", sans-serif;
 }
 .titleInfo {

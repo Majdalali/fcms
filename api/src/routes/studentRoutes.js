@@ -57,6 +57,12 @@ router.get(
   studentController.getStudentCoSupervisors
 );
 
+router.post(
+  "/removeSupervisor/:lecturerType",
+  verifyToken,
+  studentController.DeleteStudentLecturer
+);
+
 module.exports = function (io, connectedUsers) {
   router.post(
     "/uploadFile",
