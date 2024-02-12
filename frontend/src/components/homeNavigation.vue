@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid class="container z-10 hidden sm:block">
+  <v-container fluid class="container z-30 hidden sm:block">
     <v-sheet
       class="z-10 px-[10%] h-20"
       :elevation="2"
@@ -15,7 +15,7 @@
             :src="isDark ? UTMLogoBlack : UTMLogo"
           ></v-img>
         </div>
-        <div class="flex flex-row nav">
+        <div class="flex flex-row nav z-10">
           <ul class="flex flex-row gap-16 whitespace-nowrap">
             <router-link to="/"><li>Home</li></router-link>
             <router-link to="/about"> <li>About us</li></router-link>
@@ -206,7 +206,7 @@
     <v-navigation-drawer
       v-model="drawer"
       location="top"
-      temporary
+      temporarys
       class="h-auto"
     >
       <v-list class="text-center btn">

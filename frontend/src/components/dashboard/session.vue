@@ -8,7 +8,7 @@
     </div>
     <!-- Session -->
     <div class="pt-5 h-full lg:w-[90%]">
-      <v-container>
+      <v-container class="px-0">
         <div v-if="sessionInfo">
           <v-row no-gutters>
             <v-col cols="12" lg="8">

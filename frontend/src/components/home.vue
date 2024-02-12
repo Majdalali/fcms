@@ -3,7 +3,7 @@
     <div v-if="!isDark" class="overlay z-0"></div>
     <HomeNavigation />
     <div
-      class="w-full h-full z-10 flex flex-row items-center justify-center max-xl:text-center xl:px-[10%] xl:justify-around"
+      class="w-full h-screen z-10 flex flex-row items-center justify-center max-xl:text-center xl:px-[10%] xl:justify-around"
     >
       <div class="heroLeft xl:w-1/2">
         <h1
@@ -49,6 +49,7 @@
             height="50"
             size="large"
             rounded="lg"
+            @click="scrollToHDIW()"
             ><span class="font-bold"
               >How Does it work?
               <v-divider
@@ -66,6 +67,74 @@
           cover
           :src="HeroImage"
         ></v-img>
+      </div>
+    </div>
+    <div
+      class="HDIW w-full h-screen bg-slate-200 dark:bg-[#0d0d0d] flex justify-center items-center"
+    >
+      <div class="z-10 w-4/5 dark:text-white max-md:h-4/5">
+        <v-timeline
+          :theme="isDark ? 'dark' : 'light'"
+          :direction="mdAndUp ? 'horizontal' : 'vertical'"
+          :side="mdAndUp ? '' : 'end'"
+        >
+          <v-timeline-item
+            icon="mdi-numeric-1"
+            :icon-color="isDark ? 'black' : 'white'"
+          >
+            <template v-slot:opposite v-if="largerThanSm">
+              <span class="title uppercase">SIGN UP!</span>
+            </template>
+            <h1>
+              <h1 class="timelineTitle">Create Your Account</h1>
+              <p class="timelinePara">
+                Sign up to access the system by providing your details and
+                creating a profile.
+                <strong>And don't forget to choose your program</strong>
+              </p>
+            </h1>
+          </v-timeline-item>
+
+          <v-timeline-item
+            icon="mdi-numeric-2"
+            :icon-color="isDark ? 'black' : 'white'"
+          >
+            <template v-slot:opposite v-if="largerThanSm">
+              <span class="title uppercase">Submit Progress</span>
+            </template>
+            <div>
+              <h1 class="timelineTitle">Submit Your Project</h1>
+              <p class="timelinePara">
+                Once logged in, submit your progress based on the project's
+                details and requirements.
+                <strong>Make sure to submit on time.</strong>
+              </p>
+            </div>
+          </v-timeline-item>
+
+          <v-timeline-item
+            icon="mdi-numeric-3"
+            :icon-color="isDark ? 'black' : 'white'"
+          >
+            <template v-slot:opposite v-if="largerThanSm">
+              <span class="title uppercase">Track Progress</span>
+            </template>
+            <div>
+              <h1 class="timelineTitle">Track Your Project Progress</h1>
+              <p class="timelinePara">
+                Monitor project progress, receive updates, feedback, and
+                notifications from evaluators and supervisors.
+              </p>
+            </div>
+          </v-timeline-item>
+        </v-timeline>
+      </div>
+      <div class="fixed z-50 right-10 bottom-10 text-white">
+        <span class="text-xl" @click="scrollToTop()"
+          ><v-icon size="x-large" class="animate-pulse"
+            >mdi-arrow-up-thin</v-icon
+          ></span
+        >
       </div>
     </div>
     <v-dialog v-model="dialogRegister" height="500" width="500">
@@ -111,16 +180,34 @@
 
 <script setup>
 import { ref } from "vue";
-import { useDark } from "@vueuse/core";
+import { useDark, useBreakpoints, breakpointsTailwind } from "@vueuse/core";
 import HeroImage from "@/assets/images/heroImage.svg";
 import HomeNavigation from "./homeNavigation.vue";
 
 // Constants
 const isDark = useDark();
 const dialogRegister = ref(false);
+const breakpoints = useBreakpoints(breakpointsTailwind);
+const mdAndUp = breakpoints.greaterOrEqual("md");
+const largerThanSm = breakpoints.greater("sm");
+
+// Methods
+const scrollToHDIW = () => {
+  const HDIW = document.querySelector(".HDIW");
+  HDIW.scrollIntoView({ behavior: "smooth" });
+};
+
+const scrollToTop = () => {
+  window.scrollTo({ top: 0, behavior: "smooth" });
+};
+
+// breakpoints computed
 </script>
 
 <style lang="scss" scoped>
+html {
+  scroll-behavior: smooth;
+}
 .glass-background {
   background: linear-gradient(
     to top right,
@@ -236,5 +323,18 @@ li {
   .btn:nth-child(2) {
     margin-top: 10px;
   }
+}
+
+.timelineTitle {
+  font-family: "DM Sans", sans-serif;
+  font-weight: 600;
+  font-size: 1.125rem /* 18px */;
+  line-height: 1.75rem /* 28px */;
+}
+.timelinePara {
+  font-family: "Work Sans", sans-serif;
+  font-weight: 300;
+  font-size: 1rem /* 16px */;
+  line-height: 1.5rem /* 24px */;
 }
 </style>

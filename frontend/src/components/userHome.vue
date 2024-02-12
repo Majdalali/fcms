@@ -37,7 +37,7 @@
             </v-tabs>
             <v-divider class="w-[90%]"></v-divider>
 
-            <v-card-text class="pl-0">
+            <div class="pl-0">
               <v-window disabled v-model="tab">
                 <v-window-item value="one">
                   <Session :sessionInfo="sessionInfo" />
@@ -49,7 +49,7 @@
                 <v-window-item value="four"> <Lecturers /> </v-window-item>
                 <v-window-item value="five"><Archive /> </v-window-item>
               </v-window>
-            </v-card-text>
+            </div>
           </div>
         </v-col>
       </v-row>

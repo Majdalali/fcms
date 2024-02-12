@@ -9,6 +9,7 @@ const socketIO = require("socket.io");
 const generalRoutes = require("./src/routes/generalRoutes");
 const evaluationRoutes = require("./src/routes/evaluationsRoutes");
 const adminRoutes = require("./src/routes/adminRoutes");
+const archiveRoutes = require("./src/routes/archiveRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -60,6 +61,7 @@ app.use("/", lecturerRoutes);
 app.use("/", generalRoutes);
 app.use("/", evaluationRoutes);
 app.use("/", adminRoutes);
+app.use("/", archiveRoutes);
 
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

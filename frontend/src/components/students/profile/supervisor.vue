@@ -4,7 +4,7 @@
       <v-sheet
         border
         :height="75"
-        class="md:w-4/5 rounded-lg"
+        class="md:w-3/5 rounded-lg"
         :elevation="2"
         :color="isDark ? '' : '#f5f5f5'"
       >
@@ -25,7 +25,7 @@
         border
         :height="75"
         :elevation="2"
-        class="md:w-4/5 mt-4 rounded-lg"
+        class="md:w-3/5 mt-4 rounded-lg"
         :color="isDark ? '' : '#f5f5f5'"
       >
         <div class="h-full flex flex-row items-center">

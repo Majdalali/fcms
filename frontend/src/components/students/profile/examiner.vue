@@ -6,7 +6,7 @@
         border
         :height="75"
         :elevation="2"
-        class="md:w-4/5 rounded-lg"
+        class="md:w-3/5 rounded-lg"
       >
         <div class="h-full flex flex-row items-center">
           <h1 class="text-lg title flex-1 text-center font-bold">Name</h1>
@@ -20,7 +20,7 @@
         border
         :elevation="2"
         :height="75"
-        class="md:w-4/5 mt-4 rounded-lg"
+        class="md:w-3/5 mt-4 rounded-lg"
       >
         <div class="h-full flex flex-row items-center">
           <h1 class="text-lg title flex-1 text-center font-bold">Email</h1>

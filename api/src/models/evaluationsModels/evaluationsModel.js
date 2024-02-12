@@ -1,5 +1,5 @@
 const { firestore } = require("../../services/firebase");
-const evaluationsCollection = firestore().collection("Evaluations");
+const evaluationsCollection = firestore().collection("evaluations");
 
 class evaluationsModel {
   constructor({
