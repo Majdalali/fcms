@@ -1,9 +1,16 @@
 <template>
   <div class="mt-10">
     <div>
-      <h1 class="title text-lg font-medium">Evaluation Form</h1>
+      <h1 class="title text-lg font-medium">
+        Evaluation Form
+        <v-progress-circular
+          v-if="isLoading"
+          :size="22"
+          indeterminate
+        ></v-progress-circular>
+      </h1>
     </div>
-    <div class="lg:w-4/5 my-5">
+    <div v-if="!isLoading" class="lg:w-4/5 my-5">
       <v-alert
         :title="criteriaErrorMessages"
         type="error"
@@ -116,6 +123,17 @@
         >
       </v-form>
     </div>
+    <v-skeleton-loader
+      v-if="isLoading"
+      class="mw-auto border my-5 lg:w-4/5"
+      type="heading, list-item"
+    ></v-skeleton-loader>
+    <v-skeleton-loader
+      v-if="isLoading"
+      class="mw-auto border lg:w-4/5"
+      type="article, list-item"
+    >
+    </v-skeleton-loader>
     <LecturerEvaluations :criteriaData="criteriasData" />
     <v-snackbar
       :timeout="2000"
@@ -146,6 +164,7 @@ const selectedStudent = ref(null);
 const snackbar = ref(false);
 const responseMessage = ref("");
 const dark = useDark();
+const isLoading = ref(false);
 
 const valid = ref(false);
 const evaluationForm = ref(null);
@@ -253,6 +272,7 @@ const submitEvaluation = async () => {
 onMounted(async () => {
   const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
   const userId = storedUser.user_id;
+  isLoading.value = true;
   try {
     // Fetching data from the first endpoint
     const response1 = await axios.get(
@@ -322,6 +342,7 @@ onMounted(async () => {
     console.error("Error fetching evaluation criteria:", error);
     // Handle error, display an error message, or redirect if needed
   }
+  isLoading.value = false;
 });
 
 const assignCriteria = () => {

@@ -15,7 +15,7 @@
         <span class="text-red-400 font-bold" v-else>Closed</span>
       </p>
       <p
-        v-if="!submissionDate.bypass_deadline"
+        v-if="!submissionDate?.bypass_deadline"
         class="titleDes text-base font-light"
       >
         Time remaining:
@@ -63,22 +63,23 @@
                 <div v-if="fileInfo.proposalStatus === 'pending'">
                   <p>
                     Proposal Status:
-                    <span class="font-semibold ml-2">{{
+                    <span class="font-semibold">{{
                       fileInfo.proposalStatus
                     }}</span>
                   </p>
                 </div>
-                <div>
+                <div v-if="fileInfo.proposalStatus !== 'pending'">
                   <p>
+                    Proposal Status:
                     <span
                       v-if="fileInfo.proposalStatus === 'accepted'"
-                      class="font-semibold text-green-600 ml-2"
-                      >Proposal Status: {{ fileInfo.proposalStatus }}</span
+                      class="font-semibold text-green-600"
+                      >{{ fileInfo.proposalStatus }}</span
                     >
                     <span
                       v-if="fileInfo.proposalStatus === 'rejected'"
-                      class="font-semibold text-red-500 ml-2"
-                      >Proposal Status: {{ fileInfo.proposalStatus }}</span
+                      class="font-semibold text-red-500"
+                      >{{ fileInfo.proposalStatus }}</span
                     >
                   </p>
                 </div>
@@ -241,6 +242,7 @@ const props = defineProps({
   type: String,
   extrasType: String,
   name: String,
+  projectType: String,
   dateType: String,
   submissionDate: Object,
 });
@@ -288,7 +290,7 @@ const seperateName = (name) => {
 };
 
 const isWithinDeadline = computed(() => {
-  if (props.submissionDate.bypass_deadline === true) {
+  if (props.submissionDate?.bypass_deadline === true) {
     return true;
   } else if (props.submissionDate) {
     const jsStartDate = new Date(
@@ -487,17 +489,22 @@ onMounted(async () => {
   try {
     const token = localStorage.getItem("access_token");
 
+    const payload = {
+      projectType: props.projectType,
+    };
+
     // Get main file
     try {
-      const responseMain = await axios.get(
-        `${apiUrl}/myfiles?submissionType=${props.type}`,
-        {
-          headers: {
-            Authorization: token,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const responseMain = await axios.get(`${apiUrl}/myfiles`, {
+        params: {
+          submissionType: props.type,
+          ...payload,
+        },
+        headers: {
+          Authorization: token,
+          "Content-Type": "application/json",
+        },
+      });
       if (responseMain.data.length === 0) {
         filesInfo.value.Main = [];
       } else {
@@ -509,15 +516,16 @@ onMounted(async () => {
 
     // Get other files
     try {
-      const responseOthers = await axios.get(
-        `${apiUrl}/myfiles?submissionType=${props.extrasType}`,
-        {
-          headers: {
-            Authorization: token,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const responseOthers = await axios.get(`${apiUrl}/myfiles`, {
+        params: {
+          submissionType: props.extrasType,
+          ...payload,
+        },
+        headers: {
+          Authorization: token,
+          "Content-Type": "application/json",
+        },
+      });
       if (responseOthers.data.length === 0) {
         filesInfo.value.Others = [];
       } else {
@@ -540,6 +548,7 @@ const submitMainFiles = async () => {
 
     if (mainFile.value) {
       const submissionCheckData = {
+        projectType: props.projectType,
         submissionType: props.type, // Set the submission type for checking existing submission
       };
 
@@ -570,6 +579,7 @@ const submitMainFiles = async () => {
       // If no existing submission, proceed with file upload
       formData.append("file", mainFile.value[0]);
       formData.append("submissionType", props.type);
+      formData.append("projectType", props.projectType);
 
       const uploadFileResponse = await axios.post(
         `${apiUrl}/uploadFile`,
@@ -606,6 +616,7 @@ const submitOtherFiles = async () => {
         formData.append("file", file);
       });
       formData.append("submissionType", props.extrasType);
+      formData.append("projectType", props.projectType);
 
       const response = await axios.post(`${apiUrl}/uploadFile`, formData, {
         headers: {

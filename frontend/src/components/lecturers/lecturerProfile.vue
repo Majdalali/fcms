@@ -89,7 +89,7 @@
                     <v-form v-model="valid">
                       <v-card>
                         <v-card-title>
-                          <span class="text-h5">User Profile</span>
+                          <span class="text-h5">Edit Profile</span>
                         </v-card-title>
                         <v-card-text>
                           <v-alert
@@ -111,7 +111,9 @@
                                   required
                                 ></v-text-field> </v-col
                               ><v-col cols="12" md="6">
-                                <small class="titleDes">Program</small>
+                                <small class="titleDes"
+                                  >Coordinator Program</small
+                                >
                                 <v-text-field
                                   v-model="program"
                                   :placeholder="userInfo.coordinator_program"
@@ -180,6 +182,13 @@
                   </v-dialog>
                 </div>
               </v-sheet>
+              <p
+                v-if="userInfo.coordinator_program == null || ''"
+                class="mt-2 text-sm text-orange-300 title"
+              >
+                Please choose your program if you are a coordinator by clicking
+                <strong>Edit Profile</strong>
+              </p>
             </div>
 
             <v-skeleton-loader

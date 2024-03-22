@@ -10,6 +10,9 @@ import Profile from "./components/students/profile.vue";
 import Users from "./components/users.vue";
 import UserHome from "./components/userHome.vue";
 import MyProject from "./components/students/myproject.vue";
+import Proposal from "./components/students/myProject/proposal.vue";
+import ProjectOne from "./components/students/myProject/projectOne.vue";
+import ProjectTwo from "./components/students/myProject/projectTwo.vue";
 import notificationCenter from "./components/notificationCenter.vue";
 import clientTokenMiddleware from "./middleware/tokenGuard";
 import lecturerSignin from "./components/lecturers/lecturerSignin.vue";
@@ -20,6 +23,10 @@ import adminDashboard from "./components/admin/adminDashboard.vue";
 import coordinatorDashboard from "./components/coordinator/coordinatorDashboard.vue";
 import Coontact from "./components/contact.vue";
 import Notfound from "./components/notfound.vue";
+import Forms from "./components/globalPages/forms.vue";
+import Calendar from "./components/globalPages/calendar.vue";
+import Presentation from "./components/globalPages/presentation.vue";
+import Rubric from "./components/globalPages/rubric.vue";
 
 const routes = [
   {
@@ -58,9 +65,51 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
+    path: "/forms",
+    name: "forms",
+    component: Forms,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/calendar",
+    name: "calendar",
+    component: Calendar,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/presentation-schedule",
+    name: "presentation",
+    component: Presentation,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/evaluation-rubrics",
+    name: "rubric",
+    component: Rubric,
+    meta: { requiresAuth: true },
+  },
+  {
     path: "/myproject",
     name: "myproject",
     component: MyProject,
+    meta: { requiresAuth: true, allowedUserType: "student" },
+  },
+  {
+    path: "/myproject/proposal",
+    name: "proposal",
+    component: Proposal,
+    meta: { requiresAuth: true, allowedUserType: "student" },
+  },
+  {
+    path: "/myproject/1",
+    name: "projectOne",
+    component: ProjectOne,
+    meta: { requiresAuth: true, allowedUserType: "student" },
+  },
+  {
+    path: "/myproject/2",
+    name: "projectTwo",
+    component: ProjectTwo,
     meta: { requiresAuth: true, allowedUserType: "student" },
   },
   {

@@ -8,7 +8,13 @@ const nominationsController = require("../controllers/generalControllers/nominat
 const notificationsController = require("../controllers/generalControllers/notificationsController");
 const studentController = require("../controllers/usersControllers/studentController");
 const lecturerController = require("../controllers/usersControllers/lecturerController");
-const fileUploadController = require("../controllers/generalControllers/fileUploadController");
+const generalFileUploadController = require("../controllers/generalControllers/generalFileUploadController");
+
+// file upload routes
+router.get(
+  "/api/files/:collectionName",
+  generalFileUploadController.getFilesByCollection
+);
 // Session Routes
 
 // router.get("/currentSession/:sessionTitle", sessionController.getSession);

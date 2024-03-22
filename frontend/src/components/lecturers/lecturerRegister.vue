@@ -27,7 +27,7 @@
                   >
                 </p>
               </v-col>
-              <v-col class="py-0" cols="12" lg="8" md="6" sm="11">
+              <v-col class="py-0" cols="12" lg="8" md="12" sm="11">
                 <span class="inputText">Name</span>
                 <v-text-field
                   v-model="username"

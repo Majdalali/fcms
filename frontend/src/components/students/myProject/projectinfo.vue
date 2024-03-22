@@ -33,7 +33,7 @@
           :elevation="2"
           class="card title p-10 rounded-lg h-max"
         >
-          <v-card-text class="text-gray-300">
+          <v-card-text class="dark:text-gray-300">
             {{ userInfo.projectInfo[key] }}
           </v-card-text>
         </v-card>
@@ -65,7 +65,7 @@
       </template>
     </div>
     <!-- Edit Project -->
-    <div v-show="editMode" class="pt-10 h-full">
+    <div v-show="editMode" class="pt-10 h-full xl:w-4/5">
       <v-form v-model="valid">
         <v-text-field
           required

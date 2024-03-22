@@ -7,10 +7,8 @@ const nominationController = require("../controllers/generalControllers/nominati
 const cvFileController = require("../controllers/generalControllers/cvFileController");
 const commentsController = require("../controllers/generalControllers/commentsController");
 
-const authGuard = require("../middleware/roleAuth"); // Import the middleware
+const authGuard = require("../middleware/roleAuth");
 const { verifyToken } = require("../middleware/verifyToken");
-
-const multer = require("multer");
 
 // END POINTS FOR USER ROUTES
 router.post("/lecturer/register", lecturerController.registerLecturer);
@@ -20,6 +18,11 @@ router.get(
   "/lecturer/myfiles",
   authGuard("lecturer"),
   fileUploadController.getAllLecturerStudentFiles
+);
+router.get(
+  "/lecturer/myfiles/proposals",
+  authGuard("lecturer"),
+  fileUploadController.getAllLecturerProposalFiles
 );
 router.get("/lecturer/userByEmail", lecturerController.getLecturerByEmail);
 router.post(

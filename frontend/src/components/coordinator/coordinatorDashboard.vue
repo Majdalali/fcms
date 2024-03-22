@@ -30,24 +30,26 @@
               v-model="tab"
             >
               <v-tab class="v-tab" value="one">Session</v-tab>
-              <v-tab class="v-tab" value="two">Proposals</v-tab>
+              <v-tab class="v-tab" value="two">Submissions</v-tab>
               <v-tab class="v-tab" value="three">Evaluations</v-tab>
               <v-tab class="v-tab" value="four">Nominations</v-tab>
-              <v-tab class="v-tab" value="five"> Program Students </v-tab>
+              <v-tab class="v-tab" value="five">Invite Examiners</v-tab>
+              <v-tab class="v-tab" value="six"> Program Students </v-tab>
             </v-tabs>
             <v-divider class="w-[90%]"></v-divider>
 
             <v-card-text class="pl-0">
               <v-window disabled v-model="tab">
                 <v-window-item value="one"><CoordMain /> </v-window-item>
-                <v-window-item value="two"> <CoordProposals /></v-window-item>
+                <v-window-item value="two"> <CoordSubmissions /></v-window-item>
                 <v-window-item value="three"
                   ><CoordEvaluations />
                 </v-window-item>
                 <v-window-item value="four"
                   ><CoordNominations />
                 </v-window-item>
-                <v-window-item value="five">
+                <v-window-item value="five"> </v-window-item>
+                <v-window-item value="six">
                   <ProgramStudents
                     :program="programName.abbreviation"
                     :name="programName.name"
@@ -68,7 +70,7 @@ import { ref, onMounted } from "vue";
 import axios from "axios";
 
 import Navigation from "../navigation.vue";
-import CoordProposals from "./coordinatorPages/coordProposals.vue";
+import CoordSubmissions from "./coordinatorPages/coordSubmissions.vue";
 import ProgramStudents from "./coordinatorPages/programStudents.vue";
 import CoordNominations from "./coordinatorPages/coordNominations.vue";
 import CoordEvaluations from "./coordinatorPages/coordEvaluations.vue";

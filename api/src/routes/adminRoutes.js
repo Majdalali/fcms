@@ -3,6 +3,7 @@ const router = express.Router();
 const { verifyToken, clientToken } = require("../middleware/verifyToken");
 const adminGuard = require("../middleware/adminGuard");
 const coordinatorGuard = require("../middleware/coordinatorGuard");
+const authGuard = require("../middleware/roleAuth");
 
 const sessionController = require("../controllers/generalControllers/sessionController");
 const nominationsController = require("../controllers/generalControllers/nominationsController");
@@ -12,6 +13,20 @@ const lecturerController = require("../controllers/usersControllers/lecturerCont
 const fileUploadController = require("../controllers/generalControllers/fileUploadController");
 const criteriaController = require("../controllers/evaluationsControllers/criteriaController");
 const ProgramController = require("../controllers/usersControllers/programController");
+const generalFileUploadController = require("../controllers/generalControllers/generalFileUploadController");
+
+router.post(
+  "/upload",
+  authGuard("lecturer"),
+  generalFileUploadController.gUpload.array("files"),
+  generalFileUploadController.generalizedUploadFile
+);
+
+router.delete(
+  "/api/deleteFile/:fileId",
+  authGuard("lecturer"),
+  generalFileUploadController.deleteGFile
+);
 
 //! Super Admin Routes
 
@@ -73,6 +88,12 @@ router.get(
   "/getProposals",
   coordinatorGuard,
   fileUploadController.getProposalsForAdmin
+);
+
+router.get(
+  "/api/coordSubmissions",
+  coordinatorGuard,
+  fileUploadController.getAllFilesForCoordinator
 );
 
 router.post(

@@ -34,7 +34,7 @@
                   class="mt-1"
                   :rules="emailRules"
                   variant="outlined"
-                  placeholder="Enter your email address or matric number"
+                  placeholder="Enter your email address"
                   required
                 ></v-text-field>
               </v-col>
@@ -46,7 +46,7 @@
                   class="mt-1"
                   :rules="passwordRules"
                   :counter="20"
-                  placeholder="Enter your password"
+                  placeholder="*********"
                   variant="outlined"
                   :type="visiblePass ? 'text' : 'password'"
                   :append-inner-icon="visiblePass ? 'mdi-eye' : 'mdi-eye-off'"

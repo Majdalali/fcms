@@ -18,101 +18,155 @@
         v-model="drawer"
         :theme="isDark ? 'dark' : 'light'"
         :mobile-breakpoint="1488"
-        class="dark:bg-[#151515]"
+        class="h-full dark:bg-[#151515]"
       >
-        <v-list>
+        <v-list class="h-full flex flex-col">
           <v-list-item
-            title="Masters Project"
-            subtitle="Faculty of Computing"
-          ></v-list-item
-        ></v-list>
-        <v-divider class="mt-2"></v-divider>
-        <v-list class="h-[90%]">
-          <ul class="h-full flex flex-col justify-between">
-            <div>
-              <router-link
-                v-for="navigation in navigationMenu"
-                :to="navigation.link"
-              >
-                <v-list-item
-                  v-if="navigation.condidtion"
-                  :prepend-icon="navigation.icon"
-                  :title="navigation.title"
-                  link
-                  class="vli"
-                ></v-list-item>
-              </router-link>
-            </div>
-            <div>
-              <v-menu
-                v-model="menu"
-                :close-on-content-click="false"
-                location="end"
-              >
-                <template v-slot:activator="{ props }">
-                  <v-list-item
-                    :prepend-icon="settings"
-                    title="Settings"
-                    v-bind="props"
-                    link
-                    class="vli"
-                  >
-                  </v-list-item>
-                </template>
-                <v-card min-width="300">
-                  <div class="p-2">
-                    <v-switch
-                      v-model="currentMode"
-                      @change="toggleDark()"
-                      color="indigo"
-                      inset
-                      label="Night Mode"
-                      hide-details
-                    ></v-switch>
-                  </div>
-                </v-card>
-              </v-menu>
-              <router-link to="/contact">
-                <v-list-item
-                  :prepend-icon="question"
-                  title="Contact Us"
-                  class="vli"
-                  link
+            class="min-h-0 vli"
+            title="Masters P&D System"
+            :subtitle="userType === 'student' ? 'Student View' : 'Staff View'"
+          ></v-list-item>
+          <v-divider class="mt-2"></v-divider>
+          <v-list v-model:opened="open" class="min-h-0 flex-grow">
+            <ul class="h-full overflow-y-auto flex flex-col justify-between">
+              <div>
+                <router-link
+                  v-for="navigation in navigationMenu"
+                  :to="navigation.link"
                 >
-                </v-list-item
-              ></router-link>
-
-              <v-dialog width="500">
-                <template v-slot:activator="{ props }">
                   <v-list-item
-                    :prepend-icon="logout"
-                    title="Sign Out"
-                    v-bind="props"
+                    v-if="navigation.condidtion"
+                    :prepend-icon="navigation.icon"
+                    :title="navigation.title"
                     link
                     class="vli"
-                  >
-                  </v-list-item>
-                </template>
+                  ></v-list-item>
+                </router-link>
+                <v-list-group value="project" v-if="userType === 'student'">
+                  <template v-slot:activator="{ props }">
+                    <v-list-item
+                      :prepend-icon="bookmarkVue"
+                      v-bind="props"
+                      class="vli"
+                      link
+                    >
+                      <template v-slot:title>
+                        <router-link to="/myproject">
+                          <p>My Project</p>
+                        </router-link>
+                      </template>
+                    </v-list-item>
+                  </template>
 
-                <template v-slot:default="{ isActive }">
-                  <v-card title="Signing Out!">
-                    <v-card-text class="text-red-400">
-                      Are you sure you want to sign out?
-                    </v-card-text>
+                  <router-link to="/myproject/proposal">
+                    <v-list-item
+                      title="Proposal"
+                      class="vli"
+                      link
+                    ></v-list-item>
+                  </router-link>
+                  <router-link to="/myproject/1">
+                    <v-list-item
+                      title="Project 1"
+                      class="vli"
+                      link
+                    ></v-list-item>
+                  </router-link>
+                  <router-link to="/myproject/2">
+                    <v-list-item
+                      title="Project 2"
+                      class="vli"
+                      link
+                    ></v-list-item>
+                  </router-link>
+                </v-list-group>
+              </div>
+              <div>
+                <router-link
+                  v-for="navigation in secondNavigationMenu"
+                  :to="navigation.link"
+                >
+                  <v-list-item
+                    v-if="navigation.condidtion"
+                    :prepend-icon="navigation.icon"
+                    :title="navigation.title"
+                    link
+                    class="vli"
+                  ></v-list-item>
+                </router-link>
+              </div>
 
-                    <v-card-actions>
-                      <v-spacer></v-spacer>
-                      <v-btn
-                        text="Cancel"
-                        @click="isActive.value = false"
-                      ></v-btn>
-                      <v-btn text="Sign Out" @click="signout()"></v-btn>
-                    </v-card-actions>
+              <div>
+                <v-menu
+                  v-model="menu"
+                  :close-on-content-click="false"
+                  location="end"
+                >
+                  <template v-slot:activator="{ props }">
+                    <v-list-item
+                      :prepend-icon="settings"
+                      title="Settings"
+                      v-bind="props"
+                      link
+                      class="vli"
+                    >
+                    </v-list-item>
+                  </template>
+                  <v-card min-width="300">
+                    <div class="p-2">
+                      <v-switch
+                        v-model="currentMode"
+                        @change="toggleDark()"
+                        color="indigo"
+                        inset
+                        label="Night Mode"
+                        hide-details
+                      ></v-switch>
+                    </div>
                   </v-card>
-                </template>
-              </v-dialog>
-            </div>
-          </ul>
+                </v-menu>
+                <router-link to="/contact">
+                  <v-list-item
+                    :prepend-icon="question"
+                    title="Contact Us"
+                    class="vli"
+                    link
+                  >
+                  </v-list-item
+                ></router-link>
+
+                <v-dialog width="500">
+                  <template v-slot:activator="{ props }">
+                    <v-list-item
+                      :prepend-icon="logout"
+                      title="Sign Out"
+                      v-bind="props"
+                      link
+                      class="vli"
+                    >
+                    </v-list-item>
+                  </template>
+
+                  <template v-slot:default="{ isActive }">
+                    <v-card title="Signing Out!">
+                      <v-card-text class="text-red-400">
+                        Are you sure you want to sign out?
+                      </v-card-text>
+
+                      <v-card-actions>
+                        <v-spacer></v-spacer>
+                        <v-btn
+                          text="Cancel"
+                          @click="isActive.value = false"
+                        ></v-btn>
+                        <v-btn text="Sign Out" @click="signout()"></v-btn>
+                      </v-card-actions>
+                    </v-card>
+                  </template>
+                </v-dialog>
+              </div>
+            </ul>
+          </v-list>
         </v-list>
       </v-navigation-drawer>
     </div>
@@ -135,6 +189,11 @@ import question from "@/assets/icons/question.vue";
 import settings from "@/assets/icons/settings.vue";
 import dashboard from "@/assets/icons/dashboard.vue";
 import admin from "@/assets/icons/admin.vue";
+import forms from "@/assets/icons/forms.vue";
+import presentation from "@/assets/icons/presentation.vue";
+import calendar from "../assets/icons/calendar.vue";
+import grades from "../assets/icons/grades.vue";
+
 // Constants
 const store = useStore();
 const isDark = useDark();
@@ -144,6 +203,35 @@ const menu = ref(false);
 const currentMode = ref(isDark.value);
 const user = JSON.parse(localStorage.getItem("user"));
 const userType = user.user_type;
+const open = ref(["project"]);
+
+const secondNavigationMenu = ref({
+  forms: {
+    icon: markRaw(forms),
+    title: "Viva Forms",
+    condidtion: true,
+    link: "/forms",
+  },
+  calendar: {
+    icon: markRaw(calendar),
+    title: "Calendar",
+    condidtion: true,
+    link: "/calendar",
+  },
+  presentation: {
+    icon: markRaw(presentation),
+    title: "Presentation",
+    condidtion: true,
+    link: "/presentation-schedule",
+  },
+  rubric: {
+    icon: markRaw(grades),
+    title: "Evaluation Rubric",
+    condidtion: true,
+    link: "/evaluation-rubrics",
+  },
+});
+
 const navigationMenu = ref({
   home: {
     icon: markRaw(homeIconVue),
@@ -175,12 +263,7 @@ const navigationMenu = ref({
     link: "/activity-feed",
     condidtion: true,
   },
-  myProject: {
-    icon: markRaw(bookmarkVue),
-    title: "My Project",
-    link: "/myproject",
-    condidtion: userType === "student",
-  },
+
   profile: {
     icon: markRaw(userVue),
     title: "Profile",
