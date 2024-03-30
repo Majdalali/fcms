@@ -48,7 +48,7 @@
                 <v-window-item value="four"
                   ><CoordNominations />
                 </v-window-item>
-                <v-window-item value="five"> </v-window-item>
+                <v-window-item value="five"><coordInvites /> </v-window-item>
                 <v-window-item value="six">
                   <ProgramStudents
                     :program="programName.abbreviation"
@@ -75,6 +75,7 @@ import ProgramStudents from "./coordinatorPages/programStudents.vue";
 import CoordNominations from "./coordinatorPages/coordNominations.vue";
 import CoordEvaluations from "./coordinatorPages/coordEvaluations.vue";
 import CoordMain from "./coordinatorPages/coordMain.vue";
+import coordInvites from "./coordinatorPages/coordInvites.vue";
 
 // Constants
 const isDark = useDark();
@@ -100,8 +101,6 @@ onMounted(async () => {
           abbreviation: userProgramData.abbreviation,
         };
       }
-    } else {
-      console.log(response.data.message);
     }
   } catch (error) {
     console.error("Error fetching programs:", error);

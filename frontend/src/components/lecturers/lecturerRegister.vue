@@ -262,31 +262,4 @@ const register = async () => {
   content: " *";
   color: #800000;
 }
-.orSpan {
-  display: flex;
-  align-items: center;
-}
-.orSpanBlack {
-  display: flex;
-  align-items: center;
-}
-.orSpan::before,
-.orSpan::after {
-  content: "";
-  flex: 1;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.3);
-  margin: 0 15px;
-}
-.orSpanBlack::before,
-.orSpanBlack::after {
-  content: "";
-  flex: 1;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-  margin: 0 15px;
-}
-.google {
-  font-size: 18px;
-  font-family: "Work Sans", sans-serif;
-  color: #463c84;
-}
 </style>

@@ -19,6 +19,9 @@
         <v-chip size="large" color="cyan" label class="ml-2">
           <v-icon start icon="mdi-label"></v-icon>
           {{ props.studentInfo.MatricNumber }}</v-chip
+        ><v-chip size="large" color="pink" label class="ml-2">
+          <v-icon start icon="mdi-format-title"></v-icon>
+          {{ props.studentInfo.type }}</v-chip
         >
       </div>
       <v-form ref="evaluationForm" v-model="valid">
@@ -95,13 +98,14 @@
           ></v-col>
           <v-col cols="12" lg="4" md="4">
             <small class="titleDes">Type</small>
-            <v-select
+            <v-text-field
               label="Type of evaluator"
               class="mt-4"
               v-model="typeOfEvaluator"
               :rules="typeOfEvaluatorRules"
-              :items="['Supervisor', 'Co-Supervisor', 'Examiner']"
-            ></v-select>
+              readonly
+              disabled
+            ></v-text-field>
           </v-col>
         </v-row>
         <v-btn
@@ -139,7 +143,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import axios from "axios";
 import { useDark } from "@vueuse/core";
 
@@ -147,6 +151,7 @@ import { useDark } from "@vueuse/core";
 const props = defineProps({
   studentInfo: Object,
   criteriasData: Array,
+  studentType: String,
 });
 const snackbar = ref(false);
 const responseMessage = ref("");
@@ -156,13 +161,15 @@ const valid = ref(false);
 const evaluationForm = ref(null);
 const evaluationCriterias = ref([{ name: "", grade: "", from: "" }]); // criteria and it's grade
 const remarksForCord = ref("");
-const typeOfEvaluator = ref("");
+const typeOfEvaluator = ref(props.studentType);
+
 // const criteriasData = ref([]);
 const criteriaErrorMessages = ref("");
 const selectedStudentProgram = ref("");
 const selectedCriteriaName = ref("");
 const selectedCriteriaTotalMark = ref(0);
 const isInfoLoading = ref(false);
+const selectedEvaluatorMarksShare = ref(0);
 
 const getGradeRules = (evaluationCriteria) => [
   (value) => {
@@ -222,6 +229,7 @@ const submitEvaluation = async () => {
       remarksForCord: remarksForCord.value,
       typeOfEvaluator: typeOfEvaluator.value,
       criteriaProgram: selectedStudentProgram.value,
+      cmd: selectedEvaluatorMarksShare.value,
     };
 
     // Fill in evaluationObjects with data from evaluationCriterias
@@ -280,6 +288,21 @@ onMounted(async () => {
       selectedCriteriaTotalMark.value =
         criteriaForProgram?.criteriaTotalMark || 0;
       criteriaErrorMessages.value = "";
+      const marksDistribution = criteriaForProgram.criteriaMarksDistribution;
+
+      // Determine the selected evaluator type
+      let evaluatorType = "";
+      if (props.studentInfo) {
+        if (props.studentInfo.type === "Co-supervisor") {
+          evaluatorType = "Co-supervisor";
+        } else if (props.studentInfo.type === "Examinee") {
+          evaluatorType = "Examiner";
+        } else {
+          evaluatorType = "Supervisor";
+        }
+      }
+      // Set the selectedEvaluatorMarksShare based on the evaluator type
+      selectedEvaluatorMarksShare.value = marksDistribution[evaluatorType];
     } else {
       criteriaErrorMessages.value = `No criteria found for program: ${studentProgram}. Please contact the coordinator for assistance.`;
     }

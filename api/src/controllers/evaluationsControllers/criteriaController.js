@@ -8,7 +8,12 @@ const Criteria = require("../../models/evaluationsModels/criteriaModel");
 // Create a new criteria
 async function createCriteria(req, res) {
   try {
-    const { criteriaName, criteriasObjects, criteriaProgram } = req.body;
+    const {
+      criteriaName,
+      criteriasObjects,
+      criteriaProgram,
+      criteriaMarksDistribution,
+    } = req.body;
 
     let criteriaTotalMark = 0;
     for (const criterion in criteriasObjects) {
@@ -20,6 +25,7 @@ async function createCriteria(req, res) {
       criteriasObjects,
       criteriaProgram,
       criteriaTotalMark,
+      criteriaMarksDistribution,
     });
 
     await criteria.save();

@@ -4,6 +4,7 @@ const { verifyToken } = require("../middleware/verifyToken");
 const authGuard = require("../middleware/roleAuth");
 const adminGuard = require("../middleware/adminGuard");
 const coordinatorGuard = require("../middleware/coordinatorGuard");
+const adminOrCoordGuard = require("../middleware/adminOrCoordGuard");
 
 const evaluationsController = require("../controllers/evaluationsController");
 const criteriaController = require("../controllers/evaluationsControllers/criteriaController");
@@ -12,12 +13,12 @@ router.post(
   "/evaluate",
   verifyToken,
   authGuard("lecturer"),
-  evaluationsController.createANomination
+  evaluationsController.createAnEvaluation
 );
 
 router.get(
   "/evaluations",
-  coordinatorGuard,
+  adminOrCoordGuard,
   evaluationsController.getAllEvaluations
 );
 

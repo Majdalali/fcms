@@ -15,6 +15,9 @@ class Lecturer {
     isAdmin = false,
     isCoordinator = false,
     coordinator_program = null,
+    isInvited = false,
+    invitedBy = null,
+    createdAt,
   }) {
     this.user_id = user_id; // Generates a new random ID if user_id is not provided
     this.username = username;
@@ -27,6 +30,9 @@ class Lecturer {
     this.supervisedStudents = supervisedStudents;
     this.coSupervisedStudents = coSupervisedStudents;
     this.coordinator_program = coordinator_program;
+    this.isInvited = isInvited;
+    this.invitedBy = invitedBy;
+    this.createdAt = createdAt;
   }
 
   static async getUserByEmail(email) {
@@ -82,6 +88,9 @@ class Lecturer {
         supervisedStudents: this.supervisedStudents,
         coSupervisedStudents: this.coSupervisedStudents,
         coordinator_program: this.coordinator_program,
+        isInvited: this.isInvited,
+        invitedBy: this.invitedBy,
+        createdAt: this.createdAt,
       });
     } catch (error) {
       throw error;
@@ -122,6 +131,14 @@ class Lecturer {
     } catch (error) {
       // Log the error details to check the specific issue
       console.error("Update Examinees Error:", error);
+      throw error;
+    }
+  }
+
+  async delete() {
+    try {
+      await lecturerCollection.doc(this.user_id).delete();
+    } catch (error) {
       throw error;
     }
   }

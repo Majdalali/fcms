@@ -46,7 +46,7 @@ async function getAllEvaluations(req, res) {
   }
 }
 
-async function createANomination(req, res) {
+async function createAnEvaluation(req, res) {
   const token = req.headers.authorization;
   try {
     const decoded = jwt.verify(token, secretKey);
@@ -60,6 +60,8 @@ async function createANomination(req, res) {
       remarksForCord,
       typeOfEvaluator,
       criteriaProgram,
+      cmd,
+      projectType,
     } = req.body;
 
     // Calculate the final mark based on the provided evaluation criteria
@@ -85,6 +87,9 @@ async function createANomination(req, res) {
     }
 
     const student = await studentModel.getUserById(studentId);
+    let grade = "";
+
+    grade = (finalMark.totalMarks * (cmd / 100)).toFixed(2);
 
     // Create the evaluation model instance
     const newEvaluation = new evaluationsModel({
@@ -93,11 +98,14 @@ async function createANomination(req, res) {
       evaluationObjects,
       remarksForCord,
       finalMark,
+      grade,
       typeOfEvaluator,
       createdAt: new Date(),
       lecturerName: lecturerName,
       studentName: student.username,
+      matricNumber: student.matricCard,
       criteriaProgram: criteriaProgram,
+      projectType,
     });
 
     // Save the evaluation
@@ -176,7 +184,7 @@ async function deleteEvaluationById(req, res) {
 module.exports = {
   getAllEvaluations,
   getEvaluationsById,
-  createANomination,
+  createAnEvaluation,
   getLecturerEvaluations,
   getEvaluationsByProgram,
   deleteEvaluationById,

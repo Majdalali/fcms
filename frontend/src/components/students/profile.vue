@@ -140,14 +140,14 @@
                                   required
                                 ></v-text-field>
                               </v-col>
-                              <!-- <v-col cols="12">
+                              <v-col cols="12">
                                 <v-text-field
                                   v-model="password"
                                   :rules="passwordRules"
                                   variant="outlined"
                                   label="Password"
                                   type="password"
-                                  hide-details
+                                  required
                                 ></v-text-field>
                               </v-col>
                               <v-col cols="12">
@@ -157,10 +157,9 @@
                                   variant="outlined"
                                   v-model="passwordConfirmation"
                                   :rules="passwordConfirmationRules"
-                                  :required="passwordRules"
-                                  hide-details
+                                  required
                                 ></v-text-field>
-                              </v-col> -->
+                              </v-col>
                             </v-row>
                           </v-container>
                           <small
@@ -182,7 +181,11 @@
                             color="indigo"
                             variant="elevated"
                             class="w-32"
-                            :disabled="!isFormChanged || !valid"
+                            :disabled="
+                              !isFormChanged ||
+                              !valid ||
+                              password !== passwordConfirmation
+                            "
                             @click="editProfile()"
                           >
                             Save
@@ -261,7 +264,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, watch } from "vue";
 import { useDark } from "@vueuse/core";
 import axios from "axios";
 import Navigation from "../navigation.vue";
@@ -284,9 +287,6 @@ const examinersInfo = ref([]);
 const username = ref("");
 const email = ref("");
 const password = ref("");
-const isPasswordEdited = computed(() => {
-  return password.value !== "" || passwordConfirmation.value !== "";
-});
 
 const passwordConfirmation = ref("");
 const matricCard = ref("");
@@ -308,27 +308,45 @@ const emailRules = [
     }
   },
 ];
+
 const passwordRules = [
   (value) => {
-    if (isPasswordEdited.value && value) return true;
-    if (!isPasswordEdited.value) return true;
-    return "Password is required.";
-  },
-  (value) => {
-    if (value.length >= 3 || !isPasswordEdited.value) {
-      return true;
+    if (value) {
+      if (value.length >= 8) {
+        return true;
+      } else {
+        return "Password must be at least 8 characters.";
+      }
     } else {
-      return "Password must be at least 8 characters.";
+      return true;
     }
   },
 ];
+
 const passwordConfirmationRules = [
   (value) => {
-    if (isPasswordEdited.value && value === password.value) return true;
-    if (!isPasswordEdited.value) return true;
-    return "Password must match.";
+    if (value) {
+      if (value === password.value) {
+        return true;
+      } else {
+        return "Passwords do not match.";
+      }
+    } else if (password.value) {
+      return "Please confirm your password.";
+    } else {
+      return true;
+    }
   },
+  (value) => value === password.value || "Passwords do not match",
 ];
+
+watch(password, (newValue) => {
+  // Reset valid status to force re-validation
+  valid.value = false;
+  // Optionally clear any existing error messages on password confirmation
+  passwordConfirmation.value = "";
+});
+
 const nameRules = [
   (value) => {
     if (value) return true;
@@ -342,6 +360,7 @@ const nameRules = [
     }
   },
 ];
+
 const matricCardRules = [
   (value) => {
     if (value) return true;
@@ -355,6 +374,7 @@ const matricCardRules = [
     }
   },
 ];
+
 const isFormChanged = computed(() => {
   return (
     username.value !== userInfo.value.username ||
@@ -365,7 +385,6 @@ const isFormChanged = computed(() => {
     passwordConfirmation.value !== ""
   );
 });
-const responseMessage = ref("");
 const apiUrl = import.meta.env.VITE_API_URL;
 
 // Functions
@@ -383,11 +402,15 @@ const editProfile = async () => {
     if (password.value !== "" || passwordConfirmation.value !== "") {
       requestData.password = password.value;
     }
-    const response = await axios.post(`${apiUrl}/updateUser`, requestData, {
-      headers: {
-        Authorization: token,
-      },
-    });
+    const response = await axios.put(
+      `${apiUrl}/students/${userInfo.value.user_id}`,
+      requestData,
+      {
+        headers: {
+          Authorization: token,
+        },
+      }
+    );
     if (response.status === 200) {
       snackbarMessage.value = "Profile Updated Successfully";
       snackbar.value = true;
@@ -403,7 +426,6 @@ const editProfile = async () => {
       errorMessage.value = "User not found";
     } else {
       errorMessage.value = "An error occurred while updating the profile";
-      console.log("Error: ", error);
     }
   }
 };
@@ -419,10 +441,9 @@ const getInitials = (username) => {
 onMounted(async () => {
   const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
   const userId = storedUser.user_id;
-  const userExaminers = storedUser.examiners;
 
   try {
-    const response = await axios.get(`${apiUrl}/user/${userId}`);
+    const response = await axios.get(`${apiUrl}/students/${userId}`);
     userInfo.value = response.data;
 
     // Set the values of the form
@@ -435,15 +456,12 @@ onMounted(async () => {
     // Handle error, display an error message, or redirect if needed
   }
   try {
-    // Loop through userExaminers array
-    for (let i = 0; i < userExaminers.length; i++) {
-      // Get examiner details from userExaminers array
-      const response = await axios.get(
-        `${apiUrl}/getExaminersDetails/${userExaminers[i]}`
-      );
-      // Push examiner details to examinersInfo array
-      examinersInfo.value.push(response.data);
-    }
+    // Get examiner details
+    const response = await axios.get(
+      `${apiUrl}/students/${[userId]}/examiners`
+    );
+    // Push examiner details to examinersInfo array
+    examinersInfo.value = response.data;
   } catch (error) {
     console.log(error);
   }

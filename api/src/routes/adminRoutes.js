@@ -1,47 +1,69 @@
 const express = require("express");
 const router = express.Router();
-const { verifyToken, clientToken } = require("../middleware/verifyToken");
 const adminGuard = require("../middleware/adminGuard");
 const coordinatorGuard = require("../middleware/coordinatorGuard");
 const authGuard = require("../middleware/roleAuth");
+const adminOrCoordGuard = require("../middleware/adminOrCoordGuard");
 
 const sessionController = require("../controllers/generalControllers/sessionController");
 const nominationsController = require("../controllers/generalControllers/nominationsController");
-const notificationsController = require("../controllers/generalControllers/notificationsController");
 const studentController = require("../controllers/usersControllers/studentController");
 const lecturerController = require("../controllers/usersControllers/lecturerController");
 const fileUploadController = require("../controllers/generalControllers/fileUploadController");
 const criteriaController = require("../controllers/evaluationsControllers/criteriaController");
 const ProgramController = require("../controllers/usersControllers/programController");
 const generalFileUploadController = require("../controllers/generalControllers/generalFileUploadController");
+const passwordController = require("../controllers/generalControllers/passwordController");
 
+//? Shared Routes
 router.post(
   "/upload",
-  authGuard("lecturer"),
+  adminOrCoordGuard,
   generalFileUploadController.gUpload.array("files"),
   generalFileUploadController.generalizedUploadFile
 );
 
 router.delete(
   "/api/deleteFile/:fileId",
-  authGuard("lecturer"),
+  adminOrCoordGuard,
   generalFileUploadController.deleteGFile
 );
-
-//! Super Admin Routes
-
-router.post("/createSession", adminGuard, sessionController.createSession);
+router.post(
+  "/createSession",
+  adminOrCoordGuard,
+  sessionController.createSession
+);
 
 router.put(
   "/updateSession/:sessionId",
-  adminGuard,
+  adminOrCoordGuard,
   sessionController.updateSessionBypass
 );
 
 router.delete(
   "/deleteSession/:sessionId",
-  adminGuard,
+  adminOrCoordGuard,
   sessionController.deleteSession
+);
+
+router.get(
+  "/api/students/:program",
+  adminOrCoordGuard,
+  studentController.getStudentsByProgram
+);
+
+router.get(
+  "/api/nominations",
+  adminOrCoordGuard,
+  nominationsController.getAllNominations
+);
+
+//! Super Admin Routes
+
+router.delete(
+  "/api/lecturers/:userId",
+  adminGuard,
+  lecturerController.deleteLecturer
 );
 
 router.post("/api/admin", adminGuard, lecturerController.makeUserAdmin);
@@ -68,7 +90,8 @@ router.post(
   studentController.DeleteStudentExaminer
 );
 
-//TODO IS CRITERIA CREATED BY COORDINATOR OR SUPER ADMIN?
+//? Coordinator Routes
+
 router.get("/api/criterias", criteriaController.getAllCriteria);
 
 router.delete(
@@ -81,8 +104,6 @@ router.post(
   coordinatorGuard,
   criteriaController.createCriteria
 );
-
-//? Coordinator Routes
 
 router.get(
   "/getProposals",
@@ -103,18 +124,6 @@ router.post(
 );
 
 router.get(
-  "/api/students/:program",
-  coordinatorGuard,
-  studentController.getStudentsByProgram
-);
-
-router.get(
-  "/api/nominations",
-  coordinatorGuard,
-  nominationsController.getAllNominations
-);
-
-router.get(
   "/api/nominations/:program",
   coordinatorGuard,
   nominationsController.getNominationsByProgram
@@ -126,4 +135,12 @@ router.post(
   studentController.updateStudentExaminers
 );
 
-module.exports = router;
+module.exports = function (io, connectedUsers) {
+  router.put(
+    "/api/resetPassword",
+    adminGuard,
+    passwordController.changePassword.bind(null, io, connectedUsers)
+  );
+
+  return router;
+};

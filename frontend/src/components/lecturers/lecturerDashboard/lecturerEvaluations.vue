@@ -14,7 +14,9 @@
           <v-dialog v-model="item.dialog" width="800">
             <v-card>
               <v-card-text class="mt-4">
-                <h1 class="title mb-2">Evaluation Details</h1>
+                <h1 class="title mb-2">
+                  Evaluation Details: {{ item.projectType }}
+                </h1>
                 <v-table class="border">
                   <thead>
                     <tr>
@@ -55,6 +57,24 @@
                   <v-chip class="ma-2" label color="pink" variant="elevated">
                     {{ item.finalMark.totalOutOf }}
                   </v-chip>
+                </h1>
+                <h1 class="title">
+                  Grade
+                  <v-tooltip
+                    text="Grade is calculated based on the final mark and the Examiner/Supervisor's grading percentage."
+                  >
+                    <template v-slot:activator="{ props }">
+                      <v-chip
+                        v-bind="props"
+                        class="ma-2"
+                        label
+                        color="indigo"
+                        variant="elevated"
+                      >
+                        {{ item.grade }}
+                      </v-chip></template
+                    >
+                  </v-tooltip>
                 </h1>
                 <div class="text-start mt-5 text-base">
                   <v-btn @click="downloadPdf(item)" color="indigo">
@@ -163,11 +183,11 @@ const progressCircular = ref(0);
 const snackbar = ref(false);
 const responseMessage = ref("");
 const headers = ref([
-  { key: "evaluationId", sortable: true, title: "ID." },
+  { key: "evaluationId", sortable: false, title: "ID." },
   { key: "studentName", sortable: true, title: "Student" },
   { key: "typeOfEvaluator", sortable: true, title: "Type" },
   { key: "criteriaProgram", sortable: true, title: "Program" },
-  { key: "createdAt", sortable: false, title: "Created At" },
+  { key: "createdAt", sortable: true, title: "Created At" },
   { key: "finalMark", sortable: false, title: "Final Mark" },
   { key: "evaluationObjects", sortable: false, title: "Action" },
   { key: "download", sortable: false, title: "Download" },
@@ -227,6 +247,7 @@ const generatePdfContent = (item) => {
   const studentDetails = {
     name: item.studentName,
     program: item.criteriaProgram,
+    matricNumber: item.matricNumber,
   };
   const remarksForCord = item.remarksForCord;
   const finalMarkTotal = item.finalMark.totalMarks;
@@ -265,6 +286,7 @@ const generatePdfContent = (item) => {
         <div>
           <h1><strong>Student Details</strong></h1>
           <p>Name: ${studentDetails.name}</p>
+          <p>Matric No.: ${studentDetails.matricNumber}</p>
           <p>Program: ${studentDetails.program}</p>
         </div>
       </div>
@@ -292,6 +314,7 @@ const generatePdfContent = (item) => {
         </tbody>
       </table>
       <h1 style="margin-top:40px;"><strong>Final Mark:</strong> ${finalMarkTotal} / ${finalMarkOutOf}</h1>
+      <h1 style="margin-top:10px;"><strong>Grade:</strong> ${item.grade}</h1>
       <h1 style="margin-top:40px;"><strong>Notes for Coordinator</strong></h1>
       <p>${remarksForCord}</p>
     </div>
@@ -348,6 +371,8 @@ onMounted(async () => {
       return {
         ...evaluation,
         createdAt: formatDate(evaluation.createdAt),
+        projectType:
+          evaluation.projectType === "pOne" ? "Project 1" : "Project 2",
       };
     });
   } catch (error) {
@@ -399,7 +424,6 @@ const formatDate = (timestamp) => {
     day: "numeric",
     hour: "numeric",
     minute: "numeric",
-    hour12: true,
   });
 };
 </script>

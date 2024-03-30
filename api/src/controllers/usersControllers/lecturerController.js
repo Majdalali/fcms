@@ -9,7 +9,14 @@ const jwt = require("jsonwebtoken");
 const admin = require("../../services/firebase");
 
 async function registerLecturer(req, res) {
-  const { username, email, password, coordinator_program } = req.body;
+  const {
+    username,
+    email,
+    password,
+    coordinator_program,
+    isInvited,
+    invitedBy,
+  } = req.body;
 
   try {
     // Hash the password
@@ -33,6 +40,9 @@ async function registerLecturer(req, res) {
       password: hashedPassword,
       user_id: userRecord.uid,
       coordinator_program,
+      isInvited,
+      invitedBy,
+      createdAt: new Date().toISOString(),
     });
     await newUser.save();
     await admin.auth().generateEmailVerificationLink(userRecord.email);
@@ -104,6 +114,10 @@ async function getAllLecturers(req, res) {
         examinees,
         coSupervisedStudents,
         isCoordinator,
+        isInvited,
+        invitedBy,
+        isAdmin,
+        createdAt,
       }) => ({
         user_id,
         username,
@@ -112,6 +126,10 @@ async function getAllLecturers(req, res) {
         supervisedStudents,
         coSupervisedStudents,
         examinees,
+        isInvited,
+        invitedBy,
+        isAdmin,
+        createdAt,
       })
     );
 
@@ -424,6 +442,21 @@ async function changeUserPrivileges(req, res) {
   }
 }
 
+async function deleteLecturer(req, res) {
+  const { userId } = req.params;
+  try {
+    const user = await Lecturer.getUserById(userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    await user.delete();
+    return res.status(200).json({ message: "User deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
 module.exports = {
   registerLecturer,
   loginLecturer,
@@ -437,4 +470,5 @@ module.exports = {
   updateLecturerDetails,
   makeUserAdmin,
   changeUserPrivileges,
+  deleteLecturer,
 };

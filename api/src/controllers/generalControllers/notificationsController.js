@@ -96,7 +96,7 @@ async function getMyNotifications(req, res) {
     // Filter notifications that match the user's ID in the 'toUsers' array
     if (userNotifications.length === 0) {
       // Send a specific message if there are no notifications
-      res.status(200).json({ message: "No notifications found for this user" });
+      res.status(204).json({ message: "No notifications found for this user" });
     } else {
       // Send the filtered notifications as a response
       res.status(200).json(userNotifications);

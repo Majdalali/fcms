@@ -159,7 +159,6 @@ const headers = ref([
   { align: "start", key: "num", sortable: true, title: "Num." },
   { key: "username", sortable: false, title: "Name" },
   { key: "email", sortable: false, title: "Email" },
-  { key: "department", sortable: true, title: "Department" },
   { key: "numSupervised", sortable: false, title: "Students" },
   { key: "numExaminees", sortable: false, title: "Examinees" },
   // Add other headers as needed
@@ -222,7 +221,7 @@ onMounted(async () => {
     }));
     isLoading.value = false;
   } catch (error) {
-    console.error("Error fetching user info:", error);
+    console.error("Error fetching lecturers info:", error);
   }
 });
 </script>

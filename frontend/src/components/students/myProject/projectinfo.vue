@@ -181,7 +181,7 @@ onMounted(async () => {
   try {
     const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
     const userId = storedUser.user_id;
-    const response = await axios.get(`${apiUrl}/user/${userId}`); // Replace with your API endpoint
+    const response = await axios.get(`${apiUrl}/students/${userId}`);
     userInfo.value = response.data;
     // Set default values for input fields
     projectTitle.value = userInfo.value?.projectInfo?.projectTitle || "";
@@ -208,8 +208,8 @@ const updateProjectInfo = async () => {
       projectType: projectType.value,
     };
 
-    const response = await axios.post(
-      `${apiUrl}/updateProjectInfo`,
+    const response = await axios.put(
+      `${apiUrl}/students/${userInfo.value.user_id}/project`,
       { projectInfo: updatedProjectInfo },
       {
         headers: {

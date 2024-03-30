@@ -18,7 +18,7 @@
           <div class="pt-4 upperDiv">
             <h1 class="text-3xl font-medium title">Lecturer Dashboard</h1>
             <p class="text-lg titleDes font-light">
-              The MDMS System For Semester 2023/2024 - 1
+              Here you can manage your students, evaluations, and more.
             </p>
           </div>
           <div class="lowerDiv pt-10">

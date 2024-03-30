@@ -133,27 +133,26 @@
                                   required
                                 ></v-text-field>
                               </v-col>
-                              <!-- <v-col cols="12">
-                                  <v-text-field
-                                    v-model="password"
-                                    :rules="passwordRules"
-                                    variant="outlined"
-                                    label="Password"
-                                    type="password"
-                                    hide-details
-                                  ></v-text-field>
-                                </v-col>
-                                <v-col cols="12">
-                                  <v-text-field
-                                    label="Re-enter Password"
-                                    type="password"
-                                    variant="outlined"
-                                    v-model="passwordConfirmation"
-                                    :rules="passwordConfirmationRules"
-                                    :required="passwordRules"
-                                    hide-details
-                                  ></v-text-field>
-                                </v-col> -->
+                              <v-col cols="12">
+                                <v-text-field
+                                  v-model="password"
+                                  :rules="passwordRules"
+                                  variant="outlined"
+                                  label="Password"
+                                  type="password"
+                                  required
+                                ></v-text-field>
+                              </v-col>
+                              <v-col cols="12">
+                                <v-text-field
+                                  label="Re-enter Password"
+                                  type="password"
+                                  variant="outlined"
+                                  v-model="passwordConfirmation"
+                                  :rules="passwordConfirmationRules"
+                                  required
+                                ></v-text-field>
+                              </v-col>
                             </v-row>
                           </v-container>
                         </v-card-text>
@@ -163,7 +162,7 @@
                             color="warning"
                             variant="outlined"
                             class="w-32"
-                            @click="dialog = false"
+                            @click="closeDialog"
                           >
                             Close
                           </v-btn>
@@ -171,7 +170,11 @@
                             color="indigo"
                             variant="elevated"
                             class="w-32"
-                            :disabled="!isFormChanged || !valid"
+                            :disabled="
+                              !isFormChanged ||
+                              !valid ||
+                              password !== passwordConfirmation
+                            "
                             @click="editProfile()"
                           >
                             Save
@@ -219,7 +222,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, watch } from "vue";
 import { useDark } from "@vueuse/core";
 import axios from "axios";
 import Navigation from "../navigation.vue";
@@ -237,11 +240,8 @@ const username = ref("");
 const program = ref("");
 const email = ref("");
 const password = ref("");
-const isPasswordEdited = computed(() => {
-  return password.value !== "" || passwordConfirmation.value !== "";
-});
-
 const passwordConfirmation = ref("");
+
 const valid = ref(false);
 const emailRules = [
   (value) => {
@@ -257,26 +257,45 @@ const emailRules = [
   },
 ];
 const passwordRules = [
+  // if value is not empty it should be at least 8 characters but if it is empty it is not required
   (value) => {
-    if (isPasswordEdited.value && value) return true;
-    if (!isPasswordEdited.value) return true;
-    return "Password is required.";
-  },
-  (value) => {
-    if (value.length >= 3 || !isPasswordEdited.value) {
-      return true;
+    if (value) {
+      if (value.length >= 8) {
+        return true;
+      } else {
+        return "Password must be at least 8 characters.";
+      }
     } else {
-      return "Password must be at least 8 characters.";
+      return true;
     }
   },
 ];
+
 const passwordConfirmationRules = [
+  // if password is not empty it should be equal to password but if password is empty it is not required
   (value) => {
-    if (isPasswordEdited.value && value === password.value) return true;
-    if (!isPasswordEdited.value) return true;
-    return "Password must match.";
+    if (value) {
+      if (value === password.value) {
+        return true;
+      } else {
+        return "Passwords do not match.";
+      }
+    } else if (password.value) {
+      return "Please confirm your password.";
+    } else {
+      return true;
+    }
   },
+  (value) => value === password.value || "Passwords do not match",
 ];
+
+watch(password, (newValue) => {
+  // Reset valid status to force re-validation
+  valid.value = false;
+  // Optionally clear any existing error messages on password confirmation
+  passwordConfirmation.value = "";
+});
+
 const nameRules = [
   (value) => {
     if (value) return true;
@@ -342,7 +361,6 @@ const editProfile = async () => {
       errorMessage.value = "User not found";
     } else {
       errorMessage.value = error.response.data.message;
-      console.log("Error: ", error);
     }
   }
 };
@@ -372,6 +390,16 @@ onMounted(async () => {
     console.error("Error fetching user info:", error);
   }
 });
+
+const closeDialog = () => {
+  dialog.value = false;
+  errorMessage.value = "";
+  username.value = "";
+  email.value = "";
+  program.value = "";
+  password.value = "";
+  passwordConfirmation.value = "";
+};
 </script>
 
 <style lang="scss" scoped>

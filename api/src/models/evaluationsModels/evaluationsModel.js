@@ -9,10 +9,12 @@ class evaluationsModel {
     evaluationObjects = {},
     remarksForCord,
     finalMark = {},
+    grade,
     typeOfEvaluator,
     createdAt,
     lecturerName,
     studentName,
+    projectType,
     criteriaProgram,
   }) {
     this.evaluationId = evaluationId || this.generateRandomId();
@@ -20,6 +22,7 @@ class evaluationsModel {
     this.studentId = studentId;
     this.evaluationObjects = evaluationObjects;
     this.finalMark = finalMark;
+    this.grade = grade;
     this.remarksForCord = remarksForCord;
     this.criteriaProgram = criteriaProgram;
     const allowedTypes = ["Supervisor", "Examiner", "Co-Supervisor"];
@@ -32,6 +35,7 @@ class evaluationsModel {
     this.createdAt = createdAt;
     this.lecturerName = lecturerName;
     this.studentName = studentName;
+    this.projectType = projectType;
   }
   generateRandomId() {
     const randomPortion = Math.floor(Math.random() * 100000).toString(); // Random 5-digit number
@@ -46,12 +50,14 @@ class evaluationsModel {
         studentId: this.studentId,
         evaluationObjects: this.evaluationObjects,
         finalMark: this.finalMark,
+        grade: this.grade,
         remarksForCord: this.remarksForCord,
         typeOfEvaluator: this.typeOfEvaluator,
         createdAt: this.createdAt,
         lecturerName: this.lecturerName,
         studentName: this.studentName,
         criteriaProgram: this.criteriaProgram,
+        projectType: this.projectType,
       });
     } catch (error) {
       throw error;

@@ -188,7 +188,7 @@ onMounted(async () => {
     const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
     const userId = storedUser.user_id;
     const response = await axios.get(
-      `${apiUrl}/getSupervisorDetails/${userId}`
+      `${apiUrl}/students/${userId}/supervisors`
     );
     userInfo.value = response.data;
   } catch (error) {
@@ -200,9 +200,9 @@ const assignSupervisor = async () => {
   try {
     const token = localStorage.getItem("access_token");
     const response = await axios.post(
-      `${apiUrl}/assignSupervisor`,
+      `${apiUrl}/students/assign-supervisor`,
       {
-        email: email.value,
+        email: email.value.toLowerCase(),
       },
       {
         headers: {
@@ -237,7 +237,7 @@ const removeSupervisor = async () => {
   try {
     const token = localStorage.getItem("access_token");
     const response = await axios.post(
-      `${apiUrl}/removeSupervisor/supervisor`,
+      `${apiUrl}/students/supervisors/supervisor`,
       { lecturerEmail: userInfo.value.email },
       {
         headers: {

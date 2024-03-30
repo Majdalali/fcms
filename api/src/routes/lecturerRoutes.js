@@ -75,9 +75,3 @@ module.exports = function (io, connectedUsers) {
 
   return router;
 };
-
-// router.get(
-//   "/mycomments",
-//   verifyToken,
-//   commentsController.getMyLecturerComments
-// );

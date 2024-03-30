@@ -18,7 +18,7 @@
           <div class="pt-4 upperDiv">
             <h1 class="text-3xl font-medium title">Admin Dashboard!</h1>
             <p class="text-lg titleDes font-light">
-              The MDMS System For Semester 2023/2024 - 1
+              Here you can overview and manage all the programs and students.
             </p>
           </div>
           <div class="lowerDiv pt-10">
@@ -29,6 +29,7 @@
             >
               <v-tab class="v-tabMain" value="one">General</v-tab>
               <v-tab class="v-tabMain" value="two">Overview</v-tab>
+              <v-tab class="v-tabMain" value="three">Lecturers</v-tab>
               <v-tab
                 v-for="(curreentProgram, key) in currnetPrograms.programTypes"
                 :key="key"
@@ -69,6 +70,11 @@
                 </div>
               </v-window-item>
 
+              <!--? Lecturers Tab -->
+              <v-window-item value="three">
+                <AdminLecturers />
+              </v-window-item>
+
               <!--? Program Students Tab -->
               <v-window-item
                 v-for="(curreentProgram, key) in currnetPrograms.programTypes"
@@ -97,6 +103,7 @@ import AdminMain from "./adminPages/adminMain.vue";
 import ProgramStudents from "./adminPages/programStudents.vue";
 import AdminEvaluations from "./adminPages/adminEvaluations.vue";
 import AdminNominations from "./adminPages/adminNominations.vue";
+import AdminLecturers from "./adminPages/adminLecturers.vue";
 
 // Constants
 const isDark = useDark();
@@ -110,11 +117,9 @@ onMounted(async () => {
     const response = await axios.get(`${apiUrl}/api/programs`);
     if (response.status === 200) {
       currnetPrograms.value = response.data.programs;
-    } else {
-      console.log(response.data.message);
     }
   } catch (error) {
-    console.error("Error fetching programs:", error);
+    console.log(error);
   }
 });
 </script>

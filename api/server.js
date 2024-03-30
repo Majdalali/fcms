@@ -8,7 +8,6 @@ const socketIO = require("socket.io");
 // const lecturerRoutes = require("./src/routes/lecturerRoutes");
 const generalRoutes = require("./src/routes/generalRoutes");
 const evaluationRoutes = require("./src/routes/evaluationsRoutes");
-const adminRoutes = require("./src/routes/adminRoutes");
 const archiveRoutes = require("./src/routes/archiveRoutes");
 
 const app = express();
@@ -53,6 +52,7 @@ const lecturerRoutes = require("./src/routes/lecturerRoutes")(
   io,
   connectedUsers
 );
+const adminRoutes = require("./src/routes/adminRoutes")(io, connectedUsers);
 
 const studentRoutes = require("./src/routes/studentRoutes")(io, connectedUsers);
 

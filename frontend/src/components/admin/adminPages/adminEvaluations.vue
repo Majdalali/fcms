@@ -74,6 +74,24 @@
                     {{ item.finalMark.totalOutOf }}
                   </v-chip>
                 </h1>
+                <h1 class="title">
+                  Grade
+                  <v-tooltip
+                    text="Grade is calculated based on the final mark and the Examiner/Supervisor's grading percentage."
+                  >
+                    <template v-slot:activator="{ props }">
+                      <v-chip
+                        v-bind="props"
+                        class="ma-2"
+                        label
+                        color="indigo"
+                        variant="elevated"
+                      >
+                        {{ item.grade }}
+                      </v-chip></template
+                    >
+                  </v-tooltip>
+                </h1>
               </v-card-text>
 
               <v-card-actions>
@@ -151,6 +169,7 @@ const headers = ref([
   { key: "lecturerName", sortable: false, title: "Lecturer" },
   { key: "typeOfEvaluator", sortable: false, title: "Type of Evaluator" },
   { key: "studentName", sortable: false, title: "Student" },
+  { key: "projectType", sortable: false, title: "Project Type" },
   { key: "createdAt", sortable: true, title: "Date" },
   { key: "finalMark", sortable: false, title: "Final Mark" },
   { key: "evaluationObjects", sortable: true, title: "Action" },
@@ -216,6 +235,7 @@ const generatePdfContent = (item) => {
   const studentDetails = {
     name: item.studentName,
     program: item.criteriaProgram,
+    matricNumber: item.matricNumber,
   };
   const remarksForCord = item.remarksForCord;
   const finalMarkTotal = item.finalMark.totalMarks;
@@ -236,55 +256,77 @@ const generatePdfContent = (item) => {
     : "";
 
   return `
-    <div style="padding: 20px;">
-      <div style="width:100%; display:flex; flex-direction:row;  justify-content: space-between;">
-        <img src="${logoUrl}" alt="Logo" style="width: 300px; ">
-        <div style="text-align: center;">
-          <h1>FACULTY OF COMPUTING</h1>
-          <h1>UNIVERSITY TEKNOLOGI MALAYSIA</h1>
+  <html style="height: 100%;">
+    <head>
+      <style>
+        @page {
+          size: A4;
+          margin: 0;
+        }
+        body {
+          height: 100vh;
+          margin: 0;
+          padding: 0;
+        }
+      </style>
+    </head>
+    <body>
+      <div style="padding: 20px; height:100vh">
+        <div style="width:100%; display:flex; flex-direction:row;  justify-content: space-between;">
+          <img src="${logoUrl}" alt="Logo" style="width: 300px; ">
+          <div style="text-align: center;">
+            <h1>FACULTY OF COMPUTING</h1>
+            <h1>UNIVERSITY TEKNOLOGI MALAYSIA</h1>
+          </div>
+        </div>
+        ${criteriaNameDiv}
+        <div style="margin-top:40px; width:80%; display:flex; flex-direction:row;  justify-content: space-between;">
+          <div>
+            <h1><strong>Lecturer Details</strong></h1>
+            <p>Name: ${lecturerDetails.name}</p>
+            <p>Position: ${lecturerDetails.position}</p>
+          </div>
+          <div>
+            <h1><strong>Student Details</strong></h1>
+            <p>Name: ${studentDetails.name}</p>
+            <p>Matric No.: ${studentDetails.matricNumber}</p>
+            <p>Program: ${studentDetails.program}</p>
+          </div>
+        </div>
+        <h1 style="margin-top:40px;"><strong>Evaluation Details</strong></h1>
+        <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+          <thead>
+            <tr>
+              <th style="border: 1px solid #ddd; padding: 8px;">Criteria</th>
+              <th style="border: 1px solid #ddd; padding: 8px;">Mark</th>
+              <th style="border: 1px solid #ddd; padding: 8px;">Out Of</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${evaluationDataForPdf
+              .map(
+                (evaluationObject) => `
+                  <tr>
+                    <td style="text-align: center; border: 1px solid #ddd; padding: 8px;">${evaluationObject.criteria}</td>
+                    <td style="text-align: center; border: 1px solid #ddd; padding: 8px;">${evaluationObject.mark}</td>
+                    <td style="text-align: center; border: 1px solid #ddd; padding: 8px;">${evaluationObject.outOf}</td>
+                  </tr>
+                `
+              )
+              .join("")}
+          </tbody>
+        </table>
+        <h1 style="margin-top:40px;"><strong>Final Mark:</strong> ${finalMarkTotal} / ${finalMarkOutOf}</h1>
+        <h1 style="margin-top:2px;"><strong>Grade:</strong> ${item.grade}</h1>
+        <h1 style="margin-top:40px;"><strong>Notes for Coordinator</strong></h1>
+        <p>${remarksForCord}</p>
+        <div style="position:absolute; bottom:4px; width:100%; text-align: center;">
+          <p>Generated at: ${item.createdAt}</p>
         </div>
       </div>
-      ${criteriaNameDiv}
-      <div style="margin-top:40px; width:80%; display:flex; flex-direction:row;  justify-content: space-between;">
-        <div>
-          <h1><strong>Lecturer Details</strong></h1>
-          <p>Name: ${lecturerDetails.name}</p>
-          <p>Position: ${lecturerDetails.position}</p>
-        </div>
-        <div>
-          <h1><strong>Student Details</strong></h1>
-          <p>Name: ${studentDetails.name}</p>
-          <p>Program: ${studentDetails.program}</p>
-        </div>
-      </div>
-      <h1 style="margin-top:40px;"><strong>Evaluation Details</strong></h1>
-      <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
-        <thead>
-          <tr>
-            <th style="border: 1px solid #ddd; padding: 8px;">Criteria</th>
-            <th style="border: 1px solid #ddd; padding: 8px;">Mark</th>
-            <th style="border: 1px solid #ddd; padding: 8px;">Out Of</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${evaluationDataForPdf
-            .map(
-              (evaluationObject) => `
-                <tr>
-                  <td style="text-align: center; border: 1px solid #ddd; padding: 8px;">${evaluationObject.criteria}</td>
-                  <td style="text-align: center; border: 1px solid #ddd; padding: 8px;">${evaluationObject.mark}</td>
-                  <td style="text-align: center; border: 1px solid #ddd; padding: 8px;">${evaluationObject.outOf}</td>
-                </tr>
-              `
-            )
-            .join("")}
-        </tbody>
-      </table>
-      <h1 style="margin-top:40px;"><strong>Final Mark:</strong> ${finalMarkTotal} / ${finalMarkOutOf}</h1>
-      <h1 style="margin-top:40px;"><strong>Notes for Coordinator</strong></h1>
-      <p>${remarksForCord}</p>
-    </div>
-  `;
+    </body>
+  </html>
+`;
 };
 
 const downloadPdf = async (item) => {
@@ -331,6 +373,8 @@ onMounted(async () => {
       return {
         ...evaluation,
         createdAt: formatDate(evaluation.createdAt),
+        projectType:
+          evaluation.projectType === "pOne" ? "Project 1" : "Project 2",
       };
     });
   } catch (error) {

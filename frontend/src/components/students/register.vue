@@ -83,6 +83,7 @@
                   v-model="user_program"
                   label="Program"
                   variant="outlined"
+                  :rules="[(v) => !!v || 'Program is required']"
                   required
                   :items="currnetPrograms.programTypes"
                   item-title="name"
@@ -224,7 +225,7 @@ onMounted(async () => {
 
 const register = async () => {
   try {
-    const response = await axios.post(`${apiUrl}/register`, {
+    const response = await axios.post(`${apiUrl}/students`, {
       username: username.value,
       email: email.value.toLowerCase(),
       password: password.value,

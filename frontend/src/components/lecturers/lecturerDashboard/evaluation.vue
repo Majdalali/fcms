@@ -28,7 +28,18 @@
         @update:model-value="assignCriteria()"
       >
       </v-select>
+
       <v-form ref="evaluationForm" v-model="valid">
+        <p class="titleDes mt-4">Project Type</p>
+        <v-radio-group
+          inline
+          class="pt-2"
+          :rules="radioGroupRules"
+          v-model="radioGroup"
+        >
+          <v-radio label="Project One" value="pOne"></v-radio>
+          <v-radio label="Project Two" value="pTwo"></v-radio>
+        </v-radio-group>
         <v-divider></v-divider>
         <div class="mt-5 mb-2 flex flex-row text-center justify-between">
           <v-card
@@ -102,14 +113,18 @@
             ></v-text-field
           ></v-col>
           <v-col cols="12" lg="4" md="4">
-            <small class="titleDes">Type</small>
-            <v-select
+            <small class="titleDes">Type </small>
+            <v-text-field
               class="mt-4"
-              label="Type of evaluator"
+              label="Type of Evaluator"
               v-model="typeOfEvaluator"
               :rules="typeOfEvaluatorRules"
-              :items="['Supervisor', 'Co-Supervisor', 'Examiner']"
-            ></v-select>
+              readonly
+              disabled
+            ></v-text-field>
+            <span v-if="selectedEvaluatorMarksShare > 0"
+              >Share: {{ selectedEvaluatorMarksShare }}%</span
+            >
           </v-col>
         </v-row>
         <v-btn
@@ -119,8 +134,13 @@
           color="deep-purple-darken-4"
           @click="submitEvaluation()"
           :disabled="!valid"
-          >Submit Evaluation</v-btn
-        >
+          >Submit Evaluation
+          <span class="pl-2" v-if="requestLoading">
+            <v-progress-circular
+              :size="22"
+              indeterminate
+            ></v-progress-circular> </span
+        ></v-btn>
       </v-form>
     </div>
     <v-skeleton-loader
@@ -153,7 +173,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import axios from "axios";
 import { useDark } from "@vueuse/core";
 import LecturerEvaluations from "./lecturerEvaluations.vue";
@@ -165,6 +185,7 @@ const snackbar = ref(false);
 const responseMessage = ref("");
 const dark = useDark();
 const isLoading = ref(false);
+const requestLoading = ref(false);
 
 const valid = ref(false);
 const evaluationForm = ref(null);
@@ -176,6 +197,9 @@ const criteriaErrorMessages = ref("");
 const selectedStudentProgram = ref("");
 const selectedCriteriaName = ref("");
 const selectedCriteriaTotalMark = ref(0);
+const selectedEvaluatorMarksShare = ref(0);
+const radioGroup = ref("");
+const radioGroupRules = [(v) => !!v || "Please select a project type."];
 
 const getGradeRules = (evaluationCriteria) => [
   (value) => {
@@ -228,6 +252,7 @@ const resetForm = () => {
 // Function to handle the submission of evaluation
 const submitEvaluation = async () => {
   try {
+    requestLoading.value = true;
     const token = localStorage.getItem("access_token");
 
     // Prepare the payload for the evaluation submission
@@ -237,6 +262,8 @@ const submitEvaluation = async () => {
       remarksForCord: remarksForCord.value,
       typeOfEvaluator: typeOfEvaluator.value,
       criteriaProgram: selectedStudentProgram.value,
+      cmd: selectedEvaluatorMarksShare.value,
+      projectType: radioGroup.value,
     };
 
     // Fill in evaluationObjects with data from evaluationCriterias
@@ -255,9 +282,11 @@ const submitEvaluation = async () => {
     });
 
     if (response.status === 201) {
+      requestLoading.value = false;
       // Handle success
       snackbar.value = true;
       responseMessage.value = "Evaluation submitted successfully!";
+
       resetForm();
     } else {
       // Handle other status codes or errors
@@ -287,26 +316,13 @@ onMounted(async () => {
       isCoSupervised: false,
     }));
 
-    // Fetching data from the second endpoint
-    const response2 = await axios.get(
-      `${apiUrl}/lecturer/myCoSupervisedStudents/${userId}`
-    );
-
-    // Mapping username and user_id from the second response into students array
-    const studentsFromSecondEndpoint = response2.data.map((student) => ({
-      name: student.username,
-      id: student.user_id,
-      program: student.program,
-      isCoSupervised: true,
-    }));
-
     // Fetching data from the third endpoint
-    const response3 = await axios.get(
+    const response2 = await axios.get(
       `${apiUrl}/lecturer/myExaminees/${userId}`
     );
 
     // Mapping username and user_id from the third response into students array
-    const studentsFromThirdEndpoint = response3.data.map((student) => ({
+    const studentsFromSecondEndpoint = response2.data.map((student) => ({
       name: student.username,
       id: student.user_id,
       program: student.program,
@@ -316,8 +332,7 @@ onMounted(async () => {
 
     // Concatenating the arrays in the desired order
     const studentsConcat = studentsFromFirstEndpoint.concat(
-      studentsFromSecondEndpoint,
-      studentsFromThirdEndpoint
+      studentsFromSecondEndpoint
     );
 
     // Set the merged array to students.value
@@ -373,6 +388,29 @@ const assignCriteria = () => {
     selectedCriteriaTotalMark.value =
       criteriaForProgram?.criteriaTotalMark || 0;
     criteriaErrorMessages.value = "";
+
+    // Set the marks share for the selected evaluator
+    // Get the criteria marks distribution
+    const marksDistribution = criteriaForProgram.criteriaMarksDistribution;
+
+    // Determine the selected evaluator type
+    let evaluatorType = "";
+    if (selectedStudent.value) {
+      const student = students.value.find(
+        (student) => student.id === selectedStudent.value
+      );
+      if (student) {
+        if (student.isCoSupervised) {
+          evaluatorType = "Co-supervisor";
+        } else if (student.isExaminee) {
+          evaluatorType = "Examiner";
+        } else {
+          evaluatorType = "Supervisor";
+        }
+      }
+    }
+    // Set the selectedEvaluatorMarksShare based on the evaluator type
+    selectedEvaluatorMarksShare.value = marksDistribution[evaluatorType];
   } else {
     // Handle the case where no matching criteria is found
     evaluationCriterias.value = [{ name: "", grade: "", from: "" }];
@@ -389,6 +427,31 @@ const itemProps = (item) => ({
     : "" || item.isExaminee
     ? `Examinee - ${item.program}`
     : `Supervised - ${item.program}`,
+});
+
+// type of evaluator selection dynamically based on student selected
+watch(typeOfEvaluator, () => {
+  let evaluatorType = "";
+
+  if (selectedStudent.value) {
+    const student = students.value.find(
+      (student) => student.id === selectedStudent.value
+    );
+
+    if (student) {
+      if (student.isCoSupervised) {
+        evaluatorType = "Co-supervisor";
+      } else if (student.isExaminee) {
+        evaluatorType = "Examiner";
+      } else {
+        evaluatorType = "Supervisor";
+      }
+    }
+  }
+
+  typeOfEvaluator.value = evaluatorType;
+
+  return evaluatorType;
 });
 </script>
 

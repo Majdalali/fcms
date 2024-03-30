@@ -21,11 +21,19 @@
         class="h-full dark:bg-[#151515]"
       >
         <v-list class="h-full flex flex-col">
-          <v-list-item
-            class="min-h-0 vli"
-            title="Masters P&D System"
-            :subtitle="userType === 'student' ? 'Student View' : 'Staff View'"
-          ></v-list-item>
+          <v-list-item class="min-h-0 vli" title="Masters P&D System">
+            <v-list-item-subtitle>
+              <span class="font-medium text-amber-300">{{
+                user.isAdmin
+                  ? "Admin view"
+                  : user.isCoordinator
+                  ? "Coordinator view"
+                  : userType === "lecturer"
+                  ? "Lecturer view"
+                  : "Student view"
+              }}</span>
+            </v-list-item-subtitle>
+          </v-list-item>
           <v-divider class="mt-2"></v-divider>
           <v-list v-model:opened="open" class="min-h-0 flex-grow">
             <ul class="h-full overflow-y-auto flex flex-col justify-between">
@@ -193,6 +201,7 @@ import forms from "@/assets/icons/forms.vue";
 import presentation from "@/assets/icons/presentation.vue";
 import calendar from "../assets/icons/calendar.vue";
 import grades from "../assets/icons/grades.vue";
+import marks from "../assets/icons/marks.vue";
 
 // Constants
 const store = useStore();
@@ -229,6 +238,14 @@ const secondNavigationMenu = ref({
     title: "Evaluation Rubric",
     condidtion: true,
     link: "/evaluation-rubrics",
+  },
+  marksAnalysis: {
+    icon: markRaw(marks),
+    title: "Marks Analysis",
+    condidtion:
+      (userType === "lecturer" && user.isAdmin === true) ||
+      user.isCoordinator === true,
+    link: "/marks-analysis",
   },
 });
 

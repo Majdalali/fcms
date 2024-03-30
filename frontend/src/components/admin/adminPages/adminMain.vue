@@ -275,17 +275,19 @@
             </div></v-window-item
           >
           <v-window-item value="two">
-            <div class="adminMaker">
-              <div class="mt-5">
-                <h1 class="title text-lg font-medium">Admin privileges</h1>
-                <p class="titleDes text-sm font-light">
-                  Make a user an admin or a coordinator
-                </p>
-              </div>
+            <div class="adminMaker w-3/4">
               <div class="mt-4">
-                <v-form v-model="adminValid" ref="adminForm">
-                  <v-row>
-                    <v-col cols="12" md="7">
+                <v-row class="justify-between">
+                  <v-col cols="12" md="5">
+                    <v-form v-model="adminValid" ref="adminForm">
+                      <div class="mt-5">
+                        <h1 class="title text-lg font-medium">
+                          Admin privileges
+                        </h1>
+                        <p class="titleDes text-sm font-light">
+                          Make a user an admin or a coordinator
+                        </p>
+                      </div>
                       <v-alert
                         v-show="adminError !== ''"
                         v-model="adminError"
@@ -312,18 +314,59 @@
                           value="coordinator"
                         ></v-radio>
                       </v-radio-group>
-                    </v-col>
-                  </v-row>
-                  <v-btn
-                    size="large"
-                    variant="elevated"
-                    color="deep-purple-darken-4"
-                    class="mb-5 mt-4"
-                    @click="changePrivilege()"
-                    text="Submit"
-                    :disabled="!adminValid"
-                  ></v-btn>
-                </v-form>
+                      <v-btn
+                        size="large"
+                        variant="elevated"
+                        color="deep-purple-darken-4"
+                        class="mb-5 mt-4"
+                        @click="changePrivilege()"
+                        text="Assign Privilege"
+                        :disabled="!adminValid"
+                      ></v-btn>
+                    </v-form>
+                  </v-col>
+                  <v-col cols="12" md="5">
+                    <v-form ref="userForm" v-model="userValid">
+                      <div class="mt-5">
+                        <h1 class="title text-lg font-medium">
+                          Reset password
+                        </h1>
+                        <p class="titleDes text-sm font-light">
+                          Reset a user's password
+                        </p>
+                      </div>
+                      <v-alert
+                        v-show="passwordError !== ''"
+                        class="py-1 mb-2"
+                        closable
+                        :text="passwordError"
+                        type="error"
+                      ></v-alert>
+                      <v-text-field
+                        label="User email"
+                        hint="User should be a lecturer"
+                        v-model="userEmail"
+                        :rules="emailRules"
+                      ></v-text-field>
+                      <v-text-field
+                        label="New password"
+                        hint="User can change the password after login"
+                        v-model="userPassword"
+                        type="password"
+                        :rules="passwordRules"
+                      ></v-text-field>
+                      <v-btn
+                        size="large"
+                        variant="elevated"
+                        color="deep-purple-darken-4"
+                        class="mt-4"
+                        @click="changePassword()"
+                        text="Change Password"
+                        :disabled="!userValid"
+                      ></v-btn>
+                    </v-form>
+                  </v-col>
+                </v-row>
               </div>
               <v-divider></v-divider>
               <div class="mt-5">
@@ -649,9 +692,19 @@ const editPrograms = ref([]);
 const editProgramsCopy = ref([]);
 const isEditingProgram = ref(false);
 
+const userPassword = ref("");
+const userEmail = ref("");
+const passwordError = ref("");
+const userForm = ref(null);
+const userValid = ref(false);
+
 const formRules = [(value) => !!value || "The field is required"];
 const emailRules = [
   (value) => (value && /\S+@\S+\.\S+/.test(value)) || "Invalid email address.",
+];
+const passwordRules = [
+  (value) => !!value || "The field is required",
+  (value) => value.length >= 4 || "Password must be at least 4 characters",
 ];
 const radioGroupRules = [
   (value) => !!value || "Please choose a privilege", // Rule: Ensure a value is selected
@@ -680,8 +733,6 @@ onMounted(async () => {
         ? JSON.parse(JSON.stringify(currnetPrograms.value.programTypes))
         : [];
       editProgramsCopy.value = JSON.parse(JSON.stringify(editPrograms.value));
-    } else {
-      console.log(response.data.message);
     }
   } catch (error) {
     console.error("Error fetching programs:", error);
@@ -729,8 +780,6 @@ onMounted(async () => {
       });
 
       sessions.value = formattedSessions;
-    } else {
-      console.log(responseSessions.data.message);
     }
   } catch (error) {
     console.error("Error fetching sessions:", error);
@@ -795,8 +844,6 @@ const updatePrograms = async () => {
       snackbar.value = true;
       isEditingProgram.value = false;
       resetForm();
-    } else {
-      console.log(response.data.message);
     }
   } catch (error) {
     console.error("Error updating programs:", error);
@@ -827,8 +874,6 @@ const createProgram = async () => {
       responseMessage.value = response.data.message;
       snackbar.value = true;
       resetForm();
-    } else {
-      console.log(response.data.message);
     }
   } catch (error) {
     console.error("Error creating program:", error);
@@ -867,7 +912,47 @@ const changePrivilege = async () => {
       radioGroup.value = "";
       adminForm.value.reset();
     } else {
-      console.error("Error making user an admin:", error);
+      adminError.value = "An error occurred while changing the privilege";
+    }
+  }
+};
+
+const changePassword = async () => {
+  try {
+    const token = localStorage.getItem("access_token");
+
+    const response = await axios.put(
+      `${apiUrl}/api/resetPassword`,
+      {
+        email: userEmail.value,
+        password: userPassword.value,
+      },
+      {
+        headers: {
+          Authorization: token,
+        },
+      }
+    );
+    if (response.status === 200) {
+      responseMessage.value = response.data.message;
+      snackbar.value = true;
+      passwordError.value = "";
+      userPassword.value = "";
+      userEmail.value = "";
+      userForm.value.reset();
+    }
+  } catch (error) {
+    if (
+      error.response &&
+      (error.response.status === 400 || error.response.status === 404)
+    ) {
+      passwordError.value = error.response.data.error;
+      userPassword.value = "";
+      userEmail.value = "";
+      userForm.value.reset();
+    } else {
+      passwordError.value = "An error occurred while changing the password";
+      userForm.value.reset();
     }
   }
 };
@@ -956,11 +1041,13 @@ const createSession = async () => {
       dateSections.value.forEach((section) => {
         section.dateRange = [];
       });
-    } else {
-      console.log(response.data.message);
     }
   } catch (error) {
-    console.error("Error creating session info:", error);
+    if (error.response.status === 400) {
+      sessionUpdateAlert.value = error.response.data.error;
+    } else {
+      sessionUpdateAlert.value = "An error occurred while creating the session";
+    }
   }
 };
 
@@ -982,8 +1069,6 @@ const deleteSession = async (session_id) => {
       sessions.value = sessions.value.filter(
         (session) => session.session_id !== session_id
       );
-    } else {
-      console.log(response.data.message);
     }
   } catch (error) {
     if (error.response.status === 404) {
@@ -1013,8 +1098,6 @@ const updateSessionBypass = async (session_id, currentValue) => {
     if (response.status === 200) {
       responseMessage.value = response.data.message;
       snackbar.value = true;
-    } else {
-      console.log(response.data.message);
     }
   } catch (error) {
     if (error.response.status === 404 || error.response.status === 400) {
@@ -1028,6 +1111,7 @@ const updateSessionBypass = async (session_id, currentValue) => {
 const resetForm = () => {
   adminForm.value.reset();
   programForm.value.reset();
+  userForm.value.reset();
   programTypes.value = [{ name: "", abbreviation: "" }];
 };
 

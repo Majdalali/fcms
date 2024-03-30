@@ -23,12 +23,6 @@
           :items="filteredProjectInfo"
           :search="search"
         >
-          <template v-slot:item.projectInfo.projectTitle="{ item }">
-            <div>
-              <div class="titleInfo">{{ item.projectInfo.projectTitle }}</div>
-              <div class="subtitle">{{ item.username }}</div>
-            </div>
-          </template>
         </v-data-table>
       </div>
       <v-skeleton-loader
@@ -50,6 +44,7 @@ const filteredProjectInfo = ref([]);
 const isLoading = ref(false);
 const headers = ref([
   { align: "start", key: "num", sortable: true, title: "Num.", width: "4%" },
+  { key: "username", sortable: true, title: "Student", width: "10%" },
   {
     key: "projectInfo.projectTitle",
     sortable: true,
@@ -102,13 +97,5 @@ onMounted(async () => {
 .titleData,
 .titleDes {
   font-family: "Work Sans", sans-serif;
-}
-.titleInfo {
-  font-weight: bold;
-}
-
-.subtitle {
-  color: #888;
-  font-size: 0.9em;
 }
 </style>

@@ -7,7 +7,6 @@ import About from "./components/about.vue";
 import Register from "./components/students/register.vue";
 import Signin from "./components/students/signin.vue";
 import Profile from "./components/students/profile.vue";
-import Users from "./components/users.vue";
 import UserHome from "./components/userHome.vue";
 import MyProject from "./components/students/myproject.vue";
 import Proposal from "./components/students/myProject/proposal.vue";
@@ -27,6 +26,7 @@ import Forms from "./components/globalPages/forms.vue";
 import Calendar from "./components/globalPages/calendar.vue";
 import Presentation from "./components/globalPages/presentation.vue";
 import Rubric from "./components/globalPages/rubric.vue";
+import MarksAnalysis from "./components/globalPages/marksAnalysis.vue";
 
 const routes = [
   {
@@ -45,12 +45,6 @@ const routes = [
     name: "signin",
     component: Signin,
     meta: { requiresGuest: true },
-  },
-  {
-    path: "/users",
-    name: "users",
-    component: Users,
-    meta: { requiresAuth: true, requiresAdmin: true },
   },
   {
     path: "/home",
@@ -87,6 +81,16 @@ const routes = [
     name: "rubric",
     component: Rubric,
     meta: { requiresAuth: true },
+  },
+  {
+    path:"/marks-analysis",
+    name:"marks-analysis",
+    component:MarksAnalysis,
+    meta: {
+      requiresAuth: true,
+      requiresAdmin: true,
+      allowedUserType: "lecturer",
+    },
   },
   {
     path: "/myproject",

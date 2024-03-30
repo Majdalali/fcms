@@ -155,7 +155,7 @@ const errorMessage = ref("");
 const login = async () => {
   try {
     const response = await axios.post(
-      `${apiUrl}/login`,
+      `${apiUrl}/students/login`,
       {
         email: email.value.toLowerCase(),
         password: password.value,

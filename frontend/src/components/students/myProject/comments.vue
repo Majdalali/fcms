@@ -60,7 +60,9 @@ onMounted(async () => {
   try {
     const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
     const studentId = storedUser.user_id;
-    const response = await axios.get(`${apiUrl}/mycomments/${studentId}`);
+    const response = await axios.get(
+      `${apiUrl}/students/${studentId}/comments`
+    );
 
     comments.value = response.data;
   } catch (error) {

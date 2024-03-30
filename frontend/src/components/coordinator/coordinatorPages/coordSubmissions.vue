@@ -418,7 +418,7 @@ const headers = ref([
   { key: "matricCard", sortable: true, title: "Matric No." },
   {
     key: "numSubmissions",
-    sortable: true,
+    sortable: false,
     title: "No. of Submissions",
     align: "center",
   },

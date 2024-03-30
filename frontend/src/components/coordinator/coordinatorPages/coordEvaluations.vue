@@ -72,7 +72,24 @@
                     {{ item.finalMark.totalOutOf }}
                   </v-chip>
                 </h1>
-
+                <h1 class="title">
+                  Grade
+                  <v-tooltip
+                    text="Grade is calculated based on the final mark and the Examiner/Supervisor's grading percentage."
+                  >
+                    <template v-slot:activator="{ props }">
+                      <v-chip
+                        v-bind="props"
+                        class="ma-2"
+                        label
+                        color="indigo"
+                        variant="elevated"
+                      >
+                        {{ item.grade }}
+                      </v-chip></template
+                    >
+                  </v-tooltip>
+                </h1>
                 <div v-if="item.selectedCriteriaData">
                   <small class="title mt-5">
                     {{ item.selectedCriteriaData.criteriaName }} ({{
@@ -159,11 +176,12 @@ const search = ref("");
 const headers = ref([
   { key: "evaluationId", sortable: false, title: "ID" },
   { key: "lecturerName", sortable: false, title: "Lecturer" },
-  { key: "typeOfEvaluator", sortable: false, title: "Type of Evaluator" },
+  { key: "typeOfEvaluator", sortable: true, title: "Type of Evaluator" },
   { key: "studentName", sortable: false, title: "Student" },
+  { key: "projectType", sortable: true, title: "Project Type" },
   { key: "createdAt", sortable: true, title: "Date" },
   { key: "finalMark", sortable: false, title: "Final Mark" },
-  { key: "evaluationObjects", sortable: true, title: "Action" },
+  { key: "evaluationObjects", sortable: false, title: "Action" },
   { key: "download", sortable: false, title: "Download" },
 ]);
 
@@ -227,6 +245,7 @@ const generatePdfContent = (item) => {
   const studentDetails = {
     name: item.studentName,
     program: item.criteriaProgram,
+    matricNumber: item.studentMatricNumber,
   };
   const remarksForCord = item.remarksForCord;
   const finalMarkTotal = item.finalMark.totalMarks;
@@ -265,6 +284,7 @@ const generatePdfContent = (item) => {
         <div>
           <h1><strong>Student Details</strong></h1>
           <p>Name: ${studentDetails.name}</p>
+          <p>Matric No.: ${studentDetails.matricNumber}</p>
           <p>Program: ${studentDetails.program}</p>
         </div>
       </div>
@@ -292,6 +312,7 @@ const generatePdfContent = (item) => {
         </tbody>
       </table>
       <h1 style="margin-top:40px;"><strong>Final Mark:</strong> ${finalMarkTotal} / ${finalMarkOutOf}</h1>
+      <h1 style="margin-top:2px;"><strong>Grade:</strong> ${item.grade}</h1>
       <h1 style="margin-top:40px;"><strong>Notes for Coordinator</strong></h1>
       <p>${remarksForCord}</p>
     </div>
@@ -344,6 +365,8 @@ onMounted(async () => {
       return {
         ...evaluation,
         createdAt: formatDate(evaluation.createdAt),
+        projectType:
+          evaluation.projectType === "pOne" ? "Project 1" : "Project 2",
       };
     });
   } catch (error) {
@@ -385,7 +408,6 @@ const formatDate = (timestamp) => {
     year: "numeric",
     hour: "numeric",
     minute: "numeric",
-    hour12: true,
   });
 };
 

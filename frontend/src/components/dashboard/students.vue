@@ -173,7 +173,7 @@ const openDialog = async (user) => {
   spinner.value = true;
   try {
     const response = await axios.get(
-      `${apiUrl}/getSupervisorDetails/${user.user_id}`
+      `${apiUrl}/students/${user.user_id}/supervisors`
     );
     supervisorInfo.value = response.data;
     spinner.value = false;
@@ -186,17 +186,12 @@ const openDialogExaminers = async (user) => {
   dialogExaminers.value = true;
   spinner.value = true;
   try {
-    // get user examiners array from storedUser data
-    const userExaminers = user.examiners;
-    // Loop through userExaminers array
-    for (let i = 0; i < userExaminers.length; i++) {
-      // Get examiner details from userExaminers array
-      const response = await axios.get(
-        `${apiUrl}/getExaminersDetails/${userExaminers[i]}`
-      );
-      // Push examiner details to examinersInfo array
-      examinersInfo.value.push(response.data);
-    }
+    // get user examiners details
+    const response = await axios.get(
+      `${apiUrl}/students/${user.user_id}/examiners`
+    );
+
+    examinersInfo.value = response.data;
     spinner.value = false;
   } catch (error) {
     console.log(error);
@@ -211,7 +206,7 @@ const closeDialogExaminers = () => {
 onMounted(async () => {
   isLoading.value = true;
   try {
-    const response = await axios.get(`${apiUrl}/users`);
+    const response = await axios.get(`${apiUrl}/students`);
     userInfo.value = response.data.map((user, num) => ({
       ...user,
       num: num + 1,

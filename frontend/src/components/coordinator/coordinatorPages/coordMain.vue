@@ -363,11 +363,9 @@ onMounted(async () => {
       });
 
       sessions.value = formattedSessions;
-    } else {
-      console.log(responseSessions.data.message);
     }
   } catch (error) {
-    console.error("Error fetching sessions:", error);
+    console.error(error);
   }
 });
 
@@ -443,11 +441,13 @@ const createSession = async () => {
       dateSections.value.forEach((section) => {
         section.dateRange = [];
       });
-    } else {
-      console.log(response.data.message);
     }
   } catch (error) {
-    console.error("Error creating session info:", error);
+    if (error.response.status === 400) {
+      sessionUpdateAlert.value = error.response.data.error;
+    } else {
+      sessionUpdateAlert.value = "An error occurred while creating the session";
+    }
   }
 };
 
@@ -469,8 +469,6 @@ const deleteSession = async (session_id) => {
       sessions.value = sessions.value.filter(
         (session) => session.session_id !== session_id
       );
-    } else {
-      console.log(response.data.message);
     }
   } catch (error) {
     if (error.response.status === 404) {
@@ -500,8 +498,6 @@ const updateSessionBypass = async (session_id, currentValue) => {
     if (response.status === 200) {
       responseMessage.value = response.data.message;
       snackbar.value = true;
-    } else {
-      console.log(response.data.message);
     }
   } catch (error) {
     if (error.response.status === 404 || error.response.status === 400) {

@@ -21,14 +21,15 @@
               Stay Updated with Important Notices and announcements!
             </p>
           </div>
-          <v-alert
-            v-if="errorMessage"
-            type="error"
-            variant="outlined"
-            closable
-            >{{ errorMessage }}</v-alert
-          >
           <div v-if="notificationsInfo" class="lowerDiv pt-10 w-fit">
+            <v-alert
+              v-if="errorMessage"
+              class="mb-4 py-2"
+              type="error"
+              variant="outlined"
+              closable
+              >{{ errorMessage }}</v-alert
+            >
             <v-card
               v-for="(notification, index) in notificationsInfo"
               :key="index"
@@ -60,7 +61,7 @@
                       {{ notification.type }}
                     </v-chip>
                     <small class="ml-2 titleDes">
-                      {{ formatDate(notification.createdAt) }}</small
+                      {{ notification.createdAt }}</small
                     >
                   </div>
                   <v-btn
@@ -139,7 +140,6 @@ const deleteNotification = async (id) => {
       errorMessage.value = "Notification not found";
     } else {
       errorMessage.value = "An error occurred while deleting the notification";
-      console.log("Error: ", error);
     }
   }
 };
@@ -152,9 +152,18 @@ onMounted(async () => {
         Authorization: token,
       },
     });
-    notificationsInfo.value = response.data;
+    if (response.status === 200) {
+      notificationsInfo.value = response.data.map((notification) => ({
+        ...notification,
+        createdAt: formatDate(notification.createdAt),
+      }));
+    } else if (response.status === 204) {
+      notificationsInfo.value = [];
+    } else {
+      errorMessage.value = "An error occurred while fetching notifications";
+    }
   } catch (error) {
-    console.log("Error: ", error);
+    errorMessage.value = "An error occurred while fetching notifications";
   }
 });
 const getCreatorChipColor = (creator) => {

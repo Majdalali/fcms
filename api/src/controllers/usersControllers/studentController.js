@@ -153,29 +153,12 @@ async function getAllProjects(req, res) {
   }
 }
 
-async function getUserById(req, res) {
-  const { userId } = req.params;
-  try {
-    const user = await Student.getUserById(userId);
-    if (!user) {
-      return res.status(404).json({ error: "User not found 4" });
-    }
-    // Remove password from the response
-    const responseUser = { ...user };
-    delete responseUser.password;
-    return res.status(200).json(responseUser);
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: "Internal server error" });
-  }
-}
-
 async function getStudent(req, res) {
   const { userId } = req.params;
   try {
     const user = await Student.getUserById(userId);
     if (!user) {
-      return res.status(404).json({ error: "User not found 4" });
+      return res.status(404).json({ error: "User not found" });
     }
     // Remove password from the response
     const responseUser = {
@@ -215,10 +198,10 @@ async function assignSupervisor(io, connectedUsers, req, res) {
   try {
     // Find the supervisor by email
     const supervisor = await Lecturer.getUserByEmail(email);
-    const supervisorId = supervisor.user_id;
     if (!supervisor || supervisor.user_type !== "lecturer") {
       return res.status(404).json({ error: "Supervisor not found" });
     }
+    const supervisorId = supervisor.user_id;
 
     // Assign the supervisor to the student
     const student = await Student.getUserById(studentId);
@@ -308,15 +291,37 @@ async function getSupervisorDetails(req, res) {
   }
 }
 async function getExaminersDetails(req, res) {
-  const { userId } = req.params;
+  const studentId = req.params.studentId;
+
   try {
-    const user = await Lecturer.getUserById(userId);
-    if (!user) {
-      return res.status(404).json({ error: "Examiner not found" });
+    // Find the student by ID
+    const student = await Student.getUserById(studentId);
+
+    if (!student) {
+      return res.status(404).json({ error: "Student not found?" });
     }
-    // Remove password from the response
-    const responseUser = { name: user.username, email: user.email };
-    return res.status(200).json(responseUser);
+
+    // Check if the student has examiners
+    if (!student.examiners || student.examiners.length === 0) {
+      return res
+        .status(404)
+        .json({ error: "Student does not have any examiners" });
+    }
+
+    // Find the examiners by ID
+    const examinersPromises = student.examiners.map((examinerId) =>
+      Lecturer.getUserById(examinerId)
+    );
+
+    const examiners = await Promise.all(examinersPromises);
+
+    // Extract and send examiner details (name and email) in the response
+    const examinersDetails = examiners.map((examiner) => ({
+      name: examiner.username,
+      email: examiner.email,
+    }));
+
+    return res.status(200).json(examinersDetails);
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "Internal server error" });
@@ -446,7 +451,7 @@ async function getStudentCoSupervisors(req, res) {
   try {
     const student = await Student.getUserById(studentId);
     if (!student) {
-      return res.status(404).json({ error: "Student not found" });
+      return res.status(404).json({ error: "Student not found " });
     }
 
     const coSupervisors = student.coSupervisors; // Array of co-supervisor IDs
@@ -636,6 +641,23 @@ async function DeleteStudentExaminer(req, res) {
     await student.save();
     await examiner.save();
     return res.status(200).json({ message: "Examiner deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+async function getUserById(req, res) {
+  const { userId } = req.params;
+  try {
+    const user = await Student.getUserById(userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found; SC.GUBI" });
+    }
+    // Remove password from the response
+    const responseUser = { ...user };
+    delete responseUser.password;
+    return res.status(200).json(responseUser);
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "Internal server error" });

@@ -31,11 +31,6 @@
             ></v-text-field>
           </v-col>
           <v-col cols="12" md="5">
-            <!-- <v-text-field
-              :rules="nameRules"
-              label="Criteria Program"
-              hint="e.g. MECC, MCSD, etc."
-            ></v-text-field> -->
             <v-select
               v-model="criteriaProgram"
               label="Criteria Program"
@@ -46,8 +41,32 @@
               :item-props="itemProps"
             ></v-select>
           </v-col>
-          <v-col cols="12"> </v-col>
         </v-row>
+        <div
+          v-for="(criteriaMD, index) in criteriaMarksDistribution"
+          :key="index"
+          class="w-full"
+        >
+          <small class="titleDes">{{ criteriaMD.name }} Share of Marks </small>
+          <v-row>
+            <v-col cols="12" md="6">
+              <v-text-field
+                label="Evaluator Type"
+                v-model="criteriaMD.name"
+                disabled
+                readonly
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" md="6">
+              <v-text-field
+                label="Share of Marks (%)"
+                v-model="criteriaMD.share"
+                :rules="gradeRules"
+                :disabled="criteriaMD.name === 'Examiner'"
+              ></v-text-field>
+            </v-col>
+          </v-row>
+        </div>
         <div
           class="pt-2"
           v-for="(criteriasObject, index) in criteriasObjects"
@@ -134,6 +153,29 @@
                     </tr>
                   </tbody>
                 </v-table>
+                <h1 class="title mt-5 mb-2">Marks (%) Split</h1>
+                <v-table class="border">
+                  <thead>
+                    <tr>
+                      <th class="text-center text-base">Evaluator</th>
+                      <th class="text-center text-base">Share</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr
+                      v-for="(value, key) in item.criteriaMarksDistribution"
+                      :key="key"
+                    >
+                      <td class="text-center text-base">
+                        {{ key }}
+                      </td>
+                      <td class="text-center text-base">{{ value }}%</td>
+                    </tr>
+                  </tbody>
+                </v-table>
+                <h1 class="titleDes mt-5 mb-2">
+                  total marks: {{ item.criteriaTotalMark }}
+                </h1>
               </v-card-text>
               <v-card-actions>
                 <v-spacer></v-spacer>
@@ -192,7 +234,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import axios from "axios";
 
 // Constants
@@ -216,6 +258,10 @@ const userProgram = storedUser.coordinator_program;
 const criteriaName = ref("");
 const criteriaProgram = ref(userProgram);
 const criteriasObjects = ref([{ name: "", outOf: "" }]);
+const criteriaMarksDistribution = ref([
+  { name: "Supervisor", share: "" },
+  { name: "Examiner", share: "" },
+]);
 
 // Feedback
 const responseMessage = ref("");
@@ -230,11 +276,21 @@ const nameRules = [
 ];
 
 const gradeRules = [
-  (value) =>
-    (value?.trim() !== "" &&
-      !isNaN(value?.trim()) &&
-      value === value?.trim()) ||
-    "Grade must be a valid number without leading or trailing spaces.",
+  // grade must be a number between 0 and 100 and not empty or spaces
+  (value) => {
+    if (typeof value === "string") {
+      const trimmedValue = value.trim(); // Remove leading and trailing spaces
+      return (
+        (trimmedValue.length > 0 &&
+          !isNaN(trimmedValue) &&
+          parseFloat(trimmedValue) >= 0 &&
+          parseFloat(trimmedValue) <= 100 &&
+          !/\s/.test(value)) || // Ensure no spaces
+        "Grade must be a number between 0 and 100 without spaces."
+      );
+    }
+    return true; // Accept non-string values without validation
+  },
 ];
 
 // Functions
@@ -253,6 +309,11 @@ const removeEntry = (list, index) => {
 
 const resetForm = () => {
   criteriaForm.value.reset();
+  criteriaMarksDistribution.value.forEach((criteria) => {
+    criteria.share = "";
+  });
+  criteriaMarksDistribution.value[0].name = "Supervisor";
+  criteriaMarksDistribution.value[1].name = "Examiner";
 };
 
 const apiUrl = import.meta.env.VITE_API_URL;
@@ -264,6 +325,10 @@ const submitCriteria = async () => {
     criteriasObjects.value.forEach((criteria) => {
       criteriasObjectsPayload[criteria.name] = criteria.outOf;
     });
+    const criteriaMarksDistributionPayload = {};
+    criteriaMarksDistribution.value.forEach((criteria) => {
+      criteriaMarksDistributionPayload[criteria.name] = criteria.share;
+    });
 
     const response = await axios.post(
       `${apiUrl}/api/newCriteria`,
@@ -271,6 +336,7 @@ const submitCriteria = async () => {
         criteriaName: criteriaName.value,
         criteriaProgram: criteriaProgram.value,
         criteriasObjects: criteriasObjectsPayload,
+        criteriaMarksDistribution: criteriaMarksDistributionPayload,
       },
       {
         headers: {
@@ -345,6 +411,16 @@ const itemProps = (item) => ({
   subtitle:
     item.name + (item.abbreviation === userProgram ? " (Your Program)" : ""),
 });
+
+// auto fill the share of marks for examiner based on the supervisor share (100 - supervisor share)
+watch(
+  () => criteriaMarksDistribution.value[0].share,
+  (newValue) => {
+    let newShare = 100 - newValue;
+    if (newValue === "") newShare = "";
+    criteriaMarksDistribution.value[1].share = newShare.toString();
+  }
+);
 </script>
 
 <style lang="scss" scoped>
@@ -356,7 +432,7 @@ const itemProps = (item) => ({
 }
 .titleDes {
   font-family: "Work Sans", sans-serif;
-  font-size: 1rem /* 18px */;
+  font-size: 1rem /* 16px */;
   line-height: 1.75rem /* 28px */;
 }
 .formText {

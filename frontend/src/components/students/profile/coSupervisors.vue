@@ -168,7 +168,7 @@ onMounted(async () => {
   try {
     const token = localStorage.getItem("access_token");
 
-    const response = await axios.get(`${apiUrl}/myCoSupervisors`, {
+    const response = await axios.get(`${apiUrl}/students/co-supervisors`, {
       headers: { Authorization: token },
     });
 
@@ -182,10 +182,10 @@ onMounted(async () => {
 const addCoSupervisor = async () => {
   try {
     const token = localStorage.getItem("access_token");
-    const response = await axios.post(
-      `${apiUrl}/udateCoSupervisors`,
+    const response = await axios.put(
+      `${apiUrl}/students/co-supervisors`,
       {
-        email: email.value,
+        email: email.value.toLowerCase(),
       },
       {
         headers: {
@@ -212,7 +212,6 @@ const addCoSupervisor = async () => {
       errorMessage.value = error.response.data.error;
     } else {
       errorMessage.value = "An error occurred. Please try again";
-      console.log("Error adding co-supervisor:", error);
     }
   }
 };
@@ -221,7 +220,7 @@ const removeCoSupervisor = async (email) => {
   try {
     const token = localStorage.getItem("access_token");
     const response = await axios.post(
-      `${apiUrl}/removeSupervisor/coSupervisor`,
+      `${apiUrl}/students/supervisors/coSupervisor`,
       {
         lecturerEmail: email,
       },
@@ -247,7 +246,6 @@ const removeCoSupervisor = async (email) => {
       errorMessage.value = error.response.data.error;
     } else {
       errorMessage.value = "An error occurred. Please try again";
-      console.log("Error deleting co-supervisor:", error);
     }
   }
 };
