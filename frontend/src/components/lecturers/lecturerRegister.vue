@@ -201,6 +201,7 @@ onMounted(async () => {
 });
 
 const register = async () => {
+  errorMessage.value = "";
   try {
     const response = await axios.post(`${apiUrl}/lecturer/register`, {
       username: username.value,

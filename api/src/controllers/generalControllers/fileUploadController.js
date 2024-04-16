@@ -125,7 +125,6 @@ async function uploadFile(io, connectedUsers, req, res) {
     if (usersSockets.length > 0) {
       io.to(usersSockets).emit("notification", {
         message: "Student submitted a new file",
-        // Additional data if needed
         data: submissionType,
       });
     }
@@ -220,7 +219,7 @@ async function getStudentFiles(req, res) {
     );
 
     if (studentFiles.error) {
-      return res.status(400).json({ error: studentFiles.error });
+      return res.status(404).json({ error: studentFiles.error });
     }
 
     return res.status(200).json(studentFiles);

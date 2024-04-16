@@ -41,72 +41,123 @@
               :item-props="itemProps"
             ></v-select>
           </v-col>
+          <v-col>
+            <small class="titleDes">Please Select the criteria type</small>
+            <v-radio-group inline v-model="radioGroup">
+              <v-radio label="Marks & Split (%)" value="split"></v-radio>
+              <v-radio
+                label="Questionnaire"
+                value="questionnaire"
+                class="ml-4"
+              ></v-radio>
+            </v-radio-group>
+          </v-col>
         </v-row>
-        <div
-          v-for="(criteriaMD, index) in criteriaMarksDistribution"
-          :key="index"
-          class="w-full"
-        >
-          <small class="titleDes">{{ criteriaMD.name }} Share of Marks </small>
-          <v-row>
-            <v-col cols="12" md="6">
-              <v-text-field
-                label="Evaluator Type"
-                v-model="criteriaMD.name"
-                disabled
-                readonly
-              ></v-text-field>
-            </v-col>
-            <v-col cols="12" md="6">
-              <v-text-field
-                label="Share of Marks (%)"
-                v-model="criteriaMD.share"
-                :rules="gradeRules"
-                :disabled="criteriaMD.name === 'Examiner'"
-              ></v-text-field>
-            </v-col>
-          </v-row>
+        <div class="splitShare" v-if="radioGroup == 'split'">
+          <div
+            v-for="(criteriaMD, index) in criteriaMarksDistribution"
+            :key="index"
+            class="w-full"
+          >
+            <small class="titleDes"
+              >{{ criteriaMD.name }} Share of Marks
+            </small>
+            <v-row>
+              <v-col cols="12" md="6">
+                <v-text-field
+                  label="Evaluator Type"
+                  v-model="criteriaMD.name"
+                  disabled
+                  readonly
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12" md="6">
+                <v-text-field
+                  label="Share of Marks (%)"
+                  v-model="criteriaMD.share"
+                  :rules="gradeRules"
+                  :disabled="criteriaMD.name === 'Examiner'"
+                ></v-text-field>
+              </v-col>
+            </v-row>
+          </div>
+          <div
+            class="pt-2"
+            v-for="(criteriasObject, index) in criteriasObjects"
+            :key="index"
+          >
+            <small class="titleDes">Criteria {{ index + 1 }}</small>
+            <v-row class="mt-1">
+              <v-col cols="12" md="7">
+                <v-text-field
+                  v-model="criteriasObject.name"
+                  :rules="nameRules"
+                  label="Evaluation Criteria"
+                  hint="e.g. Project Managment Progress 1, Project Performance, etc."
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12" md="4">
+                <v-text-field
+                  :rules="gradeRules"
+                  v-model="criteriasObject.outOf"
+                  label="Out Of"
+                  hint="Total marks for this criteria"
+                ></v-text-field
+              ></v-col>
+              <v-col cols="12" md="1" class="mt-1">
+                <v-btn
+                  size="large"
+                  color="success"
+                  v-if="index === 0"
+                  @click="addEntry(criteriasObjects, { name: '', outOf: '' })"
+                  ><v-icon icon="mdi-plus-circle"></v-icon
+                ></v-btn>
+                <v-btn
+                  size="large"
+                  v-else
+                  color="error"
+                  @click="removeEntry(criteriasObjects, index)"
+                  ><v-icon icon="mdi-delete"></v-icon
+                ></v-btn>
+              </v-col>
+            </v-row>
+          </div>
         </div>
-        <div
-          class="pt-2"
-          v-for="(criteriasObject, index) in criteriasObjects"
-          :key="index"
-        >
-          <small class="titleDes">Criteria {{ index + 1 }}</small>
-          <v-row class="mt-1">
-            <v-col cols="12" md="7">
-              <v-text-field
-                v-model="criteriasObject.name"
-                :rules="nameRules"
-                label="Evaluation Criteria"
-                hint="e.g. Project Managment Progress 1, Project Performance, etc."
-              ></v-text-field>
-            </v-col>
-            <v-col cols="12" md="4">
-              <v-text-field
-                :rules="gradeRules"
-                v-model="criteriasObject.outOf"
-                label="Out Of"
-                hint="Total marks for this criteria"
-              ></v-text-field
-            ></v-col>
-            <v-col cols="12" md="1" class="mt-1">
-              <v-btn
-                size="large"
-                color="success"
-                v-if="index === 0"
-                @click="addEntry(criteriasObjects, { name: '', outOf: '' })"
-                ><v-icon icon="mdi-plus-circle"></v-icon
-              ></v-btn>
-              <v-btn
-                size="large"
-                v-else
-                color="error"
-                @click="removeEntry(criteriasObjects, index)"
-                ><v-icon icon="mdi-delete"></v-icon
-              ></v-btn>
-            </v-col>
-          </v-row>
+        <div class="questionnaire" v-if="radioGroup == 'questionnaire'">
+          <div
+            class="pt-2"
+            v-for="(criteriasObject, index) in criteriasObjects"
+            :key="index"
+          >
+            <small class="titleDes">Criteria {{ index + 1 }}</small>
+            <v-row class="mt-1">
+              <v-col cols="12" md="10">
+                <v-text-field
+                  v-model="criteriasObject.name"
+                  :rules="nameRules"
+                  label="Evaluation Criteria or Question"
+                  hint="e.g. Recommendation, Opinion, Merit, etc."
+                ></v-text-field>
+              </v-col>
+
+              <v-col cols="12" md="1" class="mt-1">
+                <v-btn
+                  size="large"
+                  color="success"
+                  v-if="index === 0"
+                  @click="addEntry(criteriasObjects, { name: '', outOf: '' })"
+                  ><v-icon icon="mdi-plus-circle"></v-icon
+                ></v-btn>
+                <v-btn
+                  size="large"
+                  v-else
+                  color="error"
+                  @click="removeEntry(criteriasObjects, index)"
+                  ><v-icon icon="mdi-delete"></v-icon
+                ></v-btn>
+              </v-col>
+            </v-row>
+          </div>
         </div>
         <v-btn
           size="large"
@@ -262,6 +313,7 @@ const criteriaMarksDistribution = ref([
   { name: "Supervisor", share: "" },
   { name: "Examiner", share: "" },
 ]);
+const radioGroup = ref("split");
 
 // Feedback
 const responseMessage = ref("");
@@ -295,28 +347,8 @@ const gradeRules = [
 
 // Functions
 
-onMounted(() => {
-  criteriaProgram.value = userProgram; // Set the default value to userProgram
-});
-
-const addEntry = (list) => {
-  list.push({ name: "", outOf: "" });
-};
-
-const removeEntry = (list, index) => {
-  list.splice(index, 1);
-};
-
-const resetForm = () => {
-  criteriaForm.value.reset();
-  criteriaMarksDistribution.value.forEach((criteria) => {
-    criteria.share = "";
-  });
-  criteriaMarksDistribution.value[0].name = "Supervisor";
-  criteriaMarksDistribution.value[1].name = "Examiner";
-};
-
 const apiUrl = import.meta.env.VITE_API_URL;
+
 const submitCriteria = async () => {
   const token = localStorage.getItem("access_token");
   try {
@@ -337,6 +369,7 @@ const submitCriteria = async () => {
         criteriaProgram: criteriaProgram.value,
         criteriasObjects: criteriasObjectsPayload,
         criteriaMarksDistribution: criteriaMarksDistributionPayload,
+        criteriaType: radioGroup.value,
       },
       {
         headers: {
@@ -396,6 +429,27 @@ const deleteCriteria = async (program) => {
       errorMessage.value = "An unexpected error occurred. Please try again.";
     }
   }
+};
+
+onMounted(() => {
+  criteriaProgram.value = userProgram; // Set the default value to userProgram
+});
+
+const addEntry = (list) => {
+  list.push({ name: "", outOf: "" });
+};
+
+const removeEntry = (list, index) => {
+  list.splice(index, 1);
+};
+
+const resetForm = () => {
+  criteriaForm.value.reset();
+  criteriaMarksDistribution.value.forEach((criteria) => {
+    criteria.share = "";
+  });
+  criteriaMarksDistribution.value[0].name = "Supervisor";
+  criteriaMarksDistribution.value[1].name = "Examiner";
 };
 
 const openDialog = (item) => {

@@ -13,6 +13,11 @@ import '@mdi/font/css/materialdesignicons.css'
 import '@fortawesome/fontawesome-free/css/all.css'
 import { aliases, mdi } from 'vuetify/iconsets/mdi'
 
+const getFullYear = new Date().getFullYear();
+console.log(`${getFullYear} — All Rights Reserved by UTM
+Faculty of Computing, Universiti Teknologi Malaysia (UTM)
+Developed by: @MajdAlali`);
+
 const vuetify = createVuetify({
     components,
     directives,

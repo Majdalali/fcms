@@ -152,6 +152,7 @@ const passwordRules = [
 const errorMessage = ref("");
 
 const login = async () => {
+  errorMessage.value = "";
   try {
     const response = await axios.post(
       `${apiUrl}/lecturer/login`,

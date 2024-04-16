@@ -7,8 +7,9 @@ class Criteria {
     criteriaName,
     criteriasObjects = {},
     criteriaProgram,
-    criteriaTotalMark,
+    criteriaTotalMark = 0,
     criteriaMarksDistribution = {},
+    criteriaType,
   }) {
     this.criteriaId = criteriaId || this.generateRandomId();
     this.criteriaName = criteriaName;
@@ -16,6 +17,7 @@ class Criteria {
     this.criteriaProgram = criteriaProgram;
     this.criteriaTotalMark = criteriaTotalMark;
     this.criteriaMarksDistribution = criteriaMarksDistribution;
+    this.criteriaType = criteriaType;
   }
 
   generateRandomId() {
@@ -42,6 +44,7 @@ class Criteria {
         criteriaProgram: this.criteriaProgram,
         criteriaTotalMark: this.criteriaTotalMark,
         criteriaMarksDistribution: this.criteriaMarksDistribution,
+        criteriaType: this.criteriaType,
       });
       return;
     } catch (error) {

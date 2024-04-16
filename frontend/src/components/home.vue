@@ -32,6 +32,7 @@
         </p>
         <div class="mt-6">
           <v-btn
+            v-if="!user"
             class="btn"
             variant="flat"
             color="#800000"
@@ -41,6 +42,17 @@
             text="Register"
             @click="dialogRegister = true"
           ></v-btn>
+          <router-link to="/home">
+            <v-btn
+              v-if="user"
+              class="btn"
+              variant="flat"
+              color=""
+              width="200"
+              rounded="lg"
+              text="Head to Dashboard"
+            ></v-btn>
+          </router-link>
           <v-btn
             class="btn sm:ml-6"
             variant="text"
@@ -179,7 +191,8 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
+import { useStore } from "vuex";
 import { useDark, useBreakpoints, breakpointsTailwind } from "@vueuse/core";
 import HeroImage from "@/assets/images/heroImage.svg";
 import HomeNavigation from "./homeNavigation.vue";
@@ -190,6 +203,8 @@ const dialogRegister = ref(false);
 const breakpoints = useBreakpoints(breakpointsTailwind);
 const mdAndUp = breakpoints.greaterOrEqual("md");
 const largerThanSm = breakpoints.greater("sm");
+const store = useStore();
+const user = computed(() => store.state.user);
 
 // Methods
 const scrollToHDIW = () => {

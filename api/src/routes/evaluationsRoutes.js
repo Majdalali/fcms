@@ -23,6 +23,12 @@ router.get(
 );
 
 router.get(
+  "/students/evaluations/:programType",
+  verifyToken,
+  evaluationsController.getStudentEvals
+);
+
+router.get(
   "/evaluations/:criteriaProgram",
   coordinatorGuard,
   evaluationsController.getEvaluationsByProgram

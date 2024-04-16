@@ -9,8 +9,9 @@
     </div>
     <div class="pt-10 h-full lg:w-4/5">
       <v-alert
+        type="secondary"
         variant="outlined"
-        type="warning"
+        icon="mdi-information"
         v-show="errorMessage !== ''"
         :text="errorMessage"
       >
@@ -71,7 +72,7 @@ onMounted(async () => {
       error.response.status === 400 &&
       error.response.data.message === "No comments found for this student"
     ) {
-      errorMessage.value = "Please check back later for comments";
+      errorMessage.value = "You have no comments yet. Please check back later";
     } else {
       errorMessage.value = "An error occurred while fetching comments";
     }

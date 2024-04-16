@@ -14,8 +14,11 @@ class evaluationsModel {
     createdAt,
     lecturerName,
     studentName,
+    matricNumber,
     projectType,
     criteriaProgram,
+    supportingDocs = [],
+    evalType,
   }) {
     this.evaluationId = evaluationId || this.generateRandomId();
     this.evaluatorId = evaluatorId;
@@ -36,6 +39,9 @@ class evaluationsModel {
     this.lecturerName = lecturerName;
     this.studentName = studentName;
     this.projectType = projectType;
+    this.supportingDocs = supportingDocs;
+    this.matricNumber = matricNumber;
+    this.evalType = evalType;
   }
   generateRandomId() {
     const randomPortion = Math.floor(Math.random() * 100000).toString(); // Random 5-digit number
@@ -58,6 +64,9 @@ class evaluationsModel {
         studentName: this.studentName,
         criteriaProgram: this.criteriaProgram,
         projectType: this.projectType,
+        supportingDocs: this.supportingDocs,
+        matricNumber: this.matricNumber,
+        evalType: this.evalType,
       });
     } catch (error) {
       throw error;
@@ -166,6 +175,21 @@ class evaluationsModel {
     } catch (error) {
       throw error;
     }
+  }
+
+  static async getStudentEvaluationsByProjectType(id, projectType) {
+    const querySnapshot = await evaluationsCollection
+      .where("studentId", "==", id)
+      .where("projectType", "==", projectType)
+      .get();
+
+    if (querySnapshot.empty) {
+      return [];
+    }
+
+    const evaluations = querySnapshot.docs.map((doc) => doc.data());
+
+    return evaluations;
   }
 }
 

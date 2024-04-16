@@ -63,6 +63,9 @@ app.use("/", evaluationRoutes);
 app.use("/", adminRoutes);
 app.use("/", archiveRoutes);
 
+app.use(express.static(__dirname + "/public/"));
+app.get(/.*/, (req, res) => res.sendFile(__dirname + "/public/index.html"));
+
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });

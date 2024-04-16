@@ -6,87 +6,108 @@
         <v-icon size="small">mdi-chevron-right</v-icon> Project
         {{ props.projectType === "pOne" ? "1" : "2" }}
       </h1>
-      <p class="titleDes mb-5 text-sm font-light">
-        <v-btn
-          color="indigo"
-          variant="text"
-          size="small"
-          @click="dialog = true"
-          append-icon="mdi-information"
-          class="pl-0"
-        >
-          Understanding the calculations
-        </v-btn>
-      </p>
-      <v-dialog v-model="dialog" width="800px">
-        <v-card>
-          <v-card-title class="title"
-            >Understanding the calculations</v-card-title
+      <div class="ValidPrograms" v-if="!props.evalType">
+        <p class="titleDes mb-5 text-sm font-light">
+          <v-btn
+            color="indigo"
+            variant="text"
+            size="small"
+            @click="dialog = true"
+            append-icon="mdi-information"
+            class="pl-0"
           >
-          <v-card-text>
-            <v-list lines="two">
-              <v-list-item>
-                <v-list-item-title class="title">Final Grade</v-list-item-title>
-                <p class="titleSec text-sm opacity-70">
-                  The final grade is a combined score. The examiner marks are
-                  averaged and then combined with the supervisor's marks.
-                </p>
-              </v-list-item>
-              <v-list-item>
-                <v-list-item-title class="title"
-                  >Average [Ex1, Ex2]</v-list-item-title
-                >
-                <p class="titleSec text-sm opacity-70">
-                  The average represents the combined marks from all examiners
-                  divided by the number of examiners.
-                </p>
-              </v-list-item>
-              <v-list-item>
-                <v-list-item-title class="title">Total</v-list-item-title>
-                <p class="titleSec text-sm opacity-70">
-                  The total is calculated by summing the total marks from all
-                  evaluations (which may include both examiner and supervisor
-                  evaluations) and dividing by the total number of evaluations.
-                </p>
-              </v-list-item>
-            </v-list>
-          </v-card-text>
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn color="primary" dark @click="dialog = false"> Close </v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
-      <div v-if="!emptyEvals">
-        <v-card :rounded="0" :elevation="0">
-          <v-text-field
-            v-model="search"
-            label="Search"
-            prepend-inner-icon="mdi-magnify"
-            single-line
-            :rounded="0"
+            Understanding the calculations
+          </v-btn>
+        </p>
+        <v-dialog v-model="dialog" width="800px">
+          <v-card>
+            <v-card-title class="title"
+              >Understanding the calculations</v-card-title
+            >
+            <v-card-text>
+              <v-list lines="two">
+                <v-list-item>
+                  <v-list-item-title class="title"
+                    >Final Grade</v-list-item-title
+                  >
+                  <p class="titleSec text-sm opacity-70">
+                    The final grade is a combined score. The examiner marks are
+                    averaged and then combined with the supervisor's marks.
+                  </p>
+                </v-list-item>
+                <v-list-item>
+                  <v-list-item-title class="title"
+                    >Average [Ex1, Ex2]</v-list-item-title
+                  >
+                  <p class="titleSec text-sm opacity-70">
+                    The average represents the combined marks from all examiners
+                    divided by the number of examiners.
+                  </p>
+                </v-list-item>
+                <v-list-item>
+                  <v-list-item-title class="title">Total</v-list-item-title>
+                  <p class="titleSec text-sm opacity-70">
+                    The total is calculated by summing the total marks from all
+                    evaluations (which may include both examiner and supervisor
+                    evaluations) and dividing by the total number of
+                    evaluations.
+                  </p>
+                </v-list-item>
+              </v-list>
+            </v-card-text>
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn color="primary" dark @click="dialog = false">
+                Close
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+        <div v-if="!emptyEvals">
+          <v-card :rounded="0" :elevation="0">
+            <v-text-field
+              v-model="search"
+              label="Search"
+              prepend-inner-icon="mdi-magnify"
+              single-line
+              :rounded="0"
+              variant="outlined"
+              hide-details
+            ></v-text-field>
+          </v-card>
+          <v-data-table
+            class="border"
+            :headers="headers"
+            :search="search"
+            :items="groupedEvals"
+          >
+          </v-data-table>
+        </div>
+        <div class="" v-else>
+          <v-alert
+            type="info"
             variant="outlined"
-            hide-details
-          ></v-text-field>
-        </v-card>
-        <v-data-table
-          class="border"
-          :headers="headers"
-          :search="search"
-          :items="groupedEvals"
-        >
-        </v-data-table>
+            border="left"
+            elevation="0"
+            icon="mdi-information"
+          >
+            No evaluation data found for the selected program and project type.
+            Please wait for examiners/supervisors to submit their evaluations.
+          </v-alert>
+        </div>
       </div>
-      <div class="" v-else>
+      <div v-else>
         <v-alert
-          type="info"
+          type="warning"
           variant="outlined"
           border="left"
           elevation="0"
           icon="mdi-information"
+          class="mt-4 py-2"
         >
-          No evaluation data found for the selected program and project type.
-          Please wait for examiners/supervisors to submit their evaluations.
+          Marks analysis is not avaliable for this program ({{
+            props.programType
+          }})
         </v-alert>
       </div>
     </div>
@@ -101,6 +122,7 @@ const props = defineProps({
   projectType: String,
   programType: String,
   evaluationData: Array,
+  evalType: Boolean,
 });
 
 const dialog = ref(false);

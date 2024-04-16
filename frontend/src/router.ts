@@ -27,6 +27,7 @@ import Calendar from "./components/globalPages/calendar.vue";
 import Presentation from "./components/globalPages/presentation.vue";
 import Rubric from "./components/globalPages/rubric.vue";
 import MarksAnalysis from "./components/globalPages/marksAnalysis.vue";
+import chairDashboard from "./components/chairman/chairDashboard.vue";
 
 const routes = [
   {
@@ -91,6 +92,12 @@ const routes = [
       requiresAdmin: true,
       allowedUserType: "lecturer",
     },
+  },
+  {
+    path: "/chairman",
+    name: "chairman",
+    component: chairDashboard,
+    meta: { requiresAuth: true, allowedUserType: "lecturer" },
   },
   {
     path: "/myproject",

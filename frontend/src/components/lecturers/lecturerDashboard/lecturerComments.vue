@@ -3,9 +3,14 @@
     <div>
       <h1 class="title text-lg font-medium">
         Add Comments & Feedback to students
+        <v-progress-circular
+          indeterminate
+          :size="22"
+          v-if="isLoading"
+        ></v-progress-circular>
       </h1>
     </div>
-    <div class="lg:w-4/5 mt-5">
+    <div v-if="!isLoading" class="lg:w-4/5 mt-5">
       <v-form>
         <v-autocomplete
           v-model="selectedStudent"
@@ -107,6 +112,13 @@
         </v-dialog>
       </v-form>
     </div>
+    <div v-else class="lg:w-4/5 mt-5">
+      <v-skeleton-loader type="heading"></v-skeleton-loader>
+      <v-skeleton-loader
+        type="paragraph, list-item, button, button"
+        class="mt-5"
+      ></v-skeleton-loader>
+    </div>
 
     <v-snackbar
       :timeout="2000"
@@ -144,10 +156,12 @@ const dialog = ref(false);
 const apiUrl = import.meta.env.VITE_API_URL;
 const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
 const userId = storedUser.user_id;
+const isLoading = ref(false);
 
 // Functions
 
 onMounted(async () => {
+  isLoading.value = true;
   try {
     // Fetching data from the first endpoint
     const response1 = await axios.get(
@@ -198,6 +212,7 @@ onMounted(async () => {
     console.error("Error fetching user info:", error);
     // Handle error, display an error message, or redirect if needed
   }
+  isLoading.value = false;
 });
 
 const itemProps = (item) => ({

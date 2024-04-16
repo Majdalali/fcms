@@ -18,7 +18,7 @@
           <div class="pt-4 upperDiv">
             <h1 class="text-3xl font-medium title">
               My Project <v-icon size="small">mdi-chevron-right</v-icon> Project
-              2
+              2 / Dissertation 3
             </h1>
             <p class="text-lg titleDes font-light" v-if="sessionDate">
               The Masters System For Semester
@@ -38,6 +38,7 @@
               <v-tab class="v-tab" value="five">Final Submission</v-tab>
               <v-tab class="v-tab" value="six">Presentation & Demo</v-tab>
               <v-tab class="v-tab" value="seven">Corrections</v-tab>
+              <v-tab class="v-tab" value="eight">Evaluations</v-tab>
             </v-tabs>
             <v-divider></v-divider>
             <v-card-text class="pl-0">
@@ -100,6 +101,11 @@
                     :submissionDate="sessionDate"
                   />
                 </v-window-item>
+
+                <!--? Evaluations -->
+                <v-window-item value="eight">
+                  <studentEvals projectType="pTwo" />
+                </v-window-item>
               </v-window>
             </v-card-text>
           </div>
@@ -111,6 +117,7 @@
 <script setup>
 import Navigation from "../../navigation.vue";
 import fileUpload from "./fileUpload.vue";
+import studentEvals from "./studentEvals.vue";
 import { useDark } from "@vueuse/core";
 import { ref, onMounted } from "vue";
 import axios from "axios";

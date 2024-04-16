@@ -33,74 +33,154 @@
         <p class="titleDes mt-4">Project Type</p>
         <v-radio-group
           inline
-          class="pt-2"
+          class="py-2"
           :rules="radioGroupRules"
           v-model="radioGroup"
         >
           <v-radio label="Project One" value="pOne"></v-radio>
           <v-radio label="Project Two" value="pTwo"></v-radio>
         </v-radio-group>
-        <v-divider></v-divider>
-        <div class="mt-5 mb-2 flex flex-row text-center justify-between">
-          <v-card
-            class="w-[60%] ml-2 rounded-lg flex items-center p-4"
-            title="Criteria"
-            v-if="selectedStudent && criteriaErrorMessages === ''"
-          >
-            <template v-slot:text>
-              <span class="title"
-                ><strong
-                  >{{ selectedCriteriaName }} ({{
-                    selectedStudentProgram
-                  }})</strong
-                ></span
-              >
-            </template>
-          </v-card>
-          <v-card
-            class="w-[30%] rounded-lg flex flex-row items-center"
-            title="Total Mark"
-            v-if="selectedStudent && criteriaErrorMessages === ''"
-            ><template v-slot:text
-              ><span class="title"
-                ><strong>{{ selectedCriteriaTotalMark }}</strong></span
-              ></template
-            >
-          </v-card>
-        </div>
 
-        <div
-          class="pt-2"
-          v-for="(evaluationCriteria, index) in evaluationCriterias"
-          :key="index"
-        >
-          <small class="titleDes">Criteria {{ index + 1 }}</small>
-          <v-row class="mt-1">
-            <v-col cols="12" md="6">
-              <v-text-field
-                v-model="evaluationCriteria.name"
-                readonly
-                :disabled="evaluationCriteria.name == ''"
-                label="Evaluation Criteria"
-              ></v-text-field>
-            </v-col>
-            <v-col cols="12" md="3">
-              <v-text-field
-                :rules="getGradeRules(evaluationCriteria)"
-                v-model="evaluationCriteria.grade"
-                label="Grade"
-                :disabled="evaluationCriteria.name == ''"
-              ></v-text-field>
-            </v-col>
-            <v-col cols="12" md="3">
-              <v-text-field
-                v-model="evaluationCriteria.outOf"
-                :readonly="!dark"
-                :disabled="dark"
-                label="Out of"
-              ></v-text-field>
-            </v-col>
-          </v-row>
+        <p class="titleDes mt-2 mb-2">Supporting files</p>
+        <v-file-input
+          v-model="formFiles"
+          variant="outlined"
+          clearable
+          label="Upload a File"
+          show-size
+          counter
+        ></v-file-input>
+        <v-divider></v-divider>
+        <div class="splitShare" v-if="selectedCriteriaType == 'split'">
+          <div class="mt-5 mb-2 flex flex-row text-center justify-between">
+            <v-card
+              class="w-[60%] ml-2 rounded-lg flex items-center p-4"
+              title="Criteria"
+              v-if="selectedStudent && criteriaErrorMessages === ''"
+            >
+              <template v-slot:text>
+                <span class="title"
+                  ><strong
+                    >{{ selectedCriteriaName }} ({{
+                      selectedStudentProgram
+                    }})</strong
+                  ></span
+                >
+              </template>
+            </v-card>
+            <v-card
+              class="w-[30%] rounded-lg flex flex-row items-center"
+              title="Total Mark"
+              v-if="selectedStudent && criteriaErrorMessages === ''"
+              ><template v-slot:text
+                ><span class="title"
+                  ><strong>{{ selectedCriteriaTotalMark }}</strong></span
+                ></template
+              >
+            </v-card>
+          </div>
+
+          <div
+            class="pt-2"
+            v-for="(evaluationCriteria, index) in evaluationCriterias"
+            :key="index"
+          >
+            <small class="titleDes">Criteria {{ index + 1 }}</small>
+            <v-row class="mt-1">
+              <v-col cols="12" md="6">
+                <v-text-field
+                  v-model="evaluationCriteria.name"
+                  readonly
+                  :disabled="evaluationCriteria.name == ''"
+                  label="Evaluation Criteria"
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12" md="3">
+                <v-text-field
+                  :rules="getGradeRules(evaluationCriteria)"
+                  v-model="evaluationCriteria.grade"
+                  label="Grade"
+                  :disabled="evaluationCriteria.name == ''"
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12" md="3">
+                <v-text-field
+                  v-model="evaluationCriteria.outOf"
+                  :readonly="!dark"
+                  :disabled="dark"
+                  label="Out of"
+                ></v-text-field>
+              </v-col>
+            </v-row>
+          </div>
+        </div>
+        <div class="questionnaire" v-else>
+          <div class="mt-5 mb-2 flex flex-row text-center justify-center">
+            <v-card
+              class="w-[90%] ml-2 rounded-lg flex items-center p-4"
+              title="Criteria"
+              v-if="selectedStudent && criteriaErrorMessages === ''"
+            >
+              <template v-slot:text>
+                <span class="title"
+                  ><strong
+                    >{{ selectedCriteriaName }} ({{
+                      selectedStudentProgram
+                    }})</strong
+                  ></span
+                >
+              </template>
+            </v-card>
+          </div>
+          <div v-if="selectedCriteriaType == 'questionnaire'">
+            <p class="titleDes mt-2 mb-2">Evaluation Decision</p>
+            <v-radio-group :rules="radioGroupRules" v-model="decision">
+              <v-radio label="A - No correction " value="a"></v-radio>
+              <v-radio label="B1 - One month correction" value="b1"></v-radio>
+              <v-radio
+                label="B2 - Three months correction"
+                value="b2"
+              ></v-radio>
+              <v-radio label="C1 - Six months correction" value="c1"></v-radio>
+              <v-radio
+                label="C2 - Six months correction and Re-Presentation"
+                value="c2"
+              ></v-radio>
+            </v-radio-group>
+          </div>
+          <div
+            class="pt-2"
+            v-for="(evaluationCriteria, index) in evaluationCriteriasQuestion"
+            :key="index"
+          >
+            <small class="titleDes">Question {{ index + 1 }}</small>
+            <v-row class="mt-1">
+              <v-col cols="12">
+                <v-text-field
+                  v-model="evaluationCriteria.name"
+                  :class="evaluationCriteria.name == '' ? 'block' : '!hidden'"
+                  readonly
+                  :disabled="evaluationCriteria.name == ''"
+                  label="Evaluation Criteria"
+                ></v-text-field>
+                <h1
+                  class="title"
+                  :class="evaluationCriteria.name == '' ? 'hidden' : 'block'"
+                >
+                  <v-icon size="small" icon="mdi-label"></v-icon>
+                  {{ evaluationCriteria.name }}
+                </h1>
+              </v-col>
+              <v-col cols="12">
+                <v-text-field
+                  :rules="[(v) => !!v || 'Field is required']"
+                  v-model="evaluationCriteria.answer"
+                  label="Answer"
+                  :disabled="evaluationCriteria.name == ''"
+                ></v-text-field>
+              </v-col>
+            </v-row>
+          </div>
         </div>
         <v-row>
           <v-col cols="12">
@@ -190,16 +270,21 @@ const requestLoading = ref(false);
 const valid = ref(false);
 const evaluationForm = ref(null);
 const evaluationCriterias = ref([{ name: "", grade: "", from: "" }]); // criteria and it's grade
+const evaluationCriteriasQuestion = ref([{ name: "", answer: "" }]);
 const remarksForCord = ref("");
 const typeOfEvaluator = ref("");
 const criteriasData = ref([]);
 const criteriaErrorMessages = ref("");
 const selectedStudentProgram = ref("");
 const selectedCriteriaName = ref("");
+const selectedCriteriaType = ref("");
 const selectedCriteriaTotalMark = ref(0);
 const selectedEvaluatorMarksShare = ref(0);
 const radioGroup = ref("");
 const radioGroupRules = [(v) => !!v || "Please select a project type."];
+const formFiles = ref([]);
+const autoGenName = ref([]);
+const decision = ref("");
 
 const getGradeRules = (evaluationCriteria) => [
   (value) => {
@@ -243,10 +328,32 @@ const apiUrl = import.meta.env.VITE_API_URL;
 
 // Functions
 
-// Function to reset form fields
-const resetForm = () => {
-  evaluationForm.value.reset();
-  evaluationCriterias.value = [{ name: "", grade: "", outOf: "" }];
+const uploadFiles = async () => {
+  const token = localStorage.getItem("access_token");
+  const formData = new FormData();
+
+  for (let i = 0; i < formFiles.value.length; i++) {
+    formData.append("files", formFiles.value[i]);
+  }
+  formData.append("submissionType", "evalSupportingDocs");
+  try {
+    const response = await axios.post(`${apiUrl}/upload`, formData, {
+      headers: {
+        Authorization: token,
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    if (response.status === 200) {
+      autoGenName.value = response.data.fileSubmissionData.map(
+        (file) => file.autogeneratedName
+      );
+      formFiles.value = [];
+    }
+  } catch (error) {
+    criteriaErrorMessages.value = error.response.data.message;
+
+    return;
+  }
 };
 
 // Function to handle the submission of evaluation
@@ -254,6 +361,11 @@ const submitEvaluation = async () => {
   try {
     requestLoading.value = true;
     const token = localStorage.getItem("access_token");
+
+    // upload files and get the autoGeneratedName of the files to be pushed to the supportingDocs array
+    if (formFiles.value.length > 0) {
+      await uploadFiles();
+    }
 
     // Prepare the payload for the evaluation submission
     const evaluationPayload = {
@@ -264,15 +376,24 @@ const submitEvaluation = async () => {
       criteriaProgram: selectedStudentProgram.value,
       cmd: selectedEvaluatorMarksShare.value,
       projectType: radioGroup.value,
+      supportingDocs: autoGenName.value,
+      evalType: selectedCriteriaType.value,
+      decision: decision.value,
     };
 
     // Fill in evaluationObjects with data from evaluationCriterias
-    evaluationCriterias.value.forEach((criteria) => {
-      evaluationPayload.evaluationObjects[criteria.name] = {
-        mark: criteria.grade,
-        outOf: criteria.outOf,
-      };
-    });
+    if (selectedCriteriaType.value === "split") {
+      evaluationCriterias.value.forEach((criteria) => {
+        evaluationPayload.evaluationObjects[criteria.name] = {
+          mark: criteria.grade,
+          outOf: criteria.outOf,
+        };
+      });
+    } else {
+      evaluationCriteriasQuestion.value.forEach((criteria) => {
+        evaluationPayload.evaluationObjects[criteria.name] = criteria.answer;
+      });
+    }
 
     // Make the POST request to submit the evaluation
     const response = await axios.post(`${apiUrl}/evaluate`, evaluationPayload, {
@@ -286,12 +407,13 @@ const submitEvaluation = async () => {
       // Handle success
       snackbar.value = true;
       responseMessage.value = "Evaluation submitted successfully!";
-
-      resetForm();
+      autoGenName.value = [];
+      evaluationForm.value.reset();
+      evaluationCriterias.value = [{ name: "", grade: "", outOf: "" }];
+      formFiles.value = [];
     } else {
-      // Handle other status codes or errors
-      console.error("Error submitting evaluation:", response.data);
-      // Optionally, display an error message
+      criteriaErrorMessages.value = "Error submitting evaluation.";
+      requestLoading.value = false;
     }
   } catch (error) {
     console.error("Internal error submitting evaluation:", error);
@@ -376,13 +498,24 @@ const assignCriteria = () => {
 
   // Map criteriasObjects to evaluationCriterias
   if (criteriaForProgram) {
-    evaluationCriterias.value = Object.keys(
-      criteriaForProgram.criteriasObjects
-    ).map((key) => ({
-      name: key,
-      grade: "", // Set initial grade to empty
-      outOf: criteriaForProgram.criteriasObjects[key], // Use the value from criteriasObjects as "from"
-    }));
+    selectedCriteriaType.value = criteriaForProgram?.criteriaType || "";
+    if (selectedCriteriaType.value === "split") {
+      evaluationCriterias.value = Object.keys(
+        criteriaForProgram.criteriasObjects
+      ).map((key) => ({
+        name: key,
+        grade: "", // Set initial grade to empty
+        outOf: criteriaForProgram.criteriasObjects[key], // Use the value from criteriasObjects as "from"
+      }));
+    } else {
+      evaluationCriteriasQuestion.value = Object.keys(
+        criteriaForProgram.criteriasObjects
+      ).map((key) => ({
+        name: key,
+        answer: "", // Set initial grade to empty
+      }));
+    }
+
     selectedStudentProgram.value = studentProgram;
     selectedCriteriaName.value = criteriaForProgram?.criteriaName || "";
     selectedCriteriaTotalMark.value =
@@ -417,6 +550,7 @@ const assignCriteria = () => {
     criteriaErrorMessages.value = `No criteria found for program: ${studentProgram}. Please contact the coordinator for assistance.`;
   }
   evaluationForm.value.reset();
+  formFiles.value = [];
 };
 
 // Add a subtitle for students who are co-supervised or examinees

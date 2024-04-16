@@ -62,6 +62,7 @@
                         :evaluationData="evaluationData"
                         :programType="curreentProgram.abbreviation"
                         projectType="pOne"
+                        :evalType="curreentProgram.hasQuestionnaireEvaluations"
                       ></marksBuilder>
                     </v-window-item>
                     <v-window-item value="two">
@@ -69,6 +70,7 @@
                         :evaluationData="evaluationData"
                         :programType="curreentProgram.abbreviation"
                         projectType="pTwo"
+                        :evalType="curreentProgram.hasQuestionnaireEvaluations"
                       ></marksBuilder>
                     </v-window-item>
                   </v-window>
@@ -121,16 +123,6 @@ onMounted(async () => {
   isLoading.value = true;
   const token = localStorage.getItem("access_token");
   try {
-    const response = await axios.get(`${apiUrl}/evaluations`, {
-      headers: {
-        Authorization: token,
-      },
-    });
-    evaluationData.value = response.data;
-  } catch (error) {
-    console.error("Error fetching proposal files:", error);
-  }
-  try {
     const response = await axios.get(`${apiUrl}/api/programs`);
     if (response.status === 200) {
       currnetPrograms.value = response.data.programs;
@@ -140,6 +132,36 @@ onMounted(async () => {
   } catch (error) {
     console.error("Error fetching programs:", error);
   }
+  try {
+    const response = await axios.get(`${apiUrl}/evaluations`, {
+      headers: {
+        Authorization: token,
+      },
+    });
+    const filteredEvaluations = response.data.filter(
+      (evaluation) => evaluation.evalType !== "questionnaire"
+    );
+
+    // Extract criteriaProgram for evaluations with evalType "questionnaire"
+    const questionnairePrograms = response.data
+      .filter((evaluation) => evaluation.evalType === "questionnaire")
+      .map((evaluation) => evaluation.criteriaProgram);
+
+    // Map through current programs and check if their abbreviation matches
+    currnetPrograms.value.programTypes.forEach((program) => {
+      if (questionnairePrograms.includes(program.abbreviation)) {
+        program.hasQuestionnaireEvaluations = true;
+      } else {
+        program.hasQuestionnaireEvaluations = false;
+      }
+    });
+
+    // Update evaluationData with filtered evaluations
+    evaluationData.value = filteredEvaluations;
+  } catch (error) {
+    console.error("Error fetching evaluations: ", error);
+  }
+
   isLoading.value = false;
 });
 </script>

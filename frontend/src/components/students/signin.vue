@@ -141,7 +141,7 @@ const passwordRules = [
     return "Password is required.";
   },
   (value) => {
-    if (value.length >= 3) {
+    if (value.length >= 8) {
       validPassword.value = true;
       return true;
     } else {
@@ -153,6 +153,7 @@ const passwordRules = [
 const errorMessage = ref("");
 
 const login = async () => {
+  errorMessage.value = "";
   try {
     const response = await axios.post(
       `${apiUrl}/students/login`,

@@ -12,6 +12,7 @@ const mutations = {
 };
 const actions = {
   connectSocket({ commit }) {
+    const getFullYear = new Date().getFullYear();
     const userId = localStorage.getItem("user")
       ? JSON.parse(localStorage.getItem("user")).user_id
       : null;
@@ -25,6 +26,7 @@ const actions = {
 
       socket.on("connect", () => {
         console.log("Socket connected");
+
         // Emit the userId to the server after connecting
         socket.emit("userId", userId);
       });

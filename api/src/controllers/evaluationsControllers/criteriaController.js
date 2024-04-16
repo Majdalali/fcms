@@ -13,6 +13,7 @@ async function createCriteria(req, res) {
       criteriasObjects,
       criteriaProgram,
       criteriaMarksDistribution,
+      criteriaType,
     } = req.body;
 
     let criteriaTotalMark = 0;
@@ -26,6 +27,7 @@ async function createCriteria(req, res) {
       criteriaProgram,
       criteriaTotalMark,
       criteriaMarksDistribution,
+      criteriaType,
     });
 
     await criteria.save();

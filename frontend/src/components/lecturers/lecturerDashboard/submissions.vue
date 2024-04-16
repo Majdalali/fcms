@@ -164,6 +164,7 @@
                             :studentInfo="studentInfo"
                             :criteriasData="criteriasData"
                             :studentType="studentType"
+                            :projectType="'pOne'"
                           />
                         </v-card-text>
                         <v-card-actions>
@@ -284,6 +285,7 @@
                             :studentInfo="studentInfo"
                             :criteriasData="criteriasData"
                             :studentType="studentType"
+                            :projectType="'pTwo'"
                           />
                         </v-card-text>
                         <v-card-actions>

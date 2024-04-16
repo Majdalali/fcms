@@ -179,7 +179,7 @@ const passwordRules = [
     return "Password is required.";
   },
   (value) => {
-    if (value.length >= 3) {
+    if (value.length >= 8) {
       return true;
     } else {
       return "Password must be at least 8 characters.";
@@ -224,6 +224,7 @@ onMounted(async () => {
 });
 
 const register = async () => {
+  errorMessage.value = "";
   try {
     const response = await axios.post(`${apiUrl}/students`, {
       username: username.value,

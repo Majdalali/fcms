@@ -26,13 +26,13 @@
           <v-dialog v-model="item.dialog" width="800">
             <v-card>
               <v-card-text class="mt-4">
-                <h1 class="title mb-2">Evaluation Details</h1>
-                <v-table class="border">
+                <h1 class="title mb-2">
+                  Evaluation Details: {{ item.projectType }}
+                </h1>
+                <v-table v-if="item.evalType == 'split'" class="border">
                   <thead>
                     <tr>
-                      <th class="text-center text-base">
-                        Criteria ({{ item.criteriaProgram }})
-                      </th>
+                      <th class="text-center text-base">Criteria</th>
                       <th class="text-center text-base">Grade</th>
                       <th class="text-center text-base">Out Of</th>
                     </tr>
@@ -54,18 +54,35 @@
                     </tr>
                   </tbody>
                 </v-table>
+                <v-table v-if="item.evalType == 'questionnaire'" class="border">
+                  <thead>
+                    <tr>
+                      <th class="text-center text-base">Criteria</th>
+                      <th class="text-center text-base">Answer</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr
+                      v-for="(value, key) in item.evaluationObjects"
+                      :key="key"
+                    >
+                      <td class="text-center text-base">
+                        {{ key }}
+                      </td>
+                      <td class="text-center text-base">
+                        {{ value }}
+                      </td>
+                    </tr>
+                  </tbody>
+                </v-table>
                 <div class="mt-5">
                   <h1 class="title mb-2">Notes for Coordinator</h1>
-                  <v-sheet
-                    class="p-4 rounded-t-lg h-32 max-h-32 overflow-y-scroll no-scrollbar"
-                    elevation="4"
-                    color="amber-lighten-4"
-                  >
+                  <v-text-field readonly>
                     <h1>{{ item.remarksForCord }}</h1>
-                  </v-sheet>
+                  </v-text-field>
                 </div>
-                <h1 class="title mt-2">
-                  Final Mark
+                <h1 v-if="item.evalType == 'split'" class="title">
+                  Final Mark:
                   <v-chip class="ma-2" label color="teal" variant="elevated">
                     {{ item.finalMark.totalMarks }}
                   </v-chip>
@@ -75,8 +92,9 @@
                   </v-chip>
                 </h1>
                 <h1 class="title">
-                  Grade
+                  {{ item.evalType == "split" ? "Grade" : "Results" }}:
                   <v-tooltip
+                    v-if="item.evalType == 'split'"
                     text="Grade is calculated based on the final mark and the Examiner/Supervisor's grading percentage."
                   >
                     <template v-slot:activator="{ props }">
@@ -91,9 +109,40 @@
                       </v-chip></template
                     >
                   </v-tooltip>
+                  <v-tooltip v-else :text="getText(item.grade)">
+                    <template v-slot:activator="{ props }">
+                      <v-chip
+                        v-bind="props"
+                        class="ma-2"
+                        label
+                        color="indigo"
+                        variant="elevated"
+                      >
+                        {{ item.grade.toUpperCase() }}
+                      </v-chip></template
+                    >
+                  </v-tooltip>
                 </h1>
+                <!-- Fetch files from supportingDocs array in a herf link a tag -->
+                <div class="mt-5" v-if="item.supportingDocs.length > 0">
+                  <h1 class="title mb-2">Supporting Documents</h1>
+                  <v-row>
+                    <v-col v-for="file in item.supportingDocs">
+                      <a
+                        :href="`${apiUrl}/files/${file}`"
+                        target="_blank"
+                        class="text-indigo-500"
+                        >{{ file }}</a
+                      >
+                    </v-col>
+                  </v-row>
+                </div>
+                <div class="text-start mt-5 text-base">
+                  <v-btn @click="downloadPdf(item)" color="indigo">
+                    Download Evaluation
+                  </v-btn>
+                </div>
               </v-card-text>
-
               <v-card-actions>
                 <v-spacer></v-spacer>
                 <v-btn
@@ -103,14 +152,17 @@
                   text="Cancel"
                   @click="closeDialog(item)"
                 ></v-btn>
-              </v-card-actions>
-            </v-card>
-          </v-dialog>
-        </template>
+              </v-card-actions> </v-card></v-dialog
+        ></template>
         <template v-slot:item.finalMark="{ item }">
-          {{ item.finalMark.totalMarks }}
-          /
-          {{ item.finalMark.totalOutOf }}
+          <div v-if="item.evalType == 'split'">
+            {{ item.finalMark.totalMarks }}
+            /
+            {{ item.finalMark.totalOutOf }}
+          </div>
+          <div v-else>
+            {{ item.grade.toUpperCase() }}
+          </div>
         </template>
         <template v-slot:item.download="{ item }">
           <v-btn @click="downloadPdf(item)" size="small" color="indigo">
@@ -165,11 +217,11 @@ import utmLogo from "@/assets/images/utmLogo.png";
 
 const search = ref("");
 const headers = ref([
-  { key: "evaluationId", sortable: false, title: "ID" },
   { key: "lecturerName", sortable: false, title: "Lecturer" },
   { key: "typeOfEvaluator", sortable: false, title: "Type of Evaluator" },
   { key: "studentName", sortable: false, title: "Student" },
-  { key: "projectType", sortable: false, title: "Project Type" },
+  { key: "matricNumber", sortable: false, title: "Matric No." },
+  { key: "projectType", sortable: true, title: "Project Type" },
   { key: "createdAt", sortable: true, title: "Date" },
   { key: "finalMark", sortable: false, title: "Final Mark" },
   { key: "evaluationObjects", sortable: true, title: "Action" },
@@ -240,13 +292,79 @@ const generatePdfContent = (item) => {
   const remarksForCord = item.remarksForCord;
   const finalMarkTotal = item.finalMark.totalMarks;
   const finalMarkOutOf = item.finalMark.totalOutOf;
-  const evaluationDataForPdf = Object.entries(item.evaluationObjects).map(
-    ([key, evaluationObject]) => ({
-      criteria: key,
-      mark: evaluationObject.mark,
-      outOf: evaluationObject.outOf,
-    })
-  );
+  const tableHeaders = () => {
+    if (item.evalType === "split") {
+      return `
+                  <tr>
+                    <th style="text-align: center; border: 1px solid #ddd; padding: 8px;">Criteria</th>
+                    <th style="text-align: center; border: 1px solid #ddd; padding: 8px;">Grade</th>
+                    <th style="text-align: center; border: 1px solid #ddd; padding: 8px;">Out Of</th>
+                  </tr>
+                `;
+    } else {
+      return `
+                  <tr>
+                    <th style="text-align: center; border: 1px solid #ddd; padding: 8px;">Criteria</th>
+                    <th style="text-align: center; border: 1px solid #ddd; padding: 8px;">Answer</th>
+                  </tr>
+                `;
+    }
+  };
+  const tableValues = () => {
+    if (item.evalType === "split") {
+      return ` ${evaluationDataForPdf
+        .map(
+          (evaluationObject) => `
+                  <tr>
+                    <td style="text-align: center; border: 1px solid #ddd; padding: 8px;">${evaluationObject.criteria}</td>
+                    <td style="text-align: center; border: 1px solid #ddd; padding: 8px;">${evaluationObject.mark}</td>
+                    <td style="text-align: center; border: 1px solid #ddd; padding: 8px;">${evaluationObject.outOf}</td>
+                  </tr>
+                `
+        )
+        .join("")}`;
+    } else {
+      return ` ${evaluationDataForPdf
+        .map(
+          (evaluationObject) => `
+                  <tr>
+                    <td style="text-align: center; border: 1px solid #ddd; padding: 8px;">${evaluationObject.criteria}</td>
+                    <td style="text-align: center; border: 1px solid #ddd; padding: 8px;">${evaluationObject.answer}</td>
+                  </tr>
+                `
+        )
+        .join("")}`;
+    }
+  };
+  const finalMarks = () => {
+    if (item.evalType === "split") {
+      return `
+                <h1 style="margin-top:40px;"><strong>Final Mark:</strong> ${finalMarkTotal} / ${finalMarkOutOf}</h1>
+                <h1 style="margin-top:2px;"><strong>Grade:</strong> ${item.grade}</h1>
+              `;
+    } else {
+      return `
+                <h1 style="margin-top:40px;"><strong>Results:</strong> ${item.grade.toUpperCase()}</h1>
+              `;
+    }
+  };
+  let evaluationDataForPdf = [];
+  if (item.evalType === "split") {
+    evaluationDataForPdf = Object.entries(item.evaluationObjects).map(
+      ([key, evaluationObject]) => ({
+        criteria: key,
+        mark: evaluationObject.mark,
+        outOf: evaluationObject.outOf,
+      })
+    );
+  } else {
+    evaluationDataForPdf = Object.entries(item.evaluationObjects).map(
+      ([key, evaluationObject]) => ({
+        criteria: key,
+        answer: evaluationObject,
+      })
+    );
+  }
   const matchingCriteria = criteriasData.value.find(
     (criteria) => criteria.criteriaProgram === item.criteriaProgram
   );
@@ -296,32 +414,17 @@ const generatePdfContent = (item) => {
         <h1 style="margin-top:40px;"><strong>Evaluation Details</strong></h1>
         <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
           <thead>
-            <tr>
-              <th style="border: 1px solid #ddd; padding: 8px;">Criteria</th>
-              <th style="border: 1px solid #ddd; padding: 8px;">Mark</th>
-              <th style="border: 1px solid #ddd; padding: 8px;">Out Of</th>
-            </tr>
+            ${tableHeaders()}
           </thead>
           <tbody>
-            ${evaluationDataForPdf
-              .map(
-                (evaluationObject) => `
-                  <tr>
-                    <td style="text-align: center; border: 1px solid #ddd; padding: 8px;">${evaluationObject.criteria}</td>
-                    <td style="text-align: center; border: 1px solid #ddd; padding: 8px;">${evaluationObject.mark}</td>
-                    <td style="text-align: center; border: 1px solid #ddd; padding: 8px;">${evaluationObject.outOf}</td>
-                  </tr>
-                `
-              )
-              .join("")}
+            ${tableValues()}
           </tbody>
         </table>
-        <h1 style="margin-top:40px;"><strong>Final Mark:</strong> ${finalMarkTotal} / ${finalMarkOutOf}</h1>
-        <h1 style="margin-top:2px;"><strong>Grade:</strong> ${item.grade}</h1>
+        ${finalMarks()}
         <h1 style="margin-top:40px;"><strong>Notes for Coordinator</strong></h1>
         <p>${remarksForCord}</p>
         <div style="position:absolute; bottom:4px; width:100%; text-align: center;">
-          <p>Generated at: ${item.createdAt}</p>
+          <p>${item.createdAt}</p>
         </div>
       </div>
     </body>
@@ -383,6 +486,23 @@ onMounted(async () => {
   }
 });
 
+const getText = (grade) => {
+  switch (grade) {
+    case "a":
+      return "No correction";
+    case "b1":
+      return "One month correction";
+    case "b2":
+      return "Three months correction";
+    case "c1":
+      return "Six months correction";
+    case "c2":
+      return "Six months correction and Re-Presentation";
+    default:
+      return ""; // Or any default message you want to show if grade is not matched
+  }
+};
+
 const formatDate = (timestamp) => {
   const date = new Date(timestamp._seconds * 1000); // Convert seconds to milliseconds
   return date.toLocaleString("en-UK", {
@@ -391,7 +511,6 @@ const formatDate = (timestamp) => {
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
-    hour12: true,
   });
 };
 

@@ -62,6 +62,9 @@ async function createAnEvaluation(req, res) {
       criteriaProgram,
       cmd,
       projectType,
+      supportingDocs,
+      evalType,
+      decision,
     } = req.body;
 
     // Calculate the final mark based on the provided evaluation criteria
@@ -87,9 +90,13 @@ async function createAnEvaluation(req, res) {
     }
 
     const student = await studentModel.getUserById(studentId);
-    let grade = "";
 
-    grade = (finalMark.totalMarks * (cmd / 100)).toFixed(2);
+    let grade = "";
+    if (evalType === "split") {
+      grade = (finalMark.totalMarks * (cmd / 100)).toFixed(2);
+    } else {
+      grade = decision;
+    }
 
     // Create the evaluation model instance
     const newEvaluation = new evaluationsModel({
@@ -106,6 +113,8 @@ async function createAnEvaluation(req, res) {
       matricNumber: student.matricCard,
       criteriaProgram: criteriaProgram,
       projectType,
+      supportingDocs,
+      evalType,
     });
 
     // Save the evaluation
@@ -179,6 +188,30 @@ async function deleteEvaluationById(req, res) {
   }
 }
 
+async function getStudentEvals(req, res) {
+  const token = req.headers.authorization;
+  const { programType } = req.params;
+  try {
+    const decoded = jwt.verify(token, secretKey);
+    const studentId = decoded.user_id;
+
+    const evaluations =
+      await evaluationsModel.getStudentEvaluationsByProjectType(
+        studentId,
+        programType
+      );
+
+    if (evaluations.length === 0) {
+      return res.status(404).json({ message: "No evaluations found" });
+    }
+
+    return res.status(200).json(evaluations);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
 // Exports
 
 module.exports = {
@@ -188,4 +221,5 @@ module.exports = {
   getLecturerEvaluations,
   getEvaluationsByProgram,
   deleteEvaluationById,
+  getStudentEvals,
 };

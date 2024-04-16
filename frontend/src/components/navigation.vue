@@ -21,9 +21,18 @@
         class="h-full dark:bg-[#151515]"
       >
         <v-list class="h-full flex flex-col">
-          <v-list-item class="min-h-0 vli" title="Masters P&D System">
+          <v-list-item
+            class="min-h-0 vli"
+            title="Masters P&D System"
+            :append-icon="!TxlAndUP ? 'mdi-close' : ''"
+          >
+            <template v-slot:append>
+              <v-icon @click="drawer = !drawer">{{
+                TxlAndUP ? "" : "mdi-close"
+              }}</v-icon>
+            </template>
             <v-list-item-subtitle>
-              <span class="font-medium text-amber-300">{{
+              <span class="font-medium dark:text-amber-300">{{
                 user.isAdmin
                   ? "Admin view"
                   : user.isCoordinator
@@ -69,20 +78,20 @@
                   <router-link to="/myproject/proposal">
                     <v-list-item
                       title="Proposal"
-                      class="vli"
+                      class="vli vliTwo"
                       link
                     ></v-list-item>
                   </router-link>
                   <router-link to="/myproject/1">
                     <v-list-item
-                      title="Project 1"
+                      title="Project 1 / Diss 2"
                       class="vli"
                       link
                     ></v-list-item>
                   </router-link>
                   <router-link to="/myproject/2">
                     <v-list-item
-                      title="Project 2"
+                      title="Project 2 / Diss 3"
                       class="vli"
                       link
                     ></v-list-item>
@@ -183,10 +192,16 @@
 
 <script setup>
 // Import System requirements
-import { useDark, useToggle } from "@vueuse/core";
+import {
+  useDark,
+  useToggle,
+  useBreakpoints,
+  breakpointsTailwind,
+} from "@vueuse/core";
 import { ref, markRaw } from "vue";
 import { useStore } from "vuex";
 import router from "@/router";
+
 // Import icons
 import homeIconVue from "@/assets/icons/homeIcon.vue";
 import bellVue from "@/assets/icons/bell.vue";
@@ -207,12 +222,18 @@ import marks from "../assets/icons/marks.vue";
 const store = useStore();
 const isDark = useDark();
 const toggleDark = useToggle(isDark);
-const drawer = ref(true);
+const drawer = ref(false);
 const menu = ref(false);
 const currentMode = ref(isDark.value);
 const user = JSON.parse(localStorage.getItem("user"));
 const userType = user.user_type;
 const open = ref(["project"]);
+const breakpoints = useBreakpoints(breakpointsTailwind);
+const TxlAndUP = breakpoints.greater("xl");
+
+if (TxlAndUP.value) {
+  drawer.value = true;
+}
 
 const secondNavigationMenu = ref({
   forms: {
@@ -274,6 +295,12 @@ const navigationMenu = ref({
     link: "/coordinator",
     condidtion: userType === "lecturer" && user.isCoordinator === true,
   },
+  chairman: {
+    icon: markRaw(admin),
+    title: "Chairman",
+    link: "/chairman",
+    condidtion: userType === "lecturer" && user.isAdmin === true,
+  },
   notification: {
     icon: markRaw(bellVue),
     title: "Notification",
@@ -303,6 +330,7 @@ const signout = () => {
 .vli :deep(.v-list-item-title) {
   font-weight: 500;
 }
+
 .router-link-active {
   color: #6589ff; /* Change text color */
 }

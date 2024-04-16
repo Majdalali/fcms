@@ -31,7 +31,9 @@
             >
               <v-tab class="v-tab" value="one">Session</v-tab>
               <v-tab class="v-tab" value="two">Projects</v-tab>
-              <v-tab class="v-tab" value="three">Students</v-tab>
+              <v-tab v-if="userType !== 'student'" class="v-tab" value="three"
+                >Students</v-tab
+              >
               <v-tab class="v-tab" value="four">Supervisors</v-tab>
               <v-tab class="v-tab" value="five">Archive</v-tab>
             </v-tabs>
@@ -45,7 +47,9 @@
 
                 <v-window-item value="two"> <Projects /> </v-window-item>
 
-                <v-window-item value="three"> <Students /> </v-window-item>
+                <v-window-item v-if="userType !== 'student'" value="three">
+                  <Students />
+                </v-window-item>
                 <v-window-item value="four"> <Lecturers /> </v-window-item>
                 <v-window-item value="five"><Archive /> </v-window-item>
               </v-window>
@@ -60,6 +64,7 @@
 import { useDark } from "@vueuse/core";
 import { ref, onMounted } from "vue";
 import axios from "axios";
+import { useJwt } from "@vueuse/integrations/useJwt";
 
 import Navigation from "./navigation.vue";
 import Session from "./dashboard/session.vue";
@@ -73,6 +78,9 @@ const isDark = useDark();
 const tab = ref("");
 const sessionInfo = ref(null);
 const apiUrl = import.meta.env.VITE_API_URL;
+const token = ref(localStorage.getItem("access_token"));
+const { header, payload } = useJwt(token);
+const userType = payload.value.user_type;
 
 // Functions
 onMounted(async () => {
