@@ -97,7 +97,7 @@ const routes = [
     path: "/chairman",
     name: "chairman",
     component: chairDashboard,
-    meta: { requiresAuth: true, allowedUserType: "lecturer" },
+    meta: { requiresAuth: true, allowedUserType: "lecturer", requiresChairman: true},
   },
   {
     path: "/myproject",
@@ -223,6 +223,13 @@ router.beforeEach(async (to, from, next) => {
         to.matched.some((record) => record.meta.requiresCoordinator) &&
         decodedUserData.isCoordinator !== true
       ) {
+        return next({ name: "home" });
+      }
+      if(
+        to.matched.some((record) => record.meta.requiresChairman) &&
+        decodedUserData.isChairMan !== true
+      )
+      {
         return next({ name: "home" });
       }
       // If authentication and user type checks pass, allow navigation

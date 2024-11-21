@@ -313,6 +313,7 @@
                           label="Coordinator"
                           value="coordinator"
                         ></v-radio>
+                        <v-radio label="Chairman" value="chairman"></v-radio>
                       </v-radio-group>
                       <v-btn
                         size="large"

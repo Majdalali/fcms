@@ -88,6 +88,20 @@ class evaluationsModel {
     }
   }
 
+  static async getQuestionnaireEvaluations() {
+    const querySnapshot = await evaluationsCollection
+      .where("evalType", "==", "questionnaire")
+      .get();
+
+    if (querySnapshot.empty) {
+      return [];
+    }
+
+    const evaluations = querySnapshot.docs.map((doc) => doc.data());
+
+    return evaluations;
+  }
+
   // Get evaluations by criteriaProgram
   static async getEvaluationsByProgram(criteriaProgram) {
     const querySnapshot = await evaluationsCollection

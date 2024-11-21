@@ -8,6 +8,7 @@ const adminOrCoordGuard = require("../middleware/adminOrCoordGuard");
 
 const evaluationsController = require("../controllers/evaluationsController");
 const criteriaController = require("../controllers/evaluationsControllers/criteriaController");
+const chairmanController = require("../controllers/evaluationsControllers/chairmanController");
 
 router.post(
   "/evaluate",
@@ -20,6 +21,12 @@ router.get(
   "/evaluations",
   adminOrCoordGuard,
   evaluationsController.getAllEvaluations
+);
+
+router.get(
+  "/evaluations/questionnaires",
+  adminOrCoordGuard,
+  evaluationsController.getQuestionnaireEvaluations
 );
 
 router.get(
@@ -50,6 +57,41 @@ router.delete(
   verifyToken,
   authGuard("lecturer"),
   evaluationsController.deleteEvaluationById
+);
+
+//? Chairman Routes
+router.post(
+  "/api/chairmanApp",
+  verifyToken,
+  adminOrCoordGuard,
+  chairmanController.createChairmanApp
+);
+
+router.get(
+  "/api/chairmanApps",
+  verifyToken,
+  adminOrCoordGuard,
+  chairmanController.getAllChairmanApps
+);
+
+router.put(
+  "/api/chairmanApp",
+  verifyToken,
+  adminOrCoordGuard,
+  chairmanController.updateChairmanApp
+);
+
+router.get(
+  "/api/student/chairmanApp",
+  verifyToken,
+  chairmanController.getStudentApp
+);
+
+router.put(
+  "/api/chairmanApp/document",
+  verifyToken,
+  adminOrCoordGuard,
+  chairmanController.deleteSupportingDoc
 );
 
 module.exports = router;

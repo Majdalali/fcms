@@ -299,7 +299,7 @@ const navigationMenu = ref({
     icon: markRaw(admin),
     title: "Chairman",
     link: "/chairman",
-    condidtion: userType === "lecturer" && user.isAdmin === true,
+    condidtion: userType === "lecturer" && user.isChairMan === true,
   },
   notification: {
     icon: markRaw(bellVue),

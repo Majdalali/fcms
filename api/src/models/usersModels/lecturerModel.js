@@ -14,6 +14,7 @@ class Lecturer {
     coSupervisedStudents = [],
     isAdmin = false,
     isCoordinator = false,
+    isChairMan = false,
     coordinator_program = null,
     isInvited = false,
     invitedBy = null,
@@ -26,6 +27,7 @@ class Lecturer {
     this.user_type = user_type;
     this.isAdmin = isAdmin;
     this.isCoordinator = isCoordinator;
+    this.isChairMan = isChairMan;
     this.examinees = examinees;
     this.supervisedStudents = supervisedStudents;
     this.coSupervisedStudents = coSupervisedStudents;
@@ -85,6 +87,7 @@ class Lecturer {
         examinees: this.examinees,
         isAdmin: this.isAdmin,
         isCoordinator: this.isCoordinator,
+        isChairMan: this.isChairMan,
         supervisedStudents: this.supervisedStudents,
         coSupervisedStudents: this.coSupervisedStudents,
         coordinator_program: this.coordinator_program,
@@ -109,6 +112,7 @@ class Lecturer {
         coSupervisedStudents: this.coSupervisedStudents,
         isAdmin: this.isAdmin,
         isCoordinator: this.isCoordinator,
+        isChairMan: this.isChairMan,
         coordinator_program: this.coordinator_program,
       });
     } catch (error) {

@@ -81,6 +81,7 @@ async function loginLecturer(req, res) {
         user_type: user.user_type,
         isAdmin: user.isAdmin,
         isCoordinator: user.isCoordinator,
+        isChairMan: user.isChairMan,
         coordinator_program: user.coordinator_program,
       },
       secretKey,
@@ -114,6 +115,7 @@ async function getAllLecturers(req, res) {
         examinees,
         coSupervisedStudents,
         isCoordinator,
+        isChairMan,
         isInvited,
         invitedBy,
         isAdmin,
@@ -123,6 +125,7 @@ async function getAllLecturers(req, res) {
         username,
         email,
         isCoordinator,
+        isChairMan,
         supervisedStudents,
         coSupervisedStudents,
         examinees,
@@ -423,6 +426,15 @@ async function changeUserPrivileges(req, res) {
             .json({ error: `${username} is already a coordinator` });
         } else {
           user.isCoordinator = true;
+          break;
+        }
+      case "chairman":
+        if (user.isChairMan) {
+          return res
+            .status(400)
+            .json({ error: `${username} is already a chairman` });
+        } else {
+          user.isChairMan = true;
           break;
         }
 

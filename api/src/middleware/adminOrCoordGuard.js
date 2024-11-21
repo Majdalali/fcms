@@ -14,7 +14,11 @@ function adminOrCoordGuard(req, res, next) {
     const decoded = jwt.verify(token, process.env.SECRET_TOKEN);
 
     // Check if the user is a coordinator or admin
-    if (decoded.isCoordinator !== true && decoded.isAdmin !== true) {
+    if (
+      decoded.isCoordinator !== true &&
+      decoded.isAdmin !== true &&
+      decoded.isChairMan !== true
+    ) {
       return res
         .status(403)
         .json({ error: "Forbidden: Insufficient privileges." });

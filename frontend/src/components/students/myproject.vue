@@ -32,6 +32,7 @@
               <v-tab class="v-tab" value="one">Project Info</v-tab>
 
               <v-tab class="v-tab" value="two">Comments</v-tab>
+              <v-tab class="v-tab" value="three">Chairman Application</v-tab>
             </v-tabs>
             <v-divider class="lg:w-4/5"></v-divider>
 
@@ -43,6 +44,9 @@
 
                 <v-window-item value="two">
                   <comments />
+                </v-window-item>
+                <v-window-item value="three">
+                  <ChairmanApp />
                 </v-window-item>
               </v-window>
             </v-card-text>
@@ -57,7 +61,7 @@
 import Navigation from "../navigation.vue";
 import projectinfo from "./myProject/projectinfo.vue";
 import comments from "./myProject/comments.vue";
-import fileUpload from "./myProject/fileUpload.vue";
+import ChairmanApp from "./myProject/chairmanApp.vue";
 import { ref, onMounted } from "vue";
 import { useDark } from "@vueuse/core";
 import axios from "axios";
@@ -66,8 +70,6 @@ import axios from "axios";
 const isDark = useDark();
 const tab = ref("");
 const sessionDate = ref(null);
-const typeNameP2 = ref("Progress 2");
-const typeNameP1 = ref("Progress 1");
 const apiUrl = import.meta.env.VITE_API_URL;
 
 // Methods
